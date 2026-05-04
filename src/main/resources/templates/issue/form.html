@@ -33,14 +33,14 @@
                 <div class="dt-field">
                     <label for="issueType">유형</label>
                     <select id="issueType" th:field="*{issueType}" class="form-select" required>
-                        <option th:each="type : ${issueTypes}" th:value="${type}" th:text="${type}"></option>
+                        <option th:each="type : ${issueTypes}" th:value="${type}" th:text="${type.label}"></option>
                     </select>
                     <div class="dt-error" th:errors="*{issueType}"></div>
                 </div>
                 <div class="dt-field">
                     <label for="status">상태</label>
                     <select id="status" th:field="*{status}" class="form-select" required>
-                        <option th:each="status : ${issueStatuses}" th:value="${status}" th:text="${status}"></option>
+                        <option th:each="status : ${issueStatuses}" th:value="${status}" th:text="${status.label}"></option>
                     </select>
                     <div class="dt-error" th:errors="*{status}"></div>
                 </div>
@@ -52,7 +52,7 @@
                 <div class="dt-field">
                     <label for="priority">우선순위</label>
                     <select id="priority" th:field="*{priority}" class="form-select" required>
-                        <option th:each="priority : ${priorities}" th:value="${priority}" th:text="${priority}"></option>
+                        <option th:each="priority : ${priorities}" th:value="${priority}" th:text="${priority.label}"></option>
                     </select>
                     <div class="dt-error" th:errors="*{priority}"></div>
                 </div>
@@ -76,10 +76,12 @@
                 <div class="dt-field">
                     <label for="assigneeId">담당자 ID</label>
                     <input id="assigneeId" type="text" th:field="*{assigneeId}" class="form-control" placeholder="UUID">
+                    <div class="dt-error" th:errors="*{assigneeId}"></div>
                 </div>
                 <div class="dt-field">
                     <label for="reporterId">요청자 ID</label>
                     <input id="reporterId" type="text" th:field="*{reporterId}" class="form-control" placeholder="UUID">
+                    <div class="dt-error" th:errors="*{reporterId}"></div>
                 </div>
                 <div class="dt-field dt-field-wide">
                     <label for="description">설명</label>

@@ -21,20 +21,32 @@
                 <span>이슈 키</span>
                 <strong th:text="${issue.issueKey}">DTR-001</strong>
             </div>
-            <span class="dt-status" th:text="${issue.status}">REGISTERED</span>
+            <span class="dt-status" th:classappend="${' ' + issue.status.cssClass}" th:text="${issue.status.label}">등록</span>
         </div>
+        <form th:action="@{/issues/{issueId}/status(issueId=${issue.issueId})}" method="post" class="dt-status-form" aria-label="이슈 상태 변경">
+            <label>
+                <span>상태 변경</span>
+                <select name="status" class="form-select">
+                    <option th:each="status : ${issueStatuses}"
+                            th:value="${status}"
+                            th:selected="${issue.status == status}"
+                            th:text="${status.label}"></option>
+                </select>
+            </label>
+            <button type="submit" class="dt-button dt-button-primary">상태 저장</button>
+        </form>
         <dl class="dt-detail-grid">
             <div>
-                <dt>프로젝트 ID</dt>
-                <dd th:text="${issue.projectId}"></dd>
+                <dt>프로젝트</dt>
+                <dd th:text="${issue.projectCode == null ? issue.projectId : issue.projectCode + ' - ' + issue.projectName}"></dd>
             </div>
             <div>
                 <dt>유형</dt>
-                <dd th:text="${issue.issueType}"></dd>
+                <dd th:text="${issue.issueType.label}"></dd>
             </div>
             <div>
                 <dt>우선순위</dt>
-                <dd th:text="${issue.priority}"></dd>
+                <dd th:text="${issue.priority.label}"></dd>
             </div>
             <div>
                 <dt>예상/실제 공수</dt>

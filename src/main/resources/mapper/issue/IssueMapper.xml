@@ -8,6 +8,8 @@
     <resultMap id="IssueResultMap" type="com.devtrace.manager.issue.dto.IssueEntity">
         <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
         <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
         <result property="issueKey" column="ISSUE_KEY"/>
         <result property="issueType" column="ISSUE_TYPE"/>
         <result property="title" column="TITLE"/>
@@ -43,6 +45,28 @@
         SPENT_MINUTES,
         CREATED_AT,
         UPDATED_AT
+    </sql>
+
+    <sql id="IssueSelectColumns">
+        I.ISSUE_ID,
+        I.PROJECT_ID,
+        P.PROJECT_CODE,
+        P.PROJECT_NAME,
+        I.ISSUE_KEY,
+        I.ISSUE_TYPE,
+        I.TITLE,
+        I.DESCRIPTION,
+        I.STATUS,
+        I.PRIORITY,
+        I.ASSIGNEE_ID,
+        I.REPORTER_ID,
+        I.START_DATE,
+        I.DUE_DATE,
+        I.RESOLVED_DATE,
+        I.ESTIMATED_MINUTES,
+        I.SPENT_MINUTES,
+        I.CREATED_AT,
+        I.UPDATED_AT
     </sql>
 
     <insert id="insertIssue" parameterType="com.devtrace.manager.issue.dto.IssueEntity">
@@ -90,36 +114,60 @@
         WHERE ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
     </update>
 
+    <update id="updateIssueStatus">
+        UPDATE ISSUE
+        SET
+            STATUS = #{status},
+            RESOLVED_DATE = #{resolvedDate},
+            UPDATED_AT = #{updatedAt}
+        WHERE ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
     <delete id="deleteIssue" parameterType="java.util.UUID">
         DELETE FROM ISSUE
         WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
     </delete>
 
-    <select id="selectIssueById" parameterType="java.util.UUID" resultMap="IssueResultMap">
+    <select id="selectIssueByIdDetails" parameterType="java.util.UUID" resultMap="IssueResultMap">
         SELECT
-            <include refid="IssueColumns"/>
-        FROM ISSUE
-        WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            <include refid="IssueSelectColumns"/>
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        WHERE I.ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
     </select>
 
     <select id="selectIssueList" parameterType="com.devtrace.manager.issue.dto.IssueSearchCondition" resultMap="IssueResultMap">
         SELECT
-            <include refid="IssueColumns"/>
-        FROM ISSUE
+            <include refid="IssueSelectColumns"/>
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
         <where>
             <if test="projectId != null">
-                AND PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+                AND I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
             </if>
             <if test="status != null">
-                AND STATUS = #{status}
+                AND I.STATUS = #{status}
+            </if>
+            <if test="priority != null">
+                AND I.PRIORITY = #{priority}
+            </if>
+            <if test="assigneeId != null">
+                AND I.ASSIGNEE_ID = #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="dueDateFrom != null">
+                AND I.DUE_DATE <![CDATA[>=]]> #{dueDateFrom}
+            </if>
+            <if test="dueDateTo != null">
+                AND I.DUE_DATE <![CDATA[<=]]> #{dueDateTo}
             </if>
             <if test="keyword != null and keyword != ''">
                 AND (
-                    ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
-                    OR TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                    I.ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_CODE ILIKE CONCAT('%', #{keyword}, '%')
                 )
             </if>
         </where>
-        ORDER BY CREATED_AT DESC
+        ORDER BY I.CREATED_AT DESC
     </select>
 </mapper>

@@ -408,8 +408,17 @@ svg {
     margin-bottom: 22px;
 }
 
+.dt-issue-toolbar {
+    grid-template-columns: minmax(210px, 1.35fr) minmax(180px, 1fr) minmax(120px, 0.7fr) minmax(120px, 0.7fr) minmax(128px, 0.65fr) minmax(128px, 0.65fr) 86px 86px;
+}
+
+.dt-issue-toolbar .dt-reset-button {
+    grid-column: auto;
+}
+
 .dt-search-box,
 .dt-select-box,
+.dt-date-filter,
 .dt-filter-button,
 .dt-reset-button {
     display: flex;
@@ -419,6 +428,29 @@ svg {
     border-radius: 6px;
     background: rgba(255, 253, 248, 0.82);
     color: #1c242c;
+}
+
+.dt-date-filter {
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.dt-date-filter span {
+    flex: 0 0 auto;
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.dt-date-filter input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: #1f2933;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 800;
 }
 
 .dt-search-box {
@@ -513,6 +545,46 @@ svg {
     width: 271px;
 }
 
+.dt-issue-table {
+    min-width: 1320px;
+}
+
+.dt-issue-table th:nth-child(1),
+.dt-issue-table td:nth-child(1) {
+    width: 126px;
+}
+
+.dt-issue-table th:nth-child(2),
+.dt-issue-table td:nth-child(2) {
+    width: 198px;
+}
+
+.dt-issue-table th:nth-child(3),
+.dt-issue-table td:nth-child(3) {
+    width: 246px;
+}
+
+.dt-issue-table th:nth-child(4),
+.dt-issue-table td:nth-child(4),
+.dt-issue-table th:nth-child(5),
+.dt-issue-table td:nth-child(5),
+.dt-issue-table th:nth-child(6),
+.dt-issue-table td:nth-child(6) {
+    width: 112px;
+}
+
+.dt-issue-table th:nth-child(7),
+.dt-issue-table td:nth-child(7),
+.dt-issue-table th:nth-child(8),
+.dt-issue-table td:nth-child(8) {
+    width: 132px;
+}
+
+.dt-issue-table th:nth-child(9),
+.dt-issue-table td:nth-child(9) {
+    width: 250px;
+}
+
 .dt-dashboard-table th {
     height: 47px;
     padding: 0 22px;
@@ -605,6 +677,13 @@ svg {
     color: #e32a21;
     background: #ffe0de;
     border: 1px solid #ffc9c4;
+}
+
+.dt-chip.danger,
+.dt-status.danger {
+    color: #d9241d;
+    background: #ffe2dc;
+    border: 1px solid #ffc4ba;
 }
 
 .dt-row-actions {
@@ -1000,6 +1079,25 @@ svg {
     border-bottom: 1px solid #e3dbcf;
 }
 
+.dt-status-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 22px;
+}
+
+.dt-status-form label {
+    display: grid;
+    gap: 8px;
+}
+
+.dt-status-form label span {
+    color: var(--dt-muted);
+    font-size: 14px;
+    font-weight: 900;
+}
+
 .dt-detail-head strong {
     display: block;
     margin-top: 4px;
@@ -1034,10 +1132,95 @@ svg {
     font-weight: 900;
 }
 
+.dt-status.hold {
+    color: #0968be;
+    background: #d8eaff;
+    border-color: #bdd8f7;
+}
+
+.dt-status.planned {
+    color: #d17400;
+    background: #fff0c7;
+    border-color: #f6d88e;
+}
+
+.dt-status.done {
+    color: #e32a21;
+    background: #ffe0de;
+    border-color: #ffc9c4;
+}
+
 .dt-pre {
     min-height: 120px;
     white-space: pre-wrap;
     line-height: 1.7;
+}
+
+.dt-issue-flow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    padding: 24px 18px;
+}
+
+.dt-issue-flow span {
+    display: grid;
+    min-height: 48px;
+    place-items: center;
+    border: 1px solid #e1d8ca;
+    border-radius: 6px;
+    color: #2a3138;
+    background: rgba(255, 253, 248, 0.72);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-effort-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 22px 18px;
+}
+
+.dt-effort-summary div {
+    min-height: 74px;
+    padding: 14px;
+    border: 1px solid #e1d8ca;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.72);
+}
+
+.dt-effort-summary span,
+.dt-risk-summary span {
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-effort-summary strong {
+    display: block;
+    margin-top: 6px;
+    color: #101820;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.dt-risk-summary {
+    display: grid;
+    gap: 12px;
+    padding: 24px 20px;
+}
+
+.dt-risk-summary div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1f2933;
+    font-weight: 900;
+}
+
+.dt-risk-summary strong {
+    margin-left: auto;
 }
 
 .dt-login-body {
@@ -1318,6 +1501,10 @@ svg {
         grid-template-columns: 1fr 190px 126px 108px;
     }
 
+    .dt-issue-toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .dt-reset-button {
         grid-column: auto;
     }
@@ -1411,6 +1598,10 @@ svg {
         grid-template-columns: 1fr;
     }
 
+    .dt-status-form {
+        grid-template-columns: 1fr;
+    }
+
     .dt-page-head {
         align-items: stretch;
         flex-direction: column;
@@ -1437,6 +1628,10 @@ svg {
     .dt-toolbar {
         grid-template-columns: 1fr;
         gap: 10px;
+    }
+
+    .dt-issue-toolbar {
+        grid-template-columns: 1fr;
     }
 
     .dt-reset-button,
@@ -1526,6 +1721,8 @@ svg {
     }
 
     .dt-donut-row,
+    .dt-issue-flow,
+    .dt-effort-summary,
     .dt-schedule {
         grid-template-columns: 1fr;
     }

@@ -8,6 +8,8 @@ public class IssueResponse {
 
     private UUID issueId;
     private UUID projectId;
+    private String projectCode;
+    private String projectName;
     private String issueKey;
     private IssueType issueType;
     private String title;
@@ -56,6 +58,22 @@ public class IssueResponse {
 
     public void setProjectId(UUID projectId) {
         this.projectId = projectId;
+    }
+
+    public String getProjectCode() {
+        return projectCode;
+    }
+
+    public void setProjectCode(String projectCode) {
+        this.projectCode = projectCode;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public String getIssueKey() {

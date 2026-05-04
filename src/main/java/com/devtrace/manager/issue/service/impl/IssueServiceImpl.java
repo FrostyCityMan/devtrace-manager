@@ -7,6 +7,7 @@ import com.devtrace.manager.issue.dto.IssueEntity;
 import com.devtrace.manager.issue.dto.IssueRequest;
 import com.devtrace.manager.issue.dto.IssueResponse;
 import com.devtrace.manager.issue.dto.IssueSearchCondition;
+import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.issue.service.IssueService;
 import com.devtrace.manager.project.dao.ProjectDao;
 import java.time.LocalDateTime;
@@ -29,7 +30,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
-    public IssueResponse createIssue(IssueRequest request) {
+    public IssueResponse insertIssue(IssueRequest request) {
         validateProject(request.getProjectId());
 
         LocalDateTime now = DateTimeUtil.now();
@@ -48,7 +49,7 @@ public class IssueServiceImpl implements IssueService {
     public IssueResponse updateIssue(UUID issueId, IssueRequest request) {
         validateProject(request.getProjectId());
 
-        IssueEntity issue = findIssue(issueId);
+        IssueEntity issue = selectIssueEntityDetails(issueId);
         applyRequest(issue, request);
         issue.setUpdatedAt(DateTimeUtil.now());
 
@@ -58,25 +59,44 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
+    public IssueResponse updateIssueStatus(UUID issueId, IssueStatus status) {
+        if (status == null) {
+            throw new BusinessException("이슈 상태는 필수입니다.", "ISSUE_STATUS_REQUIRED");
+        }
+
+        IssueEntity issue = selectIssueEntityDetails(issueId);
+        LocalDateTime now = DateTimeUtil.now();
+        issue.setStatus(status);
+        issue.setUpdatedAt(now);
+        if (status.isCompleted() && issue.getResolvedDate() == null) {
+            issue.setResolvedDate(now.toLocalDate());
+        }
+
+        issueDao.updateIssueStatus(issue.getIssueId(), issue.getStatus(), issue.getResolvedDate(), issue.getUpdatedAt());
+        return issue.toResponse();
+    }
+
+    @Override
+    @Transactional
     public void deleteIssue(UUID issueId) {
-        IssueEntity issue = findIssue(issueId);
+        IssueEntity issue = selectIssueEntityDetails(issueId);
         issueDao.deleteIssue(issue.getIssueId());
     }
 
     @Override
-    public IssueResponse getIssue(UUID issueId) {
-        return findIssue(issueId).toResponse();
+    public IssueResponse selectIssueDetails(UUID issueId) {
+        return selectIssueEntityDetails(issueId).toResponse();
     }
 
     @Override
-    public List<IssueResponse> getIssueList(IssueSearchCondition condition) {
+    public List<IssueResponse> selectIssueList(IssueSearchCondition condition) {
         return issueDao.selectIssueList(condition).stream()
                 .map(IssueEntity::toResponse)
                 .toList();
     }
 
-    private IssueEntity findIssue(UUID issueId) {
-        return issueDao.selectIssueById(issueId)
+    private IssueEntity selectIssueEntityDetails(UUID issueId) {
+        return issueDao.selectIssueByIdDetails(issueId)
                 .orElseThrow(() -> new BusinessException("이슈를 찾을 수 없습니다.", "ISSUE_NOT_FOUND"));
     }
 

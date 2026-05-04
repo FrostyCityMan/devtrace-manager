@@ -2,6 +2,7 @@ package com.devtrace.manager.issue.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,12 +47,12 @@ class IssueServiceImplTest {
     }
 
     @Test
-    void createIssue() {
+    void insertIssue() {
         UUID projectId = UUID.randomUUID();
         when(projectDao.selectProjectById(projectId)).thenReturn(Optional.of(createProject(projectId)));
         IssueRequest request = createRequest(projectId, "DTR-101", "이슈 등록");
 
-        IssueResponse response = issueService.createIssue(request);
+        IssueResponse response = issueService.insertIssue(request);
 
         ArgumentCaptor<IssueEntity> captor = ArgumentCaptor.forClass(IssueEntity.class);
         verify(issueDao).insertIssue(captor.capture());
@@ -71,7 +72,7 @@ class IssueServiceImplTest {
         UUID issueId = UUID.randomUUID();
         IssueEntity issue = createIssueEntity(issueId, projectId);
         when(projectDao.selectProjectById(projectId)).thenReturn(Optional.of(createProject(projectId)));
-        when(issueDao.selectIssueById(issueId)).thenReturn(Optional.of(issue));
+        when(issueDao.selectIssueByIdDetails(issueId)).thenReturn(Optional.of(issue));
 
         IssueRequest request = createRequest(projectId, "DTR-102", "수정된 이슈");
         IssueResponse response = issueService.updateIssue(issueId, request);
@@ -83,11 +84,26 @@ class IssueServiceImplTest {
     }
 
     @Test
+    void updateIssueStatus() {
+        UUID projectId = UUID.randomUUID();
+        UUID issueId = UUID.randomUUID();
+        IssueEntity issue = createIssueEntity(issueId, projectId);
+        when(issueDao.selectIssueByIdDetails(issueId)).thenReturn(Optional.of(issue));
+
+        IssueResponse response = issueService.updateIssueStatus(issueId, IssueStatus.DONE);
+
+        verify(issueDao).updateIssueStatus(eq(issueId), eq(IssueStatus.DONE), eq(response.getResolvedDate()), any(LocalDateTime.class));
+        assertThat(response.getStatus()).isEqualTo(IssueStatus.DONE);
+        assertThat(response.getResolvedDate()).isNotNull();
+        assertThat(response.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
     void deleteIssue() {
         UUID projectId = UUID.randomUUID();
         UUID issueId = UUID.randomUUID();
         IssueEntity issue = createIssueEntity(issueId, projectId);
-        when(issueDao.selectIssueById(issueId)).thenReturn(Optional.of(issue));
+        when(issueDao.selectIssueByIdDetails(issueId)).thenReturn(Optional.of(issue));
 
         issueService.deleteIssue(issueId);
 
@@ -95,25 +111,25 @@ class IssueServiceImplTest {
     }
 
     @Test
-    void getIssue() {
+    void selectIssueDetails() {
         UUID projectId = UUID.randomUUID();
         UUID issueId = UUID.randomUUID();
         IssueEntity issue = createIssueEntity(issueId, projectId);
-        when(issueDao.selectIssueById(issueId)).thenReturn(Optional.of(issue));
+        when(issueDao.selectIssueByIdDetails(issueId)).thenReturn(Optional.of(issue));
 
-        IssueResponse response = issueService.getIssue(issueId);
+        IssueResponse response = issueService.selectIssueDetails(issueId);
 
         assertThat(response.getIssueId()).isEqualTo(issueId);
         assertThat(response.getIssueKey()).isEqualTo("DTR-101");
     }
 
     @Test
-    void getIssueList() {
+    void selectIssueList() {
         UUID projectId = UUID.randomUUID();
         IssueEntity issue = createIssueEntity(UUID.randomUUID(), projectId);
         when(issueDao.selectIssueList(any(IssueSearchCondition.class))).thenReturn(List.of(issue));
 
-        List<IssueResponse> issues = issueService.getIssueList(new IssueSearchCondition());
+        List<IssueResponse> issues = issueService.selectIssueList(new IssueSearchCondition());
 
         assertThat(issues).hasSize(1);
         assertThat(issues.get(0).getProjectId()).isEqualTo(projectId);

@@ -12,10 +12,33 @@
         </a>
     </section>
 
-    <form th:action="@{/issues}" method="get" class="dt-toolbar" aria-label="이슈 검색과 필터">
+    <section class="dt-metrics" aria-label="이슈 현황">
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon coral"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 12l2 2 5-5"/></svg></span>
+            <div><p>전체 이슈</p><strong th:text="${summary.totalCount}">0</strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h5l2-6 3 10 2-4h4"/></svg></span>
+            <div><p>진행 중</p><strong th:text="${summary.activeCount}">0</strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <div><p>완료</p><strong th:text="${summary.doneCount}">0</strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01M10 3h4l8 18H2z"/></svg></span>
+            <div><p>긴급</p><strong th:text="${summary.urgentCount}">0</strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
+            <div><p>지연</p><strong th:text="${summary.delayedCount}">0</strong></div>
+        </article>
+    </section>
+
+    <form th:action="@{/issues}" method="get" class="dt-toolbar dt-issue-toolbar" aria-label="이슈 검색과 필터">
         <label class="dt-search-box">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
-            <input type="search" name="keyword" th:value="${condition.keyword}" placeholder="이슈 키 또는 제목 검색">
+            <input type="search" name="keyword" th:value="${condition.keyword}" placeholder="이슈 키, 제목, 프로젝트 코드">
         </label>
         <label class="dt-select-box">
             <select name="projectId">
@@ -32,8 +55,25 @@
                 <option th:each="status : ${issueStatuses}"
                         th:value="${status}"
                         th:selected="${condition.status == status}"
-                        th:text="${status}"></option>
+                        th:text="${status.label}"></option>
             </select>
+        </label>
+        <label class="dt-select-box">
+            <select name="priority">
+                <option value="">전체 우선순위</option>
+                <option th:each="priority : ${priorities}"
+                        th:value="${priority}"
+                        th:selected="${condition.priority == priority}"
+                        th:text="${priority.label}"></option>
+            </select>
+        </label>
+        <label class="dt-date-filter">
+            <span>예정 시작</span>
+            <input type="date" name="dueDateFrom" th:value="${condition.dueDateFrom}">
+        </label>
+        <label class="dt-date-filter">
+            <span>예정 종료</span>
+            <input type="date" name="dueDateTo" th:value="${condition.dueDateTo}">
         </label>
         <button type="submit" class="dt-filter-button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4M8 6v3M16 12v3"/></svg>
@@ -47,29 +87,33 @@
 
     <section class="dt-table-card" aria-label="이슈 데이터">
         <div class="dt-table-scroll">
-            <table class="dt-dashboard-table">
+            <table class="dt-dashboard-table dt-issue-table">
                 <thead>
                 <tr>
                     <th>이슈 키</th>
+                    <th>프로젝트</th>
                     <th>제목</th>
                     <th>유형</th>
                     <th>상태</th>
                     <th>우선순위</th>
                     <th>완료 예정일</th>
+                    <th>공수</th>
                     <th>작업</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${#lists.isEmpty(issues)}">
-                    <td colspan="7" data-label="이슈">등록된 이슈가 없습니다.</td>
+                    <td colspan="9" data-label="이슈">등록된 이슈가 없습니다.</td>
                 </tr>
-                <tr th:each="issue : ${issues}" th:class="${issue.priority.name() == 'URGENT' ? 'stripe-red' : (issue.priority.name() == 'HIGH' ? 'stripe-amber' : 'stripe-teal')}">
+                <tr th:each="issue : ${issues}" th:class="${issue.priority.rowClass}">
                     <td data-label="이슈 키" th:text="${issue.issueKey}">DTR-001</td>
+                    <td data-label="프로젝트" th:text="${issue.projectCode == null ? issue.projectId : issue.projectCode + ' - ' + issue.projectName}">DTR - DevTrace Manager</td>
                     <td data-label="제목" th:text="${issue.title}">이슈 제목</td>
-                    <td data-label="유형" th:text="${issue.issueType}">FEATURE</td>
-                    <td data-label="상태"><span class="dt-chip progress" th:text="${issue.status}">REGISTERED</span></td>
-                    <td data-label="우선순위" th:text="${issue.priority}">NORMAL</td>
+                    <td data-label="유형" th:text="${issue.issueType.label}">기능</td>
+                    <td data-label="상태"><span class="dt-chip" th:classappend="${' ' + issue.status.cssClass}" th:text="${issue.status.label}">등록</span></td>
+                    <td data-label="우선순위"><span class="dt-chip" th:classappend="${' ' + issue.priority.cssClass}" th:text="${issue.priority.label}">보통</span></td>
                     <td data-label="완료 예정일" th:text="${issue.dueDate == null ? '-' : issue.dueDate}">-</td>
+                    <td data-label="공수" th:text="${issue.estimatedMinutes + '분 / ' + issue.spentMinutes + '분'}">0분 / 0분</td>
                     <td data-label="작업">
                         <div class="dt-row-actions">
                             <a th:href="@{/issues/{issueId}/edit(issueId=${issue.issueId})}" class="dt-action">
@@ -81,7 +125,7 @@
                                 상세
                             </a>
                             <form th:action="@{/issues/{issueId}/delete(issueId=${issue.issueId})}" method="post">
-                                <button type="submit" class="dt-action danger">
+                                <button type="submit" class="dt-action danger" onclick="return confirm('이슈를 삭제하시겠습니까?')">
                                     <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
                                     삭제
                                 </button>
@@ -95,6 +139,33 @@
         <div class="dt-table-footer">
             <span th:text="${'총 ' + #lists.size(issues) + '건'}">총 0건</span>
         </div>
+    </section>
+
+    <section class="dt-widget-grid" aria-label="이슈 요약">
+        <article class="dt-widget">
+            <h2>상태 흐름</h2>
+            <div class="dt-issue-flow">
+                <span>등록</span>
+                <span>분석</span>
+                <span>진행</span>
+                <span>검토</span>
+                <span>완료</span>
+            </div>
+        </article>
+        <article class="dt-widget">
+            <h2>공수 집계</h2>
+            <div class="dt-effort-summary">
+                <div><span>예상</span><strong th:text="${summary.estimatedHoursLabel}">0.0h</strong></div>
+                <div><span>실제</span><strong th:text="${summary.spentHoursLabel}">0.0h</strong></div>
+            </div>
+        </article>
+        <article class="dt-widget">
+            <h2>우선 처리 지표</h2>
+            <div class="dt-risk-summary">
+                <div><span class="dot amber"></span>긴급 이슈 <strong th:text="${summary.urgentCount + '건'}">0건</strong></div>
+                <div><span class="dot red"></span>지연 이슈 <strong th:text="${summary.delayedCount + '건'}">0건</strong></div>
+            </div>
+        </article>
     </section>
 </main>
 </body>

@@ -67,7 +67,9 @@ gradle test
 - ProjectService 기본 단위 테스트
 - ISSUE 테이블 Flyway 마이그레이션
 - 이슈 목록, 상세, 등록, 수정, 삭제
-- 프로젝트별 이슈 목록 및 상태 필터
+- 프로젝트별 이슈 목록, 상태/우선순위/완료 예정일 필터
+- 이슈 상태 변경 화면 및 API
+- 이슈 목록 통계 카드와 공수 요약 위젯
 - 이슈 관리 Thymeleaf 화면
 - IssueService 기본 단위 테스트
 

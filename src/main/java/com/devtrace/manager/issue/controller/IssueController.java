@@ -1,7 +1,9 @@
 package com.devtrace.manager.issue.controller;
 
 import com.devtrace.manager.issue.dto.IssuePriority;
+import com.devtrace.manager.issue.dto.IssueListSummary;
 import com.devtrace.manager.issue.dto.IssueRequest;
+import com.devtrace.manager.issue.dto.IssueResponse;
 import com.devtrace.manager.issue.dto.IssueSearchCondition;
 import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.issue.dto.IssueType;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/issues")
@@ -55,7 +58,9 @@ public class IssueController {
 
     @GetMapping
     public String list(@ModelAttribute IssueSearchCondition condition, Model model) {
-        model.addAttribute("issues", issueService.getIssueList(condition));
+        List<IssueResponse> issues = issueService.selectIssueList(condition);
+        model.addAttribute("issues", issues);
+        model.addAttribute("summary", IssueListSummary.from(issues));
         model.addAttribute("condition", condition);
         return "issue/list";
     }
@@ -71,20 +76,20 @@ public class IssueController {
         if (bindingResult.hasErrors()) {
             return "issue/form";
         }
-        issueService.createIssue(request);
+        issueService.insertIssue(request);
         return "redirect:/issues";
     }
 
     @GetMapping("/{issueId}")
     public String detail(@PathVariable UUID issueId, Model model) {
-        model.addAttribute("issue", issueService.getIssue(issueId));
+        model.addAttribute("issue", issueService.selectIssueDetails(issueId));
         return "issue/detail";
     }
 
     @GetMapping("/{issueId}/edit")
     public String editForm(@PathVariable UUID issueId, Model model) {
         model.addAttribute("issueId", issueId);
-        model.addAttribute("issue", issueService.getIssue(issueId).toRequest());
+        model.addAttribute("issue", issueService.selectIssueDetails(issueId).toRequest());
         return "issue/form";
     }
 
@@ -100,6 +105,12 @@ public class IssueController {
             return "issue/form";
         }
         issueService.updateIssue(issueId, request);
+        return "redirect:/issues/" + issueId;
+    }
+
+    @PostMapping("/{issueId}/status")
+    public String updateStatus(@PathVariable UUID issueId, @RequestParam IssueStatus status) {
+        issueService.updateIssueStatus(issueId, status);
         return "redirect:/issues/" + issueId;
     }
 
