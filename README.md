@@ -2,7 +2,7 @@
 
 DevTrace Manager는 SI 개발 프로젝트에서 발생하는 프로젝트 관리, 이슈 관리, 작업 공수 관리, 형상관리 로그 관리, 컬럼명세 Excel 생성, 개발 산출물 생성을 통합 지원하기 위한 스탠드얼론 웹 애플리케이션입니다.
 
-현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능입니다.
+현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간 업무보고 Markdown 생성 기능입니다.
 
 ## 기술 스택
 
@@ -32,7 +32,7 @@ $env:DB_PASSWORD='devtrace'
 ## 실행
 
 ```powershell
-gradle bootRun
+.\gradlew.bat bootRun
 ```
 
 기본 접속 정보:
@@ -50,7 +50,7 @@ gradle bootRun
 ## 테스트
 
 ```powershell
-gradle test
+.\gradlew.bat test
 ```
 
 ## 현재 구현 기능
@@ -91,11 +91,17 @@ gradle test
 - 변경이력 미리보기 화면
 - Apache POI 기반 변경이력 `.xlsx` 다운로드
 - Git/SVN 파서 테스트 및 Excel 주요 셀 검증 테스트
+- ARTIFACT_HISTORY 테이블 Flyway 마이그레이션
+- 프로젝트/기간 기준 이슈, 작업 공수, Git/SVN 변경이력 집계
+- 주간 업무보고 Markdown 생성기
+- 주간 업무보고 미리보기 화면
+- Markdown 다운로드 및 산출물 생성 이력 저장
+- WeeklyReportMarkdownGenerator 및 ArtifactService 기본 테스트
 
 ## 아직 구현하지 않은 기능
 
 - 칸반 보드
-- 산출물 생성
+- 일일 업무보고 및 기타 산출물 생성
 - 외부 API 연동
 - React 전환
 - JPA 전환

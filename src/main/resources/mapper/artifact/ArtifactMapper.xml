@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.artifact.dao.ArtifactDao">
+
+    <resultMap id="ArtifactHistoryResultMap" type="com.devtrace.manager.artifact.dto.ArtifactHistoryEntity">
+        <id property="artifactId" column="ARTIFACT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="artifactType" column="ARTIFACT_TYPE"/>
+        <result property="fileName" column="FILE_NAME"/>
+        <result property="filePath" column="FILE_PATH"/>
+        <result property="generatedBy" column="GENERATED_BY" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="generatedAt" column="GENERATED_AT"/>
+    </resultMap>
+
+    <resultMap id="WeeklyReportIssueResultMap" type="com.devtrace.manager.artifact.dto.WeeklyReportIssueRow">
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueType" column="ISSUE_TYPE"/>
+        <result property="title" column="TITLE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="resolvedDate" column="RESOLVED_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <resultMap id="WeeklyReportWorkLogResultMap" type="com.devtrace.manager.artifact.dto.WeeklyReportWorkLogRow">
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueTitle" column="ISSUE_TITLE"/>
+        <result property="workDate" column="WORK_DATE"/>
+        <result property="workContent" column="WORK_CONTENT"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <resultMap id="WeeklyReportVcsResultMap" type="com.devtrace.manager.artifact.dto.WeeklyReportVcsRow">
+        <result property="vcsType" column="VCS_TYPE"/>
+        <result property="revisionNo" column="REVISION_NO"/>
+        <result property="author" column="AUTHOR"/>
+        <result property="changedAt" column="CHANGED_AT"/>
+        <result property="message" column="MESSAGE"/>
+        <result property="issueKeyText" column="ISSUE_KEY_TEXT"/>
+    </resultMap>
+
+    <insert id="insertArtifactHistory" parameterType="com.devtrace.manager.artifact.dto.ArtifactHistoryEntity">
+        INSERT INTO ARTIFACT_HISTORY (
+            ARTIFACT_ID,
+            PROJECT_ID,
+            ARTIFACT_TYPE,
+            FILE_NAME,
+            FILE_PATH,
+            GENERATED_BY,
+            GENERATED_AT
+        ) VALUES (
+            #{artifactId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{artifactType},
+            #{fileName},
+            #{filePath},
+            #{generatedBy,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{generatedAt}
+        )
+    </insert>
+
+    <select id="selectArtifactHistoryList" parameterType="com.devtrace.manager.artifact.dto.ArtifactSearchCondition" resultMap="ArtifactHistoryResultMap">
+        SELECT
+            ARTIFACT_ID,
+            PROJECT_ID,
+            ARTIFACT_TYPE,
+            FILE_NAME,
+            FILE_PATH,
+            GENERATED_BY,
+            GENERATED_AT
+        FROM ARTIFACT_HISTORY
+        <where>
+            <if test="projectId != null">
+                AND PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="artifactType != null">
+                AND ARTIFACT_TYPE = #{artifactType}
+            </if>
+        </where>
+        ORDER BY GENERATED_AT DESC
+    </select>
+
+    <select id="selectWeeklyReportIssueList" resultMap="WeeklyReportIssueResultMap">
+        SELECT
+            ISSUE_KEY,
+            ISSUE_TYPE,
+            TITLE,
+            STATUS,
+            PRIORITY,
+            START_DATE,
+            DUE_DATE,
+            RESOLVED_DATE,
+            ESTIMATED_MINUTES,
+            SPENT_MINUTES
+        FROM ISSUE
+        WHERE PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND (
+                CAST(CREATED_AT AS DATE) BETWEEN #{startDate} AND #{endDate}
+                OR CAST(COALESCE(UPDATED_AT, CREATED_AT) AS DATE) BETWEEN #{startDate} AND #{endDate}
+                OR START_DATE BETWEEN #{startDate} AND #{endDate}
+                OR DUE_DATE BETWEEN #{startDate} AND #{endDate}
+                OR RESOLVED_DATE BETWEEN #{startDate} AND #{endDate}
+          )
+        ORDER BY PRIORITY ASC, DUE_DATE ASC NULLS LAST, CREATED_AT DESC
+    </select>
+
+    <select id="selectWeeklyReportWorkLogList" resultMap="WeeklyReportWorkLogResultMap">
+        SELECT
+            I.ISSUE_KEY,
+            I.TITLE AS ISSUE_TITLE,
+            W.WORK_DATE,
+            W.WORK_CONTENT,
+            W.SPENT_MINUTES
+        FROM WORK_LOG W
+        INNER JOIN ISSUE I ON W.ISSUE_ID = I.ISSUE_ID
+        WHERE I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND W.WORK_DATE BETWEEN #{startDate} AND #{endDate}
+        ORDER BY W.WORK_DATE ASC, I.ISSUE_KEY ASC
+    </select>
+
+    <select id="selectWeeklyReportVcsList" resultMap="WeeklyReportVcsResultMap">
+        SELECT
+            L.VCS_TYPE,
+            L.REVISION_NO,
+            L.AUTHOR,
+            L.CHANGED_AT,
+            L.MESSAGE,
+            COALESCE(STRING_AGG(DISTINCT I.ISSUE_KEY, ', ' ORDER BY I.ISSUE_KEY), '') AS ISSUE_KEY_TEXT
+        FROM VCS_CHANGE_LOG L
+        LEFT JOIN ISSUE_CHANGE_LOG_MAP M ON L.CHANGE_LOG_ID = M.CHANGE_LOG_ID
+        LEFT JOIN ISSUE I ON M.ISSUE_ID = I.ISSUE_ID
+        WHERE L.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND CAST(L.CHANGED_AT AS DATE) BETWEEN #{startDate} AND #{endDate}
+        GROUP BY L.CHANGE_LOG_ID, L.VCS_TYPE, L.REVISION_NO, L.AUTHOR, L.CHANGED_AT, L.MESSAGE
+        ORDER BY L.CHANGED_AT ASC NULLS LAST, L.REVISION_NO ASC
+    </select>
+</mapper>
