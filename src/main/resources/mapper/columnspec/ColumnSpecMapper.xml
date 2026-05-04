@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.columnspec.dao.ColumnSpecDao">
+
+    <resultMap id="ColumnSpecResultMap" type="com.devtrace.manager.columnspec.dto.ColumnSpecEntity">
+        <id property="columnSpecId" column="COLUMN_SPEC_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="tableName" column="TABLE_NAME"/>
+        <result property="tableComment" column="TABLE_COMMENT"/>
+        <result property="columnName" column="COLUMN_NAME"/>
+        <result property="columnComment" column="COLUMN_COMMENT"/>
+        <result property="dataType" column="DATA_TYPE"/>
+        <result property="dataLength" column="DATA_LENGTH"/>
+        <result property="isNullable" column="IS_NULLABLE"/>
+        <result property="isPk" column="IS_PK"/>
+        <result property="isFk" column="IS_FK"/>
+        <result property="defaultValue" column="DEFAULT_VALUE"/>
+        <result property="remark" column="REMARK"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <sql id="ColumnSpecColumns">
+        COLUMN_SPEC_ID,
+        PROJECT_ID,
+        TABLE_NAME,
+        TABLE_COMMENT,
+        COLUMN_NAME,
+        COLUMN_COMMENT,
+        DATA_TYPE,
+        DATA_LENGTH,
+        IS_NULLABLE,
+        IS_PK,
+        IS_FK,
+        DEFAULT_VALUE,
+        REMARK,
+        CREATED_AT
+    </sql>
+
+    <insert id="insertColumnSpecs">
+        INSERT INTO COLUMN_SPEC (
+            <include refid="ColumnSpecColumns"/>
+        ) VALUES
+        <foreach collection="columnSpecs" item="spec" separator=",">
+            (
+                #{spec.columnSpecId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{spec.projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{spec.tableName},
+                #{spec.tableComment},
+                #{spec.columnName},
+                #{spec.columnComment},
+                #{spec.dataType},
+                #{spec.dataLength},
+                #{spec.isNullable},
+                #{spec.isPk},
+                #{spec.isFk},
+                #{spec.defaultValue},
+                #{spec.remark},
+                #{spec.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteColumnSpecsByProjectId" parameterType="java.util.UUID">
+        DELETE FROM COLUMN_SPEC
+        WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectColumnSpecList" parameterType="com.devtrace.manager.columnspec.dto.ColumnSpecSearchCondition" resultMap="ColumnSpecResultMap">
+        SELECT
+            <include refid="ColumnSpecColumns"/>
+        FROM COLUMN_SPEC
+        <where>
+            <if test="projectId != null">
+                AND PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="tableName != null and tableName != ''">
+                AND TABLE_NAME ILIKE CONCAT('%', #{tableName}, '%')
+            </if>
+        </where>
+        ORDER BY TABLE_NAME ASC, CREATED_AT ASC
+    </select>
+</mapper>

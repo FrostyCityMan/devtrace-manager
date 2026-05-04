@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.vcs.dao.VcsLogDao">
+
+    <resultMap id="VcsChangeLogResultMap" type="com.devtrace.manager.vcs.dto.VcsChangeLogEntity">
+        <id property="changeLogId" column="CHANGE_LOG_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="vcsType" column="VCS_TYPE"/>
+        <result property="revisionNo" column="REVISION_NO"/>
+        <result property="author" column="AUTHOR"/>
+        <result property="changedAt" column="CHANGED_AT"/>
+        <result property="message" column="MESSAGE"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <resultMap id="VcsChangeFileResultMap" type="com.devtrace.manager.vcs.dto.VcsChangeFileEntity">
+        <id property="changeFileId" column="CHANGE_FILE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="changeLogId" column="CHANGE_LOG_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="filePath" column="FILE_PATH"/>
+        <result property="changeType" column="CHANGE_TYPE"/>
+    </resultMap>
+
+    <resultMap id="VcsIssueKeyResultMap" type="com.devtrace.manager.vcs.dao.VcsIssueKeyRow">
+        <id property="changeLogId" column="CHANGE_LOG_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+    </resultMap>
+
+    <insert id="insertChangeLogs">
+        INSERT INTO VCS_CHANGE_LOG (
+            CHANGE_LOG_ID,
+            PROJECT_ID,
+            VCS_TYPE,
+            REVISION_NO,
+            AUTHOR,
+            CHANGED_AT,
+            MESSAGE,
+            CREATED_AT
+        ) VALUES
+        <foreach collection="changeLogs" item="log" separator=",">
+            (
+                #{log.changeLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{log.projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{log.vcsType},
+                #{log.revisionNo},
+                #{log.author},
+                #{log.changedAt},
+                #{log.message},
+                #{log.createdAt}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertChangeFiles">
+        INSERT INTO VCS_CHANGE_FILE (
+            CHANGE_FILE_ID,
+            CHANGE_LOG_ID,
+            FILE_PATH,
+            CHANGE_TYPE
+        ) VALUES
+        <foreach collection="changeFiles" item="file" separator=",">
+            (
+                #{file.changeFileId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{file.changeLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+                #{file.filePath},
+                #{file.changeType}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertIssueChangeLogMaps">
+        INSERT INTO ISSUE_CHANGE_LOG_MAP (
+            ISSUE_ID,
+            CHANGE_LOG_ID
+        )
+        SELECT
+            ISSUE_ID,
+            #{changeLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        FROM ISSUE
+        WHERE ISSUE_KEY IN
+        <foreach collection="issueKeys" item="issueKey" open="(" close=")" separator=",">
+            #{issueKey}
+        </foreach>
+        ON CONFLICT DO NOTHING
+    </insert>
+
+    <delete id="deleteIssueChangeLogMapsByProjectId" parameterType="java.util.UUID">
+        DELETE FROM ISSUE_CHANGE_LOG_MAP
+        WHERE CHANGE_LOG_ID IN (
+            SELECT CHANGE_LOG_ID
+            FROM VCS_CHANGE_LOG
+            WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        )
+    </delete>
+
+    <delete id="deleteChangeFilesByProjectId" parameterType="java.util.UUID">
+        DELETE FROM VCS_CHANGE_FILE
+        WHERE CHANGE_LOG_ID IN (
+            SELECT CHANGE_LOG_ID
+            FROM VCS_CHANGE_LOG
+            WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        )
+    </delete>
+
+    <delete id="deleteChangeLogsByProjectId" parameterType="java.util.UUID">
+        DELETE FROM VCS_CHANGE_LOG
+        WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectChangeLogList" parameterType="com.devtrace.manager.vcs.dto.VcsLogSearchCondition" resultMap="VcsChangeLogResultMap">
+        SELECT
+            CHANGE_LOG_ID,
+            PROJECT_ID,
+            VCS_TYPE,
+            REVISION_NO,
+            AUTHOR,
+            CHANGED_AT,
+            MESSAGE,
+            CREATED_AT
+        FROM VCS_CHANGE_LOG
+        <where>
+            <if test="projectId != null">
+                AND PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="vcsType != null">
+                AND VCS_TYPE = #{vcsType}
+            </if>
+        </where>
+        ORDER BY CHANGED_AT DESC NULLS LAST, CREATED_AT DESC
+    </select>
+
+    <select id="selectChangeFilesByChangeLogIds" resultMap="VcsChangeFileResultMap">
+        SELECT
+            CHANGE_FILE_ID,
+            CHANGE_LOG_ID,
+            FILE_PATH,
+            CHANGE_TYPE
+        FROM VCS_CHANGE_FILE
+        WHERE CHANGE_LOG_ID IN
+        <foreach collection="changeLogIds" item="changeLogId" open="(" close=")" separator=",">
+            #{changeLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        </foreach>
+        ORDER BY FILE_PATH ASC
+    </select>
+
+    <select id="selectIssueKeysByChangeLogIds" resultMap="VcsIssueKeyResultMap">
+        SELECT
+            M.CHANGE_LOG_ID,
+            I.ISSUE_KEY
+        FROM ISSUE_CHANGE_LOG_MAP M
+        INNER JOIN ISSUE I ON M.ISSUE_ID = I.ISSUE_ID
+        WHERE M.CHANGE_LOG_ID IN
+        <foreach collection="changeLogIds" item="changeLogId" open="(" close=")" separator=",">
+            #{changeLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        </foreach>
+        ORDER BY I.ISSUE_KEY ASC
+    </select>
+</mapper>

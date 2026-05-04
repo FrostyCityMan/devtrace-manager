@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('컬럼명세 Excel 생성')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>컬럼명세 Excel 생성</h1>
+            <p>DDL을 분석하여 테이블 목록, 컬럼 명세, 변경 이력 시트가 포함된 xlsx 산출물을 생성합니다.</p>
+        </div>
+        <a th:href="@{/projects}" class="dt-button dt-button-ghost">프로젝트</a>
+    </section>
+
+    <section class="dt-columnspec-summary" aria-label="컬럼명세 요약">
+        <article>
+            <span>테이블</span>
+            <strong th:text="${summary.tableCount}">0</strong>
+            <small>개</small>
+        </article>
+        <article>
+            <span>컬럼</span>
+            <strong th:text="${summary.columnCount}">0</strong>
+            <small>개</small>
+        </article>
+        <article>
+            <span>PK</span>
+            <strong th:text="${summary.primaryKeyCount}">0</strong>
+            <small>개</small>
+        </article>
+        <article>
+            <span>FK</span>
+            <strong th:text="${summary.foreignKeyCount}">0</strong>
+            <small>개</small>
+        </article>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <div th:if="${columnSpecError != null}" class="dt-form-alert danger" th:text="${columnSpecError}">
+            DDL 분석 오류
+        </div>
+        <form th:action="@{/column-specs/preview}" th:object="${columnSpec}" method="post" class="dt-form">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectId">프로젝트</label>
+                    <select id="projectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="databaseType">DB 종류</label>
+                    <select id="databaseType" th:field="*{databaseType}" class="form-select" required>
+                        <option th:each="databaseType : ${databaseTypes}"
+                                th:value="${databaseType}"
+                                th:text="${databaseType.label}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{databaseType}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="ddl">DDL</label>
+                    <textarea id="ddl" th:field="*{ddl}" class="form-control dt-ddl-input" rows="16" required
+                              placeholder="CREATE TABLE PROJECT (...);"></textarea>
+                    <div class="dt-error" th:errors="*{ddl}"></div>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">미리보기 생성</button>
+                <button type="submit" th:formaction="@{/column-specs/download}" class="dt-button dt-button-download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                    Excel 다운로드
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="dt-panel dt-form-panel dt-columnspec-preview">
+        <div class="dt-section-head">
+            <div>
+                <h2>컬럼명세 미리보기</h2>
+                <p th:text="${'총 ' + #lists.size(specs) + '개 컬럼'}">총 0개 컬럼</p>
+            </div>
+        </div>
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-columnspec-table">
+                <thead>
+                <tr>
+                    <th>순번</th>
+                    <th>테이블명</th>
+                    <th>테이블 설명</th>
+                    <th>컬럼명</th>
+                    <th>컬럼 설명</th>
+                    <th>데이터 타입</th>
+                    <th>길이</th>
+                    <th>Nullable</th>
+                    <th>PK</th>
+                    <th>FK</th>
+                    <th>기본값</th>
+                    <th>비고</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(specs)}">
+                    <td colspan="12" data-label="컬럼명세">DDL 분석 결과가 없습니다.</td>
+                </tr>
+                <tr th:each="spec, stat : ${specs}" class="stripe-teal">
+                    <td data-label="순번" th:text="${stat.count}">1</td>
+                    <td data-label="테이블명" th:text="${spec.tableName}">PROJECT</td>
+                    <td data-label="테이블 설명" th:text="${spec.tableComment == null ? '-' : spec.tableComment}">프로젝트</td>
+                    <td data-label="컬럼명" th:text="${spec.columnName}">PROJECT_ID</td>
+                    <td data-label="컬럼 설명" th:text="${spec.columnComment == null ? '-' : spec.columnComment}">프로젝트 ID</td>
+                    <td data-label="데이터 타입" th:text="${spec.dataType}">UUID</td>
+                    <td data-label="길이" th:text="${spec.dataLength == null ? '-' : spec.dataLength}">-</td>
+                    <td data-label="Nullable" th:text="${spec.isNullable}">N</td>
+                    <td data-label="PK" th:text="${spec.isPk}">Y</td>
+                    <td data-label="FK" th:text="${spec.isFk}">N</td>
+                    <td data-label="기본값" th:text="${spec.defaultValue == null ? '-' : spec.defaultValue}">-</td>
+                    <td data-label="비고" th:text="${spec.remark == null ? '-' : spec.remark}">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

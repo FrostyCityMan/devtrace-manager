@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('변경이력 Excel 생성')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>변경이력 Excel 생성</h1>
+            <p>Git/SVN 로그를 붙여넣어 이슈 키와 변경 파일을 추출하고 변경이력 xlsx 산출물을 생성합니다.</p>
+        </div>
+        <a th:href="@{/issues}" class="dt-button dt-button-ghost">이슈</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <form th:action="@{/vcs-logs/preview}" th:object="${vcsLog}" method="post" class="dt-form">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectId">프로젝트</label>
+                    <select id="projectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="vcsType">VCS</label>
+                    <select id="vcsType" th:field="*{vcsType}" class="form-select" required>
+                        <option th:each="vcsType : ${vcsTypes}"
+                                th:value="${vcsType}"
+                                th:text="${vcsType.label}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{vcsType}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="logText">로그 텍스트</label>
+                    <textarea id="logText" th:field="*{logText}" class="form-control dt-ddl-input" rows="16" required
+                              placeholder="git log --name-status --pretty=format:&quot;commit|%H|%an|%ad|%s&quot; --date=iso"></textarea>
+                    <div class="dt-error" th:errors="*{logText}"></div>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">미리보기 생성</button>
+                <button type="submit" th:formaction="@{/vcs-logs/download}" class="dt-button dt-button-download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                    Excel 다운로드
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="dt-panel dt-form-panel dt-columnspec-preview">
+        <div class="dt-section-head">
+            <div>
+                <h2>변경이력 미리보기</h2>
+                <p th:text="${'총 ' + #lists.size(logs) + '개 리비전'}">총 0개 리비전</p>
+            </div>
+        </div>
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-vcs-table">
+                <thead>
+                <tr>
+                    <th>순번</th>
+                    <th>VCS</th>
+                    <th>리비전</th>
+                    <th>작성자</th>
+                    <th>변경일시</th>
+                    <th>이슈 키</th>
+                    <th>메시지</th>
+                    <th>변경 파일</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(logs)}">
+                    <td colspan="8" data-label="변경이력">분석된 변경이력이 없습니다.</td>
+                </tr>
+                <tr th:each="log, stat : ${logs}" class="stripe-teal">
+                    <td data-label="순번" th:text="${stat.count}">1</td>
+                    <td data-label="VCS" th:text="${log.vcsType.label}">Git</td>
+                    <td data-label="리비전" th:text="${log.revisionNo}">abc123</td>
+                    <td data-label="작성자" th:text="${log.author}">admin</td>
+                    <td data-label="변경일시" th:text="${log.changedAt == null ? '-' : #temporals.format(log.changedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-04 09:00:00</td>
+                    <td data-label="이슈 키" th:text="${#strings.isEmpty(log.issueKeyText) ? '-' : log.issueKeyText}">ISO-101</td>
+                    <td data-label="메시지" th:text="${log.message}">메시지</td>
+                    <td data-label="변경 파일" class="dt-pre" th:text="${#strings.isEmpty(log.changedFileText) ? '-' : log.changedFileText}">M src/App.java</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

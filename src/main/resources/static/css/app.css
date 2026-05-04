@@ -1204,6 +1204,147 @@ svg {
     width: 170px;
 }
 
+.dt-ddl-input {
+    min-height: 340px;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    line-height: 1.6;
+}
+
+.dt-columnspec-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.dt-columnspec-summary article {
+    min-height: 92px;
+    padding: 16px;
+    border: 1px solid #d7cdbd;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.78);
+    box-shadow: 0 8px 22px rgba(62, 45, 25, 0.04);
+}
+
+.dt-columnspec-summary span,
+.dt-columnspec-summary small {
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-columnspec-summary strong {
+    display: inline-block;
+    margin: 6px 4px 0 0;
+    color: #101820;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.dt-form-alert {
+    margin-bottom: 18px;
+    padding: 13px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.dt-form-alert.danger {
+    color: #d9241d;
+    background: #ffe2dc;
+    border: 1px solid #ffc4ba;
+}
+
+.dt-button-download {
+    gap: 8px;
+}
+
+.dt-button-download svg {
+    width: 17px;
+    height: 17px;
+}
+
+.dt-columnspec-preview {
+    margin-top: 22px;
+}
+
+.dt-columnspec-table {
+    min-width: 1500px;
+}
+
+.dt-columnspec-table th:nth-child(1),
+.dt-columnspec-table td:nth-child(1) {
+    width: 72px;
+}
+
+.dt-columnspec-table th:nth-child(2),
+.dt-columnspec-table td:nth-child(2),
+.dt-columnspec-table th:nth-child(4),
+.dt-columnspec-table td:nth-child(4) {
+    width: 150px;
+}
+
+.dt-columnspec-table th:nth-child(3),
+.dt-columnspec-table td:nth-child(3),
+.dt-columnspec-table th:nth-child(5),
+.dt-columnspec-table td:nth-child(5) {
+    width: 190px;
+}
+
+.dt-columnspec-table th:nth-child(6),
+.dt-columnspec-table td:nth-child(6) {
+    width: 130px;
+}
+
+.dt-columnspec-table th:nth-child(7),
+.dt-columnspec-table td:nth-child(7),
+.dt-columnspec-table th:nth-child(8),
+.dt-columnspec-table td:nth-child(8),
+.dt-columnspec-table th:nth-child(9),
+.dt-columnspec-table td:nth-child(9),
+.dt-columnspec-table th:nth-child(10),
+.dt-columnspec-table td:nth-child(10) {
+    width: 96px;
+}
+
+.dt-vcs-table {
+    min-width: 1320px;
+}
+
+.dt-vcs-table th:nth-child(1),
+.dt-vcs-table td:nth-child(1) {
+    width: 72px;
+}
+
+.dt-vcs-table th:nth-child(2),
+.dt-vcs-table td:nth-child(2) {
+    width: 90px;
+}
+
+.dt-vcs-table th:nth-child(3),
+.dt-vcs-table td:nth-child(3) {
+    width: 160px;
+}
+
+.dt-vcs-table th:nth-child(4),
+.dt-vcs-table td:nth-child(4),
+.dt-vcs-table th:nth-child(6),
+.dt-vcs-table td:nth-child(6) {
+    width: 140px;
+}
+
+.dt-vcs-table th:nth-child(5),
+.dt-vcs-table td:nth-child(5) {
+    width: 180px;
+}
+
+.dt-vcs-table th:nth-child(7),
+.dt-vcs-table td:nth-child(7),
+.dt-vcs-table th:nth-child(8),
+.dt-vcs-table td:nth-child(8) {
+    width: 270px;
+}
+
 .dt-detail-head strong {
     display: block;
     margin-top: 4px;
@@ -1713,6 +1854,10 @@ svg {
     }
 
     .dt-worklog-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .dt-columnspec-summary {
         grid-template-columns: 1fr;
     }
 
