@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('이슈 목록')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-content">
+    <section class="dt-page-head">
+        <h1>이슈 목록</h1>
+        <a th:href="@{/issues/new}" class="dt-primary-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            새 이슈
+        </a>
+    </section>
+
+    <form th:action="@{/issues}" method="get" class="dt-toolbar" aria-label="이슈 검색과 필터">
+        <label class="dt-search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
+            <input type="search" name="keyword" th:value="${condition.keyword}" placeholder="이슈 키 또는 제목 검색">
+        </label>
+        <label class="dt-select-box">
+            <select name="projectId">
+                <option value="">전체 프로젝트</option>
+                <option th:each="project : ${projects}"
+                        th:value="${project.projectId}"
+                        th:selected="${condition.projectId != null and condition.projectId.equals(project.projectId)}"
+                        th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+            </select>
+        </label>
+        <label class="dt-select-box">
+            <select name="status">
+                <option value="">전체 상태</option>
+                <option th:each="status : ${issueStatuses}"
+                        th:value="${status}"
+                        th:selected="${condition.status == status}"
+                        th:text="${status}"></option>
+            </select>
+        </label>
+        <button type="submit" class="dt-filter-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4M8 6v3M16 12v3"/></svg>
+            조회
+        </button>
+        <a th:href="@{/issues}" class="dt-reset-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6"/></svg>
+            초기화
+        </a>
+    </form>
+
+    <section class="dt-table-card" aria-label="이슈 데이터">
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table">
+                <thead>
+                <tr>
+                    <th>이슈 키</th>
+                    <th>제목</th>
+                    <th>유형</th>
+                    <th>상태</th>
+                    <th>우선순위</th>
+                    <th>완료 예정일</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(issues)}">
+                    <td colspan="7" data-label="이슈">등록된 이슈가 없습니다.</td>
+                </tr>
+                <tr th:each="issue : ${issues}" th:class="${issue.priority.name() == 'URGENT' ? 'stripe-red' : (issue.priority.name() == 'HIGH' ? 'stripe-amber' : 'stripe-teal')}">
+                    <td data-label="이슈 키" th:text="${issue.issueKey}">DTR-001</td>
+                    <td data-label="제목" th:text="${issue.title}">이슈 제목</td>
+                    <td data-label="유형" th:text="${issue.issueType}">FEATURE</td>
+                    <td data-label="상태"><span class="dt-chip progress" th:text="${issue.status}">REGISTERED</span></td>
+                    <td data-label="우선순위" th:text="${issue.priority}">NORMAL</td>
+                    <td data-label="완료 예정일" th:text="${issue.dueDate == null ? '-' : issue.dueDate}">-</td>
+                    <td data-label="작업">
+                        <div class="dt-row-actions">
+                            <a th:href="@{/issues/{issueId}/edit(issueId=${issue.issueId})}" class="dt-action">
+                                <svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>
+                                수정
+                            </a>
+                            <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}" class="dt-action">
+                                <svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>
+                                상세
+                            </a>
+                            <form th:action="@{/issues/{issueId}/delete(issueId=${issue.issueId})}" method="post">
+                                <button type="submit" class="dt-action danger">
+                                    <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
+                                    삭제
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="dt-table-footer">
+            <span th:text="${'총 ' + #lists.size(issues) + '건'}">총 0건</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

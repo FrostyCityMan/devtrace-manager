@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('이슈 상세')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>이슈 상세</h1>
+            <p th:text="${issue.title}">이슈 제목</p>
+        </div>
+        <div class="dt-hero-actions">
+            <a th:href="@{/issues/{issueId}/edit(issueId=${issue.issueId})}" class="dt-button dt-button-primary">수정</a>
+            <a th:href="@{/issues}" class="dt-button dt-button-ghost">목록</a>
+        </div>
+    </section>
+
+    <section class="dt-panel dt-detail-panel">
+        <div class="dt-detail-head">
+            <div>
+                <span>이슈 키</span>
+                <strong th:text="${issue.issueKey}">DTR-001</strong>
+            </div>
+            <span class="dt-status" th:text="${issue.status}">REGISTERED</span>
+        </div>
+        <dl class="dt-detail-grid">
+            <div>
+                <dt>프로젝트 ID</dt>
+                <dd th:text="${issue.projectId}"></dd>
+            </div>
+            <div>
+                <dt>유형</dt>
+                <dd th:text="${issue.issueType}"></dd>
+            </div>
+            <div>
+                <dt>우선순위</dt>
+                <dd th:text="${issue.priority}"></dd>
+            </div>
+            <div>
+                <dt>예상/실제 공수</dt>
+                <dd th:text="${issue.estimatedMinutes + '분 / ' + issue.spentMinutes + '분'}"></dd>
+            </div>
+            <div>
+                <dt>시작 예정일</dt>
+                <dd th:text="${issue.startDate == null ? '-' : issue.startDate}"></dd>
+            </div>
+            <div>
+                <dt>완료 예정일</dt>
+                <dd th:text="${issue.dueDate == null ? '-' : issue.dueDate}"></dd>
+            </div>
+            <div>
+                <dt>실제 완료일</dt>
+                <dd th:text="${issue.resolvedDate == null ? '-' : issue.resolvedDate}"></dd>
+            </div>
+            <div>
+                <dt>생성일시</dt>
+                <dd th:text="${#temporals.format(issue.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>설명</dt>
+                <dd class="dt-pre" th:text="${issue.description}"></dd>
+            </div>
+        </dl>
+    </section>
+</main>
+</body>
+</html>

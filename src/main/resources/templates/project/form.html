@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${projectId == null ? '프로젝트 등록' : '프로젝트 수정'})}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero dt-hero-compact">
+        <div>
+            <h1 th:text="${projectId == null ? '프로젝트 등록' : '프로젝트 수정'}">프로젝트 등록</h1>
+            <p>프로젝트의 핵심 정보와 일정을 정리해 추적 가능한 작업 단위로 남겨두세요.</p>
+        </div>
+        <a th:href="@{/projects}" class="dt-button dt-button-ghost">목록</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <form th:action="${projectId == null ? '/projects' : '/projects/' + projectId}" th:object="${project}" method="post" class="dt-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectCode">프로젝트 코드</label>
+                    <input id="projectCode" type="text" th:field="*{projectCode}" class="form-control" maxlength="50" required>
+                    <div class="dt-error" th:errors="*{projectCode}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="projectName">프로젝트명</label>
+                    <input id="projectName" type="text" th:field="*{projectName}" class="form-control" maxlength="200" required>
+                    <div class="dt-error" th:errors="*{projectName}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="clientName">고객사명</label>
+                    <input id="clientName" type="text" th:field="*{clientName}" class="form-control" maxlength="200">
+                    <div class="dt-error" th:errors="*{clientName}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="status">상태</label>
+                    <select id="status" th:field="*{status}" class="form-select" required>
+                        <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{status}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="startDate">시작일</label>
+                    <input id="startDate" type="date" th:field="*{startDate}" class="form-control">
+                </div>
+                <div class="dt-field">
+                    <label for="endDate">종료일</label>
+                    <input id="endDate" type="date" th:field="*{endDate}" class="form-control">
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="description">설명</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="7" placeholder="주요 목표, 범위, 협업 메모를 입력하세요."></textarea>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">저장</button>
+                <a th:href="@{/projects}" class="dt-button dt-button-ghost">취소</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

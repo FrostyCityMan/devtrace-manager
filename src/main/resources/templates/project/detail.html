@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('프로젝트 상세')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero dt-hero-compact">
+        <div>
+            <h1>프로젝트 상세</h1>
+            <p th:text="${project.projectName}">프로젝트명</p>
+        </div>
+        <div class="dt-hero-actions">
+            <a th:href="@{/projects/{projectId}/edit(projectId=${project.projectId})}" class="dt-button dt-button-primary">수정</a>
+            <a th:href="@{/projects}" class="dt-button dt-button-ghost">목록</a>
+        </div>
+    </section>
+
+    <section class="dt-panel dt-detail-panel">
+        <div class="dt-detail-head">
+            <div>
+                <span>프로젝트 코드</span>
+                <strong th:text="${project.projectCode}">CODE</strong>
+            </div>
+            <span class="dt-status" th:attr="data-status=${project.status}" th:text="${project.status}">READY</span>
+        </div>
+        <dl class="dt-detail-grid">
+            <div>
+                <dt>프로젝트명</dt>
+                <dd th:text="${project.projectName}"></dd>
+            </div>
+            <div>
+                <dt>고객사명</dt>
+                <dd th:text="${project.clientName}"></dd>
+            </div>
+            <div>
+                <dt>시작일</dt>
+                <dd th:text="${project.startDate}"></dd>
+            </div>
+            <div>
+                <dt>종료일</dt>
+                <dd th:text="${project.endDate}"></dd>
+            </div>
+            <div>
+                <dt>등록일시</dt>
+                <dd th:text="${#temporals.format(project.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></dd>
+            </div>
+            <div>
+                <dt>수정일시</dt>
+                <dd th:text="${project.updatedAt == null ? '-' : #temporals.format(project.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>설명</dt>
+                <dd class="dt-pre" th:text="${project.description}"></dd>
+            </div>
+        </dl>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.project.dao.ProjectDao">
+
+    <resultMap id="ProjectResultMap" type="com.devtrace.manager.project.dto.ProjectEntity">
+        <id property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="clientName" column="CLIENT_NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
+        <result property="status" column="STATUS"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <insert id="insertProject" parameterType="com.devtrace.manager.project.dto.ProjectEntity">
+        INSERT INTO PROJECT (
+            PROJECT_ID,
+            PROJECT_CODE,
+            PROJECT_NAME,
+            CLIENT_NAME,
+            DESCRIPTION,
+            START_DATE,
+            END_DATE,
+            STATUS,
+            CREATED_AT,
+            UPDATED_AT
+        ) VALUES (
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectCode},
+            #{projectName},
+            #{clientName},
+            #{description},
+            #{startDate},
+            #{endDate},
+            #{status},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateProject" parameterType="com.devtrace.manager.project.dto.ProjectEntity">
+        UPDATE PROJECT
+        SET
+            PROJECT_CODE = #{projectCode},
+            PROJECT_NAME = #{projectName},
+            CLIENT_NAME = #{clientName},
+            DESCRIPTION = #{description},
+            START_DATE = #{startDate},
+            END_DATE = #{endDate},
+            STATUS = #{status},
+            UPDATED_AT = #{updatedAt}
+        WHERE PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteProject" parameterType="java.util.UUID">
+        DELETE FROM PROJECT
+        WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectProjectById" parameterType="java.util.UUID" resultMap="ProjectResultMap">
+        SELECT
+            PROJECT_ID,
+            PROJECT_CODE,
+            PROJECT_NAME,
+            CLIENT_NAME,
+            DESCRIPTION,
+            START_DATE,
+            END_DATE,
+            STATUS,
+            CREATED_AT,
+            UPDATED_AT
+        FROM PROJECT
+        WHERE PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectProjectList" parameterType="com.devtrace.manager.project.dto.ProjectSearchCondition" resultMap="ProjectResultMap">
+        SELECT
+            PROJECT_ID,
+            PROJECT_CODE,
+            PROJECT_NAME,
+            CLIENT_NAME,
+            DESCRIPTION,
+            START_DATE,
+            END_DATE,
+            STATUS,
+            CREATED_AT,
+            UPDATED_AT
+        FROM PROJECT
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    PROJECT_CODE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR PROJECT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                    OR CLIENT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+        </where>
+        ORDER BY CREATED_AT DESC
+    </select>
+</mapper>

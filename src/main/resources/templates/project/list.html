@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('프로젝트 목록')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-content">
+    <section class="dt-page-head">
+        <h1>프로젝트 목록</h1>
+        <a th:href="@{/projects/new}" class="dt-primary-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            새 프로젝트
+        </a>
+    </section>
+
+    <section class="dt-metrics" aria-label="프로젝트 현황">
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon coral"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h7l2 2h7v11H4z"/></svg></span>
+            <div><p>전체 프로젝트</p><strong>28 <small>건</small></strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
+            <div><p>진행 중</p><strong>12 <small>건</small></strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8v8M14 8v8M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
+            <div><p>보류</p><strong>3 <small>건</small></strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
+            <div><p>예정</p><strong>5 <small>건</small></strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4h10l1 3h5v9h-9l-1-3H5"/></svg></span>
+            <div><p>완료</p><strong>8 <small>건</small></strong></div>
+        </article>
+    </section>
+
+    <section class="dt-toolbar" aria-label="프로젝트 검색과 필터">
+        <label class="dt-search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
+            <input type="search" value="" placeholder="검색">
+        </label>
+        <label class="dt-select-box">
+            <select>
+                <option>전체 상태</option>
+            </select>
+        </label>
+        <button type="button" class="dt-filter-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4M8 6v3M16 12v3"/></svg>
+            상세 필터
+        </button>
+        <button type="button" class="dt-reset-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6"/></svg>
+            초기화
+        </button>
+    </section>
+
+    <section class="dt-table-card" aria-label="임시 프로젝트 데이터">
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table">
+                <thead>
+                <tr>
+                    <th>프로젝트 코드</th>
+                    <th>프로젝트명</th>
+                    <th>고객사</th>
+                    <th>시작일</th>
+                    <th>종료일</th>
+                    <th>상태</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="stripe-teal">
+                    <td data-label="프로젝트 코드">PRJ-2025-001</td>
+                    <td data-label="프로젝트명">차세대 웹 플랫폼 구축</td>
+                    <td data-label="고객사">굿소프트(주)</td>
+                    <td data-label="시작일">2025-01-10</td>
+                    <td data-label="종료일">2025-07-31</td>
+                    <td data-label="상태"><span class="dt-chip progress">진행 중</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-teal">
+                    <td data-label="프로젝트 코드">PRJ-2025-002</td>
+                    <td data-label="프로젝트명">모바일 앱 고도화</td>
+                    <td data-label="고객사">헬로테크(주)</td>
+                    <td data-label="시작일">2025-02-03</td>
+                    <td data-label="종료일">2025-06-30</td>
+                    <td data-label="상태"><span class="dt-chip progress">진행 중</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-blue">
+                    <td data-label="프로젝트 코드">PRJ-2025-003</td>
+                    <td data-label="프로젝트명">클라우드 인프라 이전</td>
+                    <td data-label="고객사">데이터라인(주)</td>
+                    <td data-label="시작일">2025-03-15</td>
+                    <td data-label="종료일">2025-08-15</td>
+                    <td data-label="상태"><span class="dt-chip hold">보류</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-amber">
+                    <td data-label="프로젝트 코드">PRJ-2025-004</td>
+                    <td data-label="프로젝트명">사내 업무 시스템 구축</td>
+                    <td data-label="고객사">위너스(주)</td>
+                    <td data-label="시작일">2025-04-01</td>
+                    <td data-label="종료일">2025-09-30</td>
+                    <td data-label="상태"><span class="dt-chip planned">예정</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-red">
+                    <td data-label="프로젝트 코드">PRJ-2025-005</td>
+                    <td data-label="프로젝트명">API 연동 서비스 개발</td>
+                    <td data-label="고객사">플러스엔(주)</td>
+                    <td data-label="시작일">2025-01-20</td>
+                    <td data-label="종료일">2025-05-20</td>
+                    <td data-label="상태"><span class="dt-chip done">완료</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-teal">
+                    <td data-label="프로젝트 코드">PRJ-2025-006</td>
+                    <td data-label="프로젝트명">데이터 분석 플랫폼 구축</td>
+                    <td data-label="고객사">인사이트(주)</td>
+                    <td data-label="시작일">2025-02-17</td>
+                    <td data-label="종료일">2025-07-15</td>
+                    <td data-label="상태"><span class="dt-chip progress">진행 중</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-red">
+                    <td data-label="프로젝트 코드">PRJ-2025-007</td>
+                    <td data-label="프로젝트명">고객 포털 리뉴얼</td>
+                    <td data-label="고객사">베스트솔루션(주)</td>
+                    <td data-label="시작일">2025-03-01</td>
+                    <td data-label="종료일">2025-06-01</td>
+                    <td data-label="상태"><span class="dt-chip done">완료</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                <tr class="stripe-amber">
+                    <td data-label="프로젝트 코드">PRJ-2025-008</td>
+                    <td data-label="프로젝트명">보안 시스템 강화</td>
+                    <td data-label="고객사">시큐어원(주)</td>
+                    <td data-label="시작일">2025-04-10</td>
+                    <td data-label="종료일">2025-10-10</td>
+                    <td data-label="상태"><span class="dt-chip planned">예정</span></td>
+                    <td data-label="작업"><div class="dt-row-actions"><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>수정</a><a href="#" class="dt-action"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7zM14 3v5h5"/></svg>상세</a><button class="dt-action danger"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>삭제</button></div></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="dt-table-footer">
+            <span>총 28건</span>
+            <div class="dt-pagination">
+                <button type="button" aria-label="이전"><svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+                <button type="button" class="active">1</button>
+                <button type="button">2</button>
+                <button type="button">3</button>
+                <span>...</span>
+                <button type="button">4</button>
+                <button type="button" aria-label="다음"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+                <button type="button" class="dt-page-size">10 / 페이지 <svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+            </div>
+        </div>
+    </section>
+
+    <section class="dt-widget-grid" aria-label="프로젝트 요약">
+        <article class="dt-widget">
+            <h2>상태별 프로젝트 비율</h2>
+            <div class="dt-donut-row">
+                <div class="dt-donut" aria-hidden="true"></div>
+                <ul>
+                    <li><span class="dot teal"></span>진행 중 <strong>42.9% (12건)</strong></li>
+                    <li><span class="dot blue"></span>보류 <strong>10.7% (3건)</strong></li>
+                    <li><span class="dot amber"></span>예정 <strong>17.9% (5건)</strong></li>
+                    <li><span class="dot red"></span>완료 <strong>28.5% (8건)</strong></li>
+                </ul>
+            </div>
+        </article>
+        <article class="dt-widget">
+            <h2>최근 업데이트된 프로젝트</h2>
+            <div class="dt-update-line"><span></span><strong>차세대 웹 플랫폼 구축</strong><em>진행 중</em><time>2025-05-20 14:30</time></div>
+            <div class="dt-update-line"><span></span><strong>모바일 앱 고도화</strong><em>진행 중</em><time>2025-05-19 09:15</time></div>
+        </article>
+        <article class="dt-widget">
+            <h2>다가오는 일정</h2>
+            <div class="dt-schedule">
+                <div class="dt-date-box"><strong>05.25</strong><span>금</span></div>
+                <div><strong>모바일 앱 고도화</strong><p>중간 점검 회의</p></div>
+                <time>10:00</time>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>

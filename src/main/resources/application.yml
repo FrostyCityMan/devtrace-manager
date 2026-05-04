@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: devtrace-manager
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/devtrace_manager}
+    username: ${DB_USERNAME:devtrace}
+    password: ${DB_PASSWORD:devtrace}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  thymeleaf:
+    cache: false
+  security:
+    user:
+      name: admin
+      password: admin
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.devtrace.manager
+  type-handlers-package: com.devtrace.manager.common.config
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8080

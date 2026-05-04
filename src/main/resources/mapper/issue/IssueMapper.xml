@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.issue.dao.IssueDao">
+
+    <resultMap id="IssueResultMap" type="com.devtrace.manager.issue.dto.IssueEntity">
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueType" column="ISSUE_TYPE"/>
+        <result property="title" column="TITLE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="reporterId" column="REPORTER_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="resolvedDate" column="RESOLVED_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <sql id="IssueColumns">
+        ISSUE_ID,
+        PROJECT_ID,
+        ISSUE_KEY,
+        ISSUE_TYPE,
+        TITLE,
+        DESCRIPTION,
+        STATUS,
+        PRIORITY,
+        ASSIGNEE_ID,
+        REPORTER_ID,
+        START_DATE,
+        DUE_DATE,
+        RESOLVED_DATE,
+        ESTIMATED_MINUTES,
+        SPENT_MINUTES,
+        CREATED_AT,
+        UPDATED_AT
+    </sql>
+
+    <insert id="insertIssue" parameterType="com.devtrace.manager.issue.dto.IssueEntity">
+        INSERT INTO ISSUE (
+            <include refid="IssueColumns"/>
+        ) VALUES (
+            #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{issueKey},
+            #{issueType},
+            #{title},
+            #{description},
+            #{status},
+            #{priority},
+            #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{reporterId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{startDate},
+            #{dueDate},
+            #{resolvedDate},
+            #{estimatedMinutes},
+            #{spentMinutes},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateIssue" parameterType="com.devtrace.manager.issue.dto.IssueEntity">
+        UPDATE ISSUE
+        SET
+            PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            ISSUE_KEY = #{issueKey},
+            ISSUE_TYPE = #{issueType},
+            TITLE = #{title},
+            DESCRIPTION = #{description},
+            STATUS = #{status},
+            PRIORITY = #{priority},
+            ASSIGNEE_ID = #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            REPORTER_ID = #{reporterId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            START_DATE = #{startDate},
+            DUE_DATE = #{dueDate},
+            RESOLVED_DATE = #{resolvedDate},
+            ESTIMATED_MINUTES = #{estimatedMinutes},
+            SPENT_MINUTES = #{spentMinutes},
+            UPDATED_AT = #{updatedAt}
+        WHERE ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteIssue" parameterType="java.util.UUID">
+        DELETE FROM ISSUE
+        WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectIssueById" parameterType="java.util.UUID" resultMap="IssueResultMap">
+        SELECT
+            <include refid="IssueColumns"/>
+        FROM ISSUE
+        WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectIssueList" parameterType="com.devtrace.manager.issue.dto.IssueSearchCondition" resultMap="IssueResultMap">
+        SELECT
+            <include refid="IssueColumns"/>
+        FROM ISSUE
+        <where>
+            <if test="projectId != null">
+                AND PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                    OR TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY CREATED_AT DESC
+    </select>
+</mapper>
