@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.worklog.dao.WorkLogDao">
+
+    <resultMap id="WorkLogResultMap" type="com.devtrace.manager.worklog.dto.WorkLogEntity">
+        <id property="workLogId" column="WORK_LOG_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="userId" column="USER_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="workDate" column="WORK_DATE"/>
+        <result property="workContent" column="WORK_CONTENT"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <sql id="WorkLogColumns">
+        WORK_LOG_ID,
+        ISSUE_ID,
+        USER_ID,
+        WORK_DATE,
+        WORK_CONTENT,
+        SPENT_MINUTES,
+        CREATED_AT
+    </sql>
+
+    <insert id="insertWorkLog" parameterType="com.devtrace.manager.worklog.dto.WorkLogEntity">
+        INSERT INTO WORK_LOG (
+            <include refid="WorkLogColumns"/>
+        ) VALUES (
+            #{workLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{userId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{workDate},
+            #{workContent},
+            #{spentMinutes},
+            #{createdAt}
+        )
+    </insert>
+
+    <update id="updateWorkLog" parameterType="com.devtrace.manager.worklog.dto.WorkLogEntity">
+        UPDATE WORK_LOG
+        SET
+            ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            USER_ID = #{userId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            WORK_DATE = #{workDate},
+            WORK_CONTENT = #{workContent},
+            SPENT_MINUTES = #{spentMinutes}
+        WHERE WORK_LOG_ID = #{workLogId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteWorkLog" parameterType="java.util.UUID">
+        DELETE FROM WORK_LOG
+        WHERE WORK_LOG_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectWorkLogByIdDetails" parameterType="java.util.UUID" resultMap="WorkLogResultMap">
+        SELECT
+            <include refid="WorkLogColumns"/>
+        FROM WORK_LOG
+        WHERE WORK_LOG_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectWorkLogList" parameterType="com.devtrace.manager.worklog.dto.WorkLogSearchCondition" resultMap="WorkLogResultMap">
+        SELECT
+            <include refid="WorkLogColumns"/>
+        FROM WORK_LOG
+        <where>
+            <if test="issueId != null">
+                AND ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="userId != null">
+                AND USER_ID = #{userId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+        </where>
+        ORDER BY WORK_DATE DESC, CREATED_AT DESC
+    </select>
+
+    <select id="sumSpentMinutesByIssueId" parameterType="java.util.UUID" resultType="int">
+        SELECT COALESCE(SUM(SPENT_MINUTES), 0)
+        FROM WORK_LOG
+        WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+</mapper>

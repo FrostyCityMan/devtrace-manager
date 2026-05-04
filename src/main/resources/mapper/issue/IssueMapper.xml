@@ -123,6 +123,14 @@
         WHERE ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
     </update>
 
+    <update id="updateIssueSpentMinutes">
+        UPDATE ISSUE
+        SET
+            SPENT_MINUTES = #{spentMinutes},
+            UPDATED_AT = #{updatedAt}
+        WHERE ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
     <delete id="deleteIssue" parameterType="java.util.UUID">
         DELETE FROM ISSUE
         WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}

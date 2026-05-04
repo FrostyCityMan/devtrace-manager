@@ -11,6 +11,11 @@ import com.devtrace.manager.issue.service.IssueService;
 import com.devtrace.manager.project.dto.ProjectSearchCondition;
 import com.devtrace.manager.project.dto.ProjectResponse;
 import com.devtrace.manager.project.service.ProjectService;
+import com.devtrace.manager.worklog.dto.WorkLogRequest;
+import com.devtrace.manager.worklog.dto.WorkLogResponse;
+import com.devtrace.manager.worklog.dto.WorkLogSearchCondition;
+import com.devtrace.manager.worklog.dto.WorkLogSummary;
+import com.devtrace.manager.worklog.service.WorkLogService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -30,10 +35,12 @@ public class IssueController {
 
     private final IssueService issueService;
     private final ProjectService projectService;
+    private final WorkLogService workLogService;
 
-    public IssueController(IssueService issueService, ProjectService projectService) {
+    public IssueController(IssueService issueService, ProjectService projectService, WorkLogService workLogService) {
         this.issueService = issueService;
         this.projectService = projectService;
+        this.workLogService = workLogService;
     }
 
     @ModelAttribute("issueStatuses")
@@ -83,6 +90,14 @@ public class IssueController {
     @GetMapping("/{issueId}")
     public String detail(@PathVariable UUID issueId, Model model) {
         model.addAttribute("issue", issueService.selectIssueDetails(issueId));
+        WorkLogRequest workLog = new WorkLogRequest();
+        workLog.setIssueId(issueId);
+        model.addAttribute("workLog", workLog);
+        WorkLogSearchCondition condition = new WorkLogSearchCondition();
+        condition.setIssueId(issueId);
+        List<WorkLogResponse> workLogs = workLogService.selectWorkLogList(condition);
+        model.addAttribute("workLogs", workLogs);
+        model.addAttribute("workLogSummary", WorkLogSummary.from(workLogs));
         return "issue/detail";
     }
 

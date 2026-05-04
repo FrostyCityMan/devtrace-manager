@@ -74,6 +74,93 @@
             </div>
         </dl>
     </section>
+
+    <section class="dt-panel dt-form-panel dt-worklog-panel">
+        <div class="dt-section-head">
+            <div>
+                <h2>작업 공수</h2>
+                <p>이슈별 실제 작업 시간을 분 단위로 기록합니다.</p>
+            </div>
+        </div>
+
+        <div class="dt-worklog-summary" aria-label="작업 공수 요약">
+            <div>
+                <span>총 실제 공수</span>
+                <strong th:text="${workLogSummary.totalHoursLabel}">0.0h</strong>
+                <small th:text="${workLogSummary.totalMinutes + '분'}">0분</small>
+            </div>
+            <div>
+                <span>기록 수</span>
+                <strong th:text="${workLogSummary.totalCount}">0</strong>
+                <small>건</small>
+            </div>
+            <div>
+                <span>최근 작업일</span>
+                <strong th:text="${workLogSummary.latestWorkDate == null ? '-' : workLogSummary.latestWorkDate}">-</strong>
+                <small>기준</small>
+            </div>
+        </div>
+
+        <form th:action="@{/work-logs}" th:object="${workLog}" method="post" class="dt-worklog-form">
+            <input type="hidden" th:field="*{issueId}">
+            <input type="hidden" th:field="*{userId}">
+            <label>
+                <span>작업일자</span>
+                <input type="date" th:field="*{workDate}" class="form-control" required>
+                <em class="dt-error" th:errors="*{workDate}"></em>
+            </label>
+            <label>
+                <span>소요 시간(분)</span>
+                <input type="number" th:field="*{spentMinutes}" class="form-control" min="1" required>
+                <em class="dt-error" th:errors="*{spentMinutes}"></em>
+            </label>
+            <label class="dt-worklog-content">
+                <span>작업 내용</span>
+                <input type="text" th:field="*{workContent}" class="form-control" required>
+                <em class="dt-error" th:errors="*{workContent}"></em>
+            </label>
+            <button type="submit" class="dt-button dt-button-primary">공수 등록</button>
+        </form>
+
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-worklog-table">
+                <thead>
+                <tr>
+                    <th>작업일자</th>
+                    <th>작업 내용</th>
+                    <th>소요 시간</th>
+                    <th>등록일시</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(workLogs)}">
+                    <td colspan="5" data-label="작업 공수">등록된 작업 공수가 없습니다.</td>
+                </tr>
+                <tr th:each="log : ${workLogs}" class="stripe-teal">
+                    <td data-label="작업일자" th:text="${log.workDate}">2026-05-04</td>
+                    <td data-label="작업 내용" th:text="${log.workContent}">작업 내용</td>
+                    <td data-label="소요 시간" th:text="${log.spentHoursLabel + ' (' + log.spentMinutes + '분)'}">1.0h (60분)</td>
+                    <td data-label="등록일시" th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-04 09:00:00</td>
+                    <td data-label="작업">
+                        <div class="dt-row-actions">
+                            <a th:href="@{/work-logs/{workLogId}/edit(workLogId=${log.workLogId})}" class="dt-action">
+                                <svg viewBox="0 0 24 24"><path d="m4 20 4-1 11-11-3-3L5 16z"/></svg>
+                                수정
+                            </a>
+                            <form th:action="@{/work-logs/{workLogId}/delete(workLogId=${log.workLogId})}" method="post">
+                                <button type="submit" class="dt-action danger" onclick="return confirm('작업 공수를 삭제하시겠습니까?')">
+                                    <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>
+                                    삭제
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
 </body>
 </html>

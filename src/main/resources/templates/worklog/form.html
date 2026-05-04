@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('작업 공수 수정')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>작업 공수 수정</h1>
+            <p th:text="${issue.issueKey + ' - ' + issue.title}">이슈 정보</p>
+        </div>
+        <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}" class="dt-button dt-button-ghost">이슈 상세</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <form th:action="@{/work-logs/{workLogId}(workLogId=${workLogId})}" th:object="${workLog}" method="post" class="dt-form">
+            <input type="hidden" th:field="*{issueId}">
+            <input type="hidden" th:field="*{userId}">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="workDate">작업일자</label>
+                    <input id="workDate" type="date" th:field="*{workDate}" class="form-control" required>
+                    <div class="dt-error" th:errors="*{workDate}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="spentMinutes">소요 시간(분)</label>
+                    <input id="spentMinutes" type="number" th:field="*{spentMinutes}" class="form-control" min="1" required>
+                    <div class="dt-error" th:errors="*{spentMinutes}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="workContent">작업 내용</label>
+                    <textarea id="workContent" th:field="*{workContent}" class="form-control" rows="6" required></textarea>
+                    <div class="dt-error" th:errors="*{workContent}"></div>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">저장</button>
+                <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}" class="dt-button dt-button-ghost">취소</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

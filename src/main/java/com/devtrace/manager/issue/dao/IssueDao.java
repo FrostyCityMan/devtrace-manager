@@ -23,6 +23,12 @@ public interface IssueDao {
             @Param("updatedAt") LocalDateTime updatedAt
     );
 
+    void updateIssueSpentMinutes(
+            @Param("issueId") UUID issueId,
+            @Param("spentMinutes") int spentMinutes,
+            @Param("updatedAt") LocalDateTime updatedAt
+    );
+
     void deleteIssue(UUID issueId);
 
     Optional<IssueEntity> selectIssueByIdDetails(UUID issueId);

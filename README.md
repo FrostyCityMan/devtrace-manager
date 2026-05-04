@@ -2,7 +2,7 @@
 
 DevTrace Manager는 SI 개발 프로젝트에서 발생하는 프로젝트 관리, 이슈 관리, 작업 공수 관리, 형상관리 로그 관리, 컬럼명세 Excel 생성, 개발 산출물 생성을 통합 지원하기 위한 스탠드얼론 웹 애플리케이션입니다.
 
-현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능입니다.
+현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능입니다.
 
 ## 기술 스택
 
@@ -72,10 +72,15 @@ gradle test
 - 이슈 목록 통계 카드와 공수 요약 위젯
 - 이슈 관리 Thymeleaf 화면
 - IssueService 기본 단위 테스트
+- APP_USER 최소 테이블 및 기본 admin seed
+- WORK_LOG 테이블 Flyway 마이그레이션
+- 이슈별 작업 공수 등록, 수정, 삭제, 조회
+- 작업 공수 합계의 ISSUE.SPENT_MINUTES 반영
+- 이슈 상세 화면 작업 공수 영역
+- WorkLogService 기본 단위 테스트
 
 ## 아직 구현하지 않은 기능
 
-- 작업 공수 관리
 - 칸반 보드
 - 컬럼명세 Excel 생성
 - Git 로그 분석
