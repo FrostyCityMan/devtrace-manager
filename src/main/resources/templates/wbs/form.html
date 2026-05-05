@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('WBS 작업 입력')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1 th:text="${wbsTaskId == null ? 'WBS 작업 등록' : 'WBS 작업 수정'}">WBS 작업 등록</h1>
+            <p>계층 작업, 일정, 공수, 연결 이슈를 입력합니다. WBS 코드는 저장 시 자동 생성됩니다.</p>
+        </div>
+        <a th:href="@{/wbs(projectId=${wbsTask.projectId})}" class="dt-button dt-button-ghost">목록</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <form th:action="${wbsTaskId == null} ? @{/wbs} : @{/wbs/{wbsTaskId}(wbsTaskId=${wbsTaskId})}"
+              th:object="${wbsTask}"
+              method="post"
+              class="dt-form">
+            <input type="hidden" th:field="*{assigneeId}">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectId">프로젝트</label>
+                    <select id="projectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}" th:value="${project.projectId}" th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="parentTaskId">상위 작업</label>
+                    <select id="parentTaskId" th:field="*{parentTaskId}" class="form-select" th:disabled="${wbsTaskId != null}">
+                        <option value="">최상위 작업</option>
+                        <option th:each="parentTask : ${parentTasks}"
+                                th:value="${parentTask.wbsTaskId}"
+                                th:text="${parentTask.wbsCode + ' - ' + parentTask.taskName}"></option>
+                    </select>
+                    <div class="dt-field-help" th:if="${wbsTaskId != null}">상위 작업 변경은 후속 재정렬 기능에서 다룹니다.</div>
+                </div>
+                <div class="dt-field">
+                    <label for="issueId">연결 이슈</label>
+                    <select id="issueId" th:field="*{issueId}" class="form-select">
+                        <option value="">이슈 미연결</option>
+                        <option th:each="issue : ${issues}" th:value="${issue.issueId}" th:text="${issue.issueKey + ' - ' + issue.title}"></option>
+                    </select>
+                </div>
+                <div class="dt-field">
+                    <label for="taskName">작업명</label>
+                    <input id="taskName" th:field="*{taskName}" class="form-control" required>
+                    <div class="dt-error" th:errors="*{taskName}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="taskType">작업 유형</label>
+                    <select id="taskType" th:field="*{taskType}" class="form-select" required>
+                        <option th:each="taskType : ${taskTypes}" th:value="${taskType}" th:text="${taskType.label}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{taskType}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="status">상태</label>
+                    <select id="status" th:field="*{status}" class="form-select" required>
+                        <option th:each="status : ${taskStatuses}" th:value="${status}" th:text="${status.label}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{status}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="planStartDate">계획 시작일</label>
+                    <input id="planStartDate" th:field="*{planStartDate}" type="date" class="form-control" required>
+                    <div class="dt-error" th:errors="*{planStartDate}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="planEndDate">계획 종료일</label>
+                    <input id="planEndDate" th:field="*{planEndDate}" type="date" class="form-control" required>
+                    <div class="dt-error" th:errors="*{planEndDate}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="actualStartDate">실제 시작일</label>
+                    <input id="actualStartDate" th:field="*{actualStartDate}" type="date" class="form-control">
+                </div>
+                <div class="dt-field">
+                    <label for="actualEndDate">실제 종료일</label>
+                    <input id="actualEndDate" th:field="*{actualEndDate}" type="date" class="form-control">
+                </div>
+                <div class="dt-field">
+                    <label for="estimatedMinutes">예상 공수(분)</label>
+                    <input id="estimatedMinutes" th:field="*{estimatedMinutes}" type="number" min="0" class="form-control">
+                    <div class="dt-error" th:errors="*{estimatedMinutes}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="spentMinutes">실제 공수(분)</label>
+                    <input id="spentMinutes" th:field="*{spentMinutes}" type="number" min="0" class="form-control">
+                    <div class="dt-field-help">이슈 연결 시 이슈 실제 공수가 우선 반영됩니다.</div>
+                </div>
+                <div class="dt-field">
+                    <label for="progressRate">진행률(%)</label>
+                    <input id="progressRate" th:field="*{progressRate}" type="number" min="0" max="100" class="form-control">
+                    <div class="dt-error" th:errors="*{progressRate}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="taskDescription">작업 설명</label>
+                    <textarea id="taskDescription" th:field="*{taskDescription}" class="form-control dt-evidence-textarea"></textarea>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">저장</button>
+                <a th:href="@{/wbs(projectId=${wbsTask.projectId})}" class="dt-button dt-button-ghost">취소</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

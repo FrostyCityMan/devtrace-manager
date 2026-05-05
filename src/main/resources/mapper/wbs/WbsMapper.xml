@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.wbs.dao.WbsDao">
+
+    <resultMap id="WbsTaskResultMap" type="com.devtrace.manager.wbs.dto.WbsTaskEntity">
+        <id property="wbsTaskId" column="WBS_TASK_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="parentTaskId" column="PARENT_TASK_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueTitle" column="ISSUE_TITLE"/>
+        <result property="wbsCode" column="WBS_CODE"/>
+        <result property="taskName" column="TASK_NAME"/>
+        <result property="taskDescription" column="TASK_DESCRIPTION"/>
+        <result property="taskType" column="TASK_TYPE"/>
+        <result property="status" column="STATUS"/>
+        <result property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+        <result property="planStartDate" column="PLAN_START_DATE"/>
+        <result property="planEndDate" column="PLAN_END_DATE"/>
+        <result property="actualStartDate" column="ACTUAL_START_DATE"/>
+        <result property="actualEndDate" column="ACTUAL_END_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="progressRate" column="PROGRESS_RATE"/>
+        <result property="displayOrder" column="DISPLAY_ORDER"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <resultMap id="WbsTaskDependencyResultMap" type="com.devtrace.manager.wbs.dto.WbsTaskDependencyEntity">
+        <id property="dependencyId" column="DEPENDENCY_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="predecessorTaskId" column="PREDECESSOR_TASK_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="predecessorWbsCode" column="PREDECESSOR_WBS_CODE"/>
+        <result property="predecessorTaskName" column="PREDECESSOR_TASK_NAME"/>
+        <result property="predecessorStatus" column="PREDECESSOR_STATUS"/>
+        <result property="successorTaskId" column="SUCCESSOR_TASK_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="successorWbsCode" column="SUCCESSOR_WBS_CODE"/>
+        <result property="successorTaskName" column="SUCCESSOR_TASK_NAME"/>
+        <result property="successorStatus" column="SUCCESSOR_STATUS"/>
+        <result property="dependencyType" column="DEPENDENCY_TYPE"/>
+        <result property="lagDays" column="LAG_DAYS"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <sql id="WbsTaskColumns">
+        WBS_TASK_ID,
+        PROJECT_ID,
+        PARENT_TASK_ID,
+        ISSUE_ID,
+        WBS_CODE,
+        TASK_NAME,
+        TASK_DESCRIPTION,
+        TASK_TYPE,
+        STATUS,
+        ASSIGNEE_ID,
+        PLAN_START_DATE,
+        PLAN_END_DATE,
+        ACTUAL_START_DATE,
+        ACTUAL_END_DATE,
+        ESTIMATED_MINUTES,
+        SPENT_MINUTES,
+        PROGRESS_RATE,
+        DISPLAY_ORDER,
+        CREATED_AT,
+        UPDATED_AT
+    </sql>
+
+    <sql id="WbsTaskSelectColumns">
+        W.WBS_TASK_ID,
+        W.PROJECT_ID,
+        P.PROJECT_CODE,
+        P.PROJECT_NAME,
+        W.PARENT_TASK_ID,
+        W.ISSUE_ID,
+        I.ISSUE_KEY,
+        I.TITLE AS ISSUE_TITLE,
+        W.WBS_CODE,
+        W.TASK_NAME,
+        W.TASK_DESCRIPTION,
+        W.TASK_TYPE,
+        W.STATUS,
+        W.ASSIGNEE_ID,
+        U.DISPLAY_NAME AS ASSIGNEE_NAME,
+        W.PLAN_START_DATE,
+        W.PLAN_END_DATE,
+        W.ACTUAL_START_DATE,
+        W.ACTUAL_END_DATE,
+        W.ESTIMATED_MINUTES,
+        W.SPENT_MINUTES,
+        W.PROGRESS_RATE,
+        W.DISPLAY_ORDER,
+        W.CREATED_AT,
+        W.UPDATED_AT
+    </sql>
+
+    <insert id="insertWbsTask" parameterType="com.devtrace.manager.wbs.dto.WbsTaskEntity">
+        INSERT INTO WBS_TASK (
+            <include refid="WbsTaskColumns"/>
+        ) VALUES (
+            #{wbsTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{parentTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{wbsCode},
+            #{taskName},
+            #{taskDescription},
+            #{taskType},
+            #{status},
+            #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{planStartDate},
+            #{planEndDate},
+            #{actualStartDate},
+            #{actualEndDate},
+            #{estimatedMinutes},
+            #{spentMinutes},
+            #{progressRate},
+            #{displayOrder},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateWbsTask" parameterType="com.devtrace.manager.wbs.dto.WbsTaskEntity">
+        UPDATE WBS_TASK
+        SET
+            ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            TASK_NAME = #{taskName},
+            TASK_DESCRIPTION = #{taskDescription},
+            TASK_TYPE = #{taskType},
+            STATUS = #{status},
+            ASSIGNEE_ID = #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            PLAN_START_DATE = #{planStartDate},
+            PLAN_END_DATE = #{planEndDate},
+            ACTUAL_START_DATE = #{actualStartDate},
+            ACTUAL_END_DATE = #{actualEndDate},
+            ESTIMATED_MINUTES = #{estimatedMinutes},
+            SPENT_MINUTES = #{spentMinutes},
+            PROGRESS_RATE = #{progressRate},
+            UPDATED_AT = #{updatedAt}
+        WHERE WBS_TASK_ID = #{wbsTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteWbsTask" parameterType="java.util.UUID">
+        DELETE FROM WBS_TASK
+        WHERE WBS_TASK_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectWbsTaskDetails" parameterType="java.util.UUID" resultMap="WbsTaskResultMap">
+        SELECT
+            <include refid="WbsTaskSelectColumns"/>
+        FROM WBS_TASK W
+        INNER JOIN PROJECT P ON W.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN ISSUE I ON W.ISSUE_ID = I.ISSUE_ID
+        LEFT JOIN APP_USER U ON W.ASSIGNEE_ID = U.USER_ID
+        WHERE W.WBS_TASK_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectWbsTaskList" parameterType="com.devtrace.manager.wbs.dto.WbsTaskSearchCondition" resultMap="WbsTaskResultMap">
+        SELECT
+            <include refid="WbsTaskSelectColumns"/>
+        FROM WBS_TASK W
+        INNER JOIN PROJECT P ON W.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN ISSUE I ON W.ISSUE_ID = I.ISSUE_ID
+        LEFT JOIN APP_USER U ON W.ASSIGNEE_ID = U.USER_ID
+        <where>
+            <if test="projectId != null">
+                AND W.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="parentTaskId != null">
+                AND W.PARENT_TASK_ID = #{parentTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="status != null">
+                AND W.STATUS = #{status}
+            </if>
+            <if test="taskType != null">
+                AND W.TASK_TYPE = #{taskType}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    W.WBS_CODE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR W.TASK_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY string_to_array(W.WBS_CODE, '.')::int[]
+    </select>
+
+    <select id="selectWbsTaskChildCount" resultType="int">
+        SELECT COUNT(*)
+        FROM WBS_TASK
+        WHERE PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        <choose>
+            <when test="parentTaskId != null">
+                AND PARENT_TASK_ID = #{parentTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </when>
+            <otherwise>
+                AND PARENT_TASK_ID IS NULL
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectWbsTaskDirectChildCount" parameterType="java.util.UUID" resultType="int">
+        SELECT COUNT(*)
+        FROM WBS_TASK
+        WHERE PARENT_TASK_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <insert id="insertWbsTaskDependency" parameterType="com.devtrace.manager.wbs.dto.WbsTaskDependencyEntity">
+        INSERT INTO WBS_TASK_DEPENDENCY (
+            DEPENDENCY_ID,
+            PROJECT_ID,
+            PREDECESSOR_TASK_ID,
+            SUCCESSOR_TASK_ID,
+            DEPENDENCY_TYPE,
+            LAG_DAYS,
+            CREATED_AT
+        ) VALUES (
+            #{dependencyId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{predecessorTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{successorTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{dependencyType},
+            #{lagDays},
+            #{createdAt}
+        )
+    </insert>
+
+    <delete id="deleteWbsTaskDependency" parameterType="java.util.UUID">
+        DELETE FROM WBS_TASK_DEPENDENCY
+        WHERE DEPENDENCY_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <delete id="deleteWbsTaskDependencyByTaskId" parameterType="java.util.UUID">
+        DELETE FROM WBS_TASK_DEPENDENCY
+        WHERE PREDECESSOR_TASK_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+           OR SUCCESSOR_TASK_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectWbsTaskDependencyList" parameterType="com.devtrace.manager.wbs.dto.WbsTaskDependencySearchCondition" resultMap="WbsTaskDependencyResultMap">
+        SELECT
+            D.DEPENDENCY_ID,
+            D.PROJECT_ID,
+            D.PREDECESSOR_TASK_ID,
+            P.WBS_CODE AS PREDECESSOR_WBS_CODE,
+            P.TASK_NAME AS PREDECESSOR_TASK_NAME,
+            P.STATUS AS PREDECESSOR_STATUS,
+            D.SUCCESSOR_TASK_ID,
+            S.WBS_CODE AS SUCCESSOR_WBS_CODE,
+            S.TASK_NAME AS SUCCESSOR_TASK_NAME,
+            S.STATUS AS SUCCESSOR_STATUS,
+            D.DEPENDENCY_TYPE,
+            D.LAG_DAYS,
+            D.CREATED_AT
+        FROM WBS_TASK_DEPENDENCY D
+        INNER JOIN WBS_TASK P ON D.PREDECESSOR_TASK_ID = P.WBS_TASK_ID
+        INNER JOIN WBS_TASK S ON D.SUCCESSOR_TASK_ID = S.WBS_TASK_ID
+        <where>
+            <if test="projectId != null">
+                AND D.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="wbsTaskId != null">
+                AND (
+                    D.PREDECESSOR_TASK_ID = #{wbsTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+                    OR D.SUCCESSOR_TASK_ID = #{wbsTaskId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+                )
+            </if>
+        </where>
+        ORDER BY P.WBS_CODE, S.WBS_CODE
+    </select>
+</mapper>

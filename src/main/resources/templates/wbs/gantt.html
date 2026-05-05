@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('WBS Gantt')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>WBS Gantt</h1>
+            <p>WBS 작업의 계획 시작일과 종료일을 기준으로 프로젝트 일정 흐름과 위험을 표시합니다.</p>
+        </div>
+        <a th:href="@{/wbs(projectId=${selectedProjectId})}" class="dt-button dt-button-ghost">WBS 목록</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <form th:action="@{/wbs/gantt}" method="get" class="dt-form">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectId">프로젝트</label>
+                    <select id="projectId" name="projectId" class="form-select" required>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:selected="${project.projectId == selectedProjectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">Gantt 조회</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="dt-gantt-summary" aria-label="Gantt 현황">
+        <article>
+            <span>WBS 작업</span>
+            <strong th:text="${gantt.taskCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>완료</span>
+            <strong th:text="${gantt.doneCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>지연/초과</span>
+            <strong th:text="${gantt.riskCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>선행 미완료</span>
+            <strong th:text="${gantt.blockedCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>타임라인</span>
+            <strong th:text="${gantt.timelineDays}">0</strong>
+            <small>일</small>
+        </article>
+    </section>
+
+    <section class="dt-panel dt-form-panel dt-columnspec-preview">
+        <div class="dt-section-head">
+            <div>
+                <h2>일정 타임라인</h2>
+                <p th:text="${gantt.timelineStartDate + ' ~ ' + gantt.timelineEndDate}">2026-05-01 ~ 2026-05-31</p>
+            </div>
+        </div>
+
+        <div class="dt-gantt">
+            <div class="dt-gantt-head">
+                <div>WBS 작업</div>
+                <div>
+                    <span th:text="${gantt.timelineStartDate}">2026-05-01</span>
+                    <span th:text="${gantt.timelineEndDate}">2026-05-31</span>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(gantt.tasks)}" class="dt-gantt-empty">표시할 WBS 작업이 없습니다.</div>
+            <div th:each="task : ${gantt.tasks}" class="dt-gantt-row">
+                <div class="dt-gantt-name" th:style="${'padding-left:' + task.indentPx + 'px'}">
+                    <strong th:text="${task.wbsCode}">1.1</strong>
+                    <div class="dt-gantt-name-main">
+                        <span th:text="${task.taskName}">작업명</span>
+                        <small th:text="${task.planStartDate + ' ~ ' + task.planEndDate}">2026-05-01 ~ 2026-05-07</small>
+                    </div>
+                    <div class="dt-gantt-risks">
+                        <span th:if="${task.delayed or task.overEffort}" class="dt-gantt-risk danger">위험</span>
+                        <span th:if="${task.predecessorBlocked}" class="dt-gantt-risk blocked">선행</span>
+                    </div>
+                </div>
+                <div class="dt-gantt-track">
+                    <div class="dt-gantt-bar"
+                         th:classappend="${task.riskClass}"
+                         th:style="${'left:' + task.leftPercent + '%; width:' + task.widthPercent + '%'}"
+                         th:title="${task.wbsCode + ' ' + task.taskName + ' / ' + task.planStartDate + ' ~ ' + task.planEndDate}">
+                        <span th:text="${task.progressRate + '%'}">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dt-gantt-legend">
+            <span class="progress">정상</span>
+            <span class="danger">지연/공수 초과</span>
+            <span class="blocked">선행 작업 미완료</span>
+            <span class="done">완료</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('WBS 작업 상세')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1 th:text="${task.wbsCode + ' ' + task.taskName}">WBS 작업 상세</h1>
+            <p th:text="${task.projectCode + ' - ' + task.projectName}">프로젝트</p>
+        </div>
+        <div class="dt-hero-actions">
+            <a th:href="@{/wbs/{wbsTaskId}/edit(wbsTaskId=${task.wbsTaskId})}" class="dt-button dt-button-primary">수정</a>
+            <a th:href="@{/wbs(projectId=${task.projectId})}" class="dt-button dt-button-ghost">목록</a>
+        </div>
+    </section>
+
+    <section class="dt-panel dt-detail-panel">
+        <div class="dt-detail-head">
+            <div>
+                <span>상태</span>
+                <strong>
+                    <span class="dt-status" th:classappend="${task.status.cssClass}" th:text="${task.status.label}">대기</span>
+                </strong>
+            </div>
+            <form th:action="@{/wbs/{wbsTaskId}/delete(wbsTaskId=${task.wbsTaskId})}" method="post">
+                <button type="submit" class="dt-button dt-button-ghost">삭제</button>
+            </form>
+        </div>
+
+        <dl class="dt-detail-grid">
+            <div>
+                <dt>WBS 코드</dt>
+                <dd th:text="${task.wbsCode}">1.1</dd>
+            </div>
+            <div>
+                <dt>작업 유형</dt>
+                <dd th:text="${task.taskType.label}">작업</dd>
+            </div>
+            <div>
+                <dt>연결 이슈</dt>
+                <dd th:text="${task.issueKey == null ? '-' : task.issueKey + ' - ' + task.issueTitle}">DTR-101</dd>
+            </div>
+            <div>
+                <dt>담당자</dt>
+                <dd th:text="${task.assigneeName == null ? '-' : task.assigneeName}">관리자</dd>
+            </div>
+            <div>
+                <dt>계획 기간</dt>
+                <dd th:text="${task.planStartDate + ' ~ ' + task.planEndDate}">2026-05-01 ~ 2026-05-07</dd>
+            </div>
+            <div>
+                <dt>실제 기간</dt>
+                <dd th:text="${task.actualStartDate == null ? '-' : task.actualStartDate + ' ~ ' + (task.actualEndDate == null ? '-' : task.actualEndDate)}">-</dd>
+            </div>
+            <div>
+                <dt>공수</dt>
+                <dd th:text="${task.spentHoursText + ' / ' + task.estimatedHoursText}">0.0h / 0.0h</dd>
+            </div>
+            <div>
+                <dt>진행률</dt>
+                <dd th:text="${task.progressRate + '%'}">0%</dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>작업 설명</dt>
+                <dd class="dt-pre" th:text="${#strings.isEmpty(task.taskDescription) ? '-' : task.taskDescription}">작업 설명</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="dt-panel dt-form-panel dt-columnspec-preview">
+        <div class="dt-section-head">
+            <div>
+                <h2>선후행 작업</h2>
+                <p>초기 MVP에서는 완료 후 시작(Finish-to-Start) 관계만 등록합니다.</p>
+            </div>
+        </div>
+        <form th:action="@{/wbs/dependencies}" th:object="${dependency}" method="post" class="dt-wbs-dependency-form">
+            <input type="hidden" th:field="*{projectId}">
+            <input type="hidden" th:field="*{successorTaskId}">
+            <input type="hidden" th:field="*{dependencyType}">
+            <select th:field="*{predecessorTaskId}" class="form-select" required>
+                <option value="">선행 작업 선택</option>
+                <option th:each="candidate : ${projectTasks}"
+                        th:if="${candidate.wbsTaskId != task.wbsTaskId}"
+                        th:value="${candidate.wbsTaskId}"
+                        th:text="${candidate.wbsCode + ' - ' + candidate.taskName}"></option>
+            </select>
+            <input th:field="*{lagDays}" type="number" min="0" class="form-control" aria-label="지연 일수">
+            <button type="submit" class="dt-button dt-button-primary">등록</button>
+        </form>
+
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-wbs-dependency-table">
+                <thead>
+                <tr>
+                    <th>선행 작업</th>
+                    <th>후행 작업</th>
+                    <th>유형</th>
+                    <th>Lag</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(dependencies)}">
+                    <td colspan="5" data-label="선후행 작업">등록된 선후행 작업이 없습니다.</td>
+                </tr>
+                <tr th:each="dependencyItem : ${dependencies}" class="stripe-teal">
+                    <td data-label="선행 작업" th:text="${dependencyItem.predecessorWbsCode + ' - ' + dependencyItem.predecessorTaskName}">1.1</td>
+                    <td data-label="후행 작업" th:text="${dependencyItem.successorWbsCode + ' - ' + dependencyItem.successorTaskName}">1.2</td>
+                    <td data-label="유형" th:text="${dependencyItem.dependencyType.label}">완료 후 시작</td>
+                    <td data-label="Lag" th:text="${dependencyItem.lagDays + '일'}">0일</td>
+                    <td data-label="작업">
+                        <form th:action="@{/wbs/dependencies/{dependencyId}/delete(dependencyId=${dependencyItem.dependencyId})}" method="post">
+                            <input type="hidden" name="redirectTaskId" th:value="${task.wbsTaskId}">
+                            <button type="submit" class="dt-action danger">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>
