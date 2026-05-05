@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('테스트 증적 상세')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1 th:text="${testEvidence.testName}">테스트 증적 상세</h1>
+            <p th:text="${testEvidence.projectCode + ' / ' + testEvidence.issueKey}">프로젝트 / 이슈</p>
+        </div>
+        <div class="dt-hero-actions">
+            <a th:href="@{/test-evidences/{testEvidenceId}/edit(testEvidenceId=${testEvidence.testEvidenceId})}" class="dt-button dt-button-primary">수정</a>
+            <a th:href="@{/test-evidences}" class="dt-button dt-button-ghost">목록</a>
+        </div>
+    </section>
+
+    <section class="dt-panel dt-detail-panel">
+        <div class="dt-detail-head">
+            <div>
+                <span>판정</span>
+                <strong>
+                    <span class="dt-status" th:classappend="${testEvidence.resultStatus.cssClass}" th:text="${testEvidence.resultStatus.label}">성공</span>
+                </strong>
+            </div>
+            <form th:action="@{/test-evidences/{testEvidenceId}/delete(testEvidenceId=${testEvidence.testEvidenceId})}" method="post">
+                <button type="submit" class="dt-button dt-button-ghost">삭제</button>
+            </form>
+        </div>
+
+        <dl class="dt-detail-grid">
+            <div>
+                <dt>프로젝트</dt>
+                <dd th:text="${testEvidence.projectCode + ' - ' + testEvidence.projectName}">프로젝트</dd>
+            </div>
+            <div>
+                <dt>이슈</dt>
+                <dd th:text="${testEvidence.issueKey + ' - ' + testEvidence.issueTitle}">이슈</dd>
+            </div>
+            <div>
+                <dt>테스트 대상</dt>
+                <dd th:text="${testEvidence.testTarget}">/login</dd>
+            </div>
+            <div>
+                <dt>테스트 수행자</dt>
+                <dd th:text="${testEvidence.testerName}">관리자</dd>
+            </div>
+            <div>
+                <dt>테스트 수행일시</dt>
+                <dd th:text="${#temporals.format(testEvidence.testedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-04 09:00:00</dd>
+            </div>
+            <div>
+                <dt>생성일시</dt>
+                <dd th:text="${#temporals.format(testEvidence.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-04 09:00:00</dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>테스트 절차</dt>
+                <dd class="dt-pre" th:text="${testEvidence.testProcedure}">절차</dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>기대 결과</dt>
+                <dd class="dt-pre" th:text="${testEvidence.expectedResult}">기대 결과</dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>실제 결과</dt>
+                <dd class="dt-pre" th:text="${testEvidence.actualResult}">실제 결과</dd>
+            </div>
+            <div class="dt-detail-wide">
+                <dt>스크린샷</dt>
+                <dd>
+                    <div th:if="${testEvidence.hasScreenshot}" class="dt-evidence-shot">
+                        <img th:src="@{/test-evidences/{testEvidenceId}/screenshot(testEvidenceId=${testEvidence.testEvidenceId})}" alt="테스트 증적 스크린샷">
+                        <div class="dt-evidence-shot-actions">
+                            <span th:text="${testEvidence.screenshotFileName}">screenshot.png</span>
+                            <a th:href="@{/test-evidences/{testEvidenceId}/screenshot(testEvidenceId=${testEvidence.testEvidenceId})}" target="_blank" rel="noopener" class="dt-button dt-button-download">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 13l2.5-2.5L14 14l2-2 4 4M8 8h.01"/></svg>
+                                원본 보기
+                            </a>
+                        </div>
+                    </div>
+                    <span th:unless="${testEvidence.hasScreenshot}">등록된 스크린샷이 없습니다.</span>
+                </dd>
+            </div>
+        </dl>
+    </section>
+</main>
+</body>
+</html>

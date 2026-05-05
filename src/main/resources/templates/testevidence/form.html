@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('테스트 증적 입력')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1 th:text="${testEvidenceId == null ? '테스트 증적 등록' : '테스트 증적 수정'}">테스트 증적 등록</h1>
+            <p>기능 테스트 절차, 기대 결과, 실제 결과와 화면 증적을 이슈 기준으로 기록합니다.</p>
+        </div>
+        <a th:href="@{/test-evidences}" class="dt-button dt-button-ghost">목록</a>
+    </section>
+
+    <section class="dt-panel dt-form-panel">
+        <div th:if="${testEvidenceError != null}" class="dt-form-alert danger" th:text="${testEvidenceError}">
+            테스트 증적 저장 오류
+        </div>
+        <form th:action="${testEvidenceId == null} ? @{/test-evidences} : @{/test-evidences/{testEvidenceId}(testEvidenceId=${testEvidenceId})}"
+              th:object="${testEvidence}"
+              method="post"
+              enctype="multipart/form-data"
+              class="dt-form">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="projectId">프로젝트</label>
+                    <select id="projectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="issueId">이슈</label>
+                    <select id="issueId" th:field="*{issueId}" class="form-select" required>
+                        <option value="">이슈 선택</option>
+                        <option th:each="issue : ${issues}"
+                                th:value="${issue.issueId}"
+                                th:text="${issue.issueKey + ' - ' + issue.title}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{issueId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="testName">테스트명</label>
+                    <input id="testName" th:field="*{testName}" class="form-control" required>
+                    <div class="dt-error" th:errors="*{testName}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="testTarget">테스트 대상 URL 또는 화면명</label>
+                    <input id="testTarget" th:field="*{testTarget}" class="form-control" required>
+                    <div class="dt-error" th:errors="*{testTarget}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="resultStatus">판정</label>
+                    <select id="resultStatus" th:field="*{resultStatus}" class="form-select" required>
+                        <option th:each="resultStatus : ${resultStatuses}"
+                                th:value="${resultStatus}"
+                                th:text="${resultStatus.label}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{resultStatus}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="testedAt">테스트 수행일시</label>
+                    <input id="testedAt" th:field="*{testedAt}" type="datetime-local" class="form-control" required>
+                    <div class="dt-error" th:errors="*{testedAt}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="testProcedure">테스트 절차</label>
+                    <textarea id="testProcedure" th:field="*{testProcedure}" class="form-control dt-evidence-textarea" required></textarea>
+                    <div class="dt-error" th:errors="*{testProcedure}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="expectedResult">기대 결과</label>
+                    <textarea id="expectedResult" th:field="*{expectedResult}" class="form-control dt-evidence-textarea" required></textarea>
+                    <div class="dt-error" th:errors="*{expectedResult}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="actualResult">실제 결과</label>
+                    <textarea id="actualResult" th:field="*{actualResult}" class="form-control dt-evidence-textarea" required></textarea>
+                    <div class="dt-error" th:errors="*{actualResult}"></div>
+                </div>
+                <div class="dt-field dt-field-wide">
+                    <label for="screenshotFile">스크린샷</label>
+                    <input id="screenshotFile" th:field="*{screenshotFile}" type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="form-control">
+                    <div class="dt-file-note">
+                        <span>PNG, JPG, GIF, WEBP</span>
+                        <a th:if="${testEvidenceId != null and currentScreenshotFileName != null}"
+                           th:href="@{/test-evidences/{testEvidenceId}/screenshot(testEvidenceId=${testEvidenceId})}"
+                           target="_blank"
+                           rel="noopener"
+                           th:text="${'현재 파일: ' + currentScreenshotFileName}">현재 파일</a>
+                    </div>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">저장</button>
+                <a th:href="@{/test-evidences}" class="dt-button dt-button-ghost">취소</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

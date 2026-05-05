@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('테스트 증적 관리')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-page">
+    <section class="dt-hero">
+        <div>
+            <h1>수동 기능 테스트 증적 관리</h1>
+            <p>프로젝트와 이슈 기준으로 수동 기능 테스트 결과, 판정, 스크린샷 증적을 관리합니다.</p>
+        </div>
+        <a th:href="@{/test-evidences/new}" class="dt-button dt-button-primary">증적 등록</a>
+    </section>
+
+    <section class="dt-test-evidence-summary" aria-label="테스트 증적 현황">
+        <article>
+            <span>전체 증적</span>
+            <strong th:text="${summary.totalCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>성공</span>
+            <strong th:text="${summary.successCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>실패</span>
+            <strong th:text="${summary.failCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>차단</span>
+            <strong th:text="${summary.blockedCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>스크린샷</span>
+            <strong th:text="${summary.screenshotCount}">0</strong>
+            <small>건</small>
+        </article>
+    </section>
+
+    <form th:action="@{/test-evidences}" method="get" th:object="${condition}" class="dt-toolbar dt-test-evidence-toolbar">
+        <div class="dt-search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
+            <input type="search" th:field="*{keyword}" placeholder="테스트명, 대상, 이슈 검색">
+        </div>
+        <div class="dt-select-box">
+            <select th:field="*{projectId}">
+                <option value="">전체 프로젝트</option>
+                <option th:each="project : ${projects}"
+                        th:value="${project.projectId}"
+                        th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+            </select>
+        </div>
+        <div class="dt-select-box">
+            <select th:field="*{issueId}">
+                <option value="">전체 이슈</option>
+                <option th:each="issue : ${issues}"
+                        th:value="${issue.issueId}"
+                        th:text="${issue.issueKey + ' - ' + issue.title}"></option>
+            </select>
+        </div>
+        <div class="dt-select-box">
+            <select th:field="*{resultStatus}">
+                <option value="">전체 판정</option>
+                <option th:each="resultStatus : ${resultStatuses}"
+                        th:value="${resultStatus}"
+                        th:text="${resultStatus.label}"></option>
+            </select>
+        </div>
+        <label class="dt-date-filter">
+            <span>FROM</span>
+            <input type="date" th:field="*{testedAtFrom}">
+        </label>
+        <label class="dt-date-filter">
+            <span>TO</span>
+            <input type="date" th:field="*{testedAtTo}">
+        </label>
+        <button type="submit" class="dt-filter-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            조회
+        </button>
+        <a th:href="@{/test-evidences}" class="dt-reset-button">초기화</a>
+    </form>
+
+    <section class="dt-table-card">
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-test-evidence-table">
+                <thead>
+                <tr>
+                    <th>프로젝트</th>
+                    <th>이슈</th>
+                    <th>테스트명</th>
+                    <th>테스트 대상</th>
+                    <th>판정</th>
+                    <th>수행자</th>
+                    <th>수행일시</th>
+                    <th>스크린샷</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(evidences)}">
+                    <td colspan="9" data-label="테스트 증적">등록된 테스트 증적이 없습니다.</td>
+                </tr>
+                <tr th:each="evidence : ${evidences}" class="stripe-teal">
+                    <td data-label="프로젝트" th:text="${evidence.projectCode}">DTR</td>
+                    <td data-label="이슈" th:text="${evidence.issueKey}">DTR-101</td>
+                    <td data-label="테스트명" th:text="${evidence.testName}">로그인 테스트</td>
+                    <td data-label="테스트 대상" th:text="${evidence.testTarget}">/login</td>
+                    <td data-label="판정">
+                        <span class="dt-status" th:classappend="${evidence.resultStatus.cssClass}" th:text="${evidence.resultStatus.label}">성공</span>
+                    </td>
+                    <td data-label="수행자" th:text="${evidence.testerName}">관리자</td>
+                    <td data-label="수행일시" th:text="${#temporals.format(evidence.testedAt, 'yyyy-MM-dd HH:mm')}">2026-05-04 09:00</td>
+                    <td data-label="스크린샷">
+                        <a th:if="${evidence.hasScreenshot}" th:href="@{/test-evidences/{testEvidenceId}/screenshot(testEvidenceId=${evidence.testEvidenceId})}" class="dt-action" target="_blank" rel="noopener">보기</a>
+                        <span th:unless="${evidence.hasScreenshot}">-</span>
+                    </td>
+                    <td data-label="작업">
+                        <div class="dt-row-actions">
+                            <a th:href="@{/test-evidences/{testEvidenceId}(testEvidenceId=${evidence.testEvidenceId})}" class="dt-action">상세</a>
+                            <a th:href="@{/test-evidences/{testEvidenceId}/edit(testEvidenceId=${evidence.testEvidenceId})}" class="dt-action">수정</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

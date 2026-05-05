@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.testevidence.dao.TestEvidenceDao">
+
+    <resultMap id="TestEvidenceResultMap" type="com.devtrace.manager.testevidence.dto.TestEvidenceEntity">
+        <id property="testEvidenceId" column="TEST_EVIDENCE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueTitle" column="ISSUE_TITLE"/>
+        <result property="testName" column="TEST_NAME"/>
+        <result property="testTarget" column="TEST_TARGET"/>
+        <result property="testProcedure" column="TEST_PROCEDURE"/>
+        <result property="expectedResult" column="EXPECTED_RESULT"/>
+        <result property="actualResult" column="ACTUAL_RESULT"/>
+        <result property="resultStatus" column="RESULT_STATUS"/>
+        <result property="testerId" column="TESTER_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="testerName" column="TESTER_NAME"/>
+        <result property="testedAt" column="TESTED_AT"/>
+        <result property="screenshotFileName" column="SCREENSHOT_FILE_NAME"/>
+        <result property="screenshotFilePath" column="SCREENSHOT_FILE_PATH"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <sql id="TestEvidenceColumns">
+        TEST_EVIDENCE_ID,
+        PROJECT_ID,
+        ISSUE_ID,
+        TEST_NAME,
+        TEST_TARGET,
+        TEST_PROCEDURE,
+        EXPECTED_RESULT,
+        ACTUAL_RESULT,
+        RESULT_STATUS,
+        TESTER_ID,
+        TESTED_AT,
+        SCREENSHOT_FILE_NAME,
+        SCREENSHOT_FILE_PATH,
+        CREATED_AT,
+        UPDATED_AT
+    </sql>
+
+    <sql id="TestEvidenceSelectColumns">
+        TE.TEST_EVIDENCE_ID,
+        TE.PROJECT_ID,
+        P.PROJECT_CODE,
+        P.PROJECT_NAME,
+        TE.ISSUE_ID,
+        I.ISSUE_KEY,
+        I.TITLE AS ISSUE_TITLE,
+        TE.TEST_NAME,
+        TE.TEST_TARGET,
+        TE.TEST_PROCEDURE,
+        TE.EXPECTED_RESULT,
+        TE.ACTUAL_RESULT,
+        TE.RESULT_STATUS,
+        TE.TESTER_ID,
+        U.DISPLAY_NAME AS TESTER_NAME,
+        TE.TESTED_AT,
+        TE.SCREENSHOT_FILE_NAME,
+        TE.SCREENSHOT_FILE_PATH,
+        TE.CREATED_AT,
+        TE.UPDATED_AT
+    </sql>
+
+    <insert id="insertTestEvidence" parameterType="com.devtrace.manager.testevidence.dto.TestEvidenceEntity">
+        INSERT INTO TEST_EVIDENCE (
+            <include refid="TestEvidenceColumns"/>
+        ) VALUES (
+            #{testEvidenceId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{testName},
+            #{testTarget},
+            #{testProcedure},
+            #{expectedResult},
+            #{actualResult},
+            #{resultStatus},
+            #{testerId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{testedAt},
+            #{screenshotFileName},
+            #{screenshotFilePath},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateTestEvidence" parameterType="com.devtrace.manager.testevidence.dto.TestEvidenceEntity">
+        UPDATE TEST_EVIDENCE
+        SET
+            PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            TEST_NAME = #{testName},
+            TEST_TARGET = #{testTarget},
+            TEST_PROCEDURE = #{testProcedure},
+            EXPECTED_RESULT = #{expectedResult},
+            ACTUAL_RESULT = #{actualResult},
+            RESULT_STATUS = #{resultStatus},
+            TESTER_ID = #{testerId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            TESTED_AT = #{testedAt},
+            SCREENSHOT_FILE_NAME = #{screenshotFileName},
+            SCREENSHOT_FILE_PATH = #{screenshotFilePath},
+            UPDATED_AT = #{updatedAt}
+        WHERE TEST_EVIDENCE_ID = #{testEvidenceId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteTestEvidence" parameterType="java.util.UUID">
+        DELETE FROM TEST_EVIDENCE
+        WHERE TEST_EVIDENCE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectTestEvidenceDetails" parameterType="java.util.UUID" resultMap="TestEvidenceResultMap">
+        SELECT
+            <include refid="TestEvidenceSelectColumns"/>
+        FROM TEST_EVIDENCE TE
+        INNER JOIN PROJECT P ON TE.PROJECT_ID = P.PROJECT_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        WHERE TE.TEST_EVIDENCE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectTestEvidenceList" parameterType="com.devtrace.manager.testevidence.dto.TestEvidenceSearchCondition" resultMap="TestEvidenceResultMap">
+        SELECT
+            <include refid="TestEvidenceSelectColumns"/>
+        FROM TEST_EVIDENCE TE
+        INNER JOIN PROJECT P ON TE.PROJECT_ID = P.PROJECT_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        <where>
+            <if test="projectId != null">
+                AND TE.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="issueId != null">
+                AND TE.ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="resultStatus != null">
+                AND TE.RESULT_STATUS = #{resultStatus}
+            </if>
+            <if test="testedAtFrom != null">
+                AND CAST(TE.TESTED_AT AS DATE) <![CDATA[>=]]> #{testedAtFrom}
+            </if>
+            <if test="testedAtTo != null">
+                AND CAST(TE.TESTED_AT AS DATE) <![CDATA[<=]]> #{testedAtTo}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    TE.TEST_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                    OR TE.TEST_TARGET ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY TE.TESTED_AT DESC, TE.CREATED_AT DESC
+    </select>
+</mapper>

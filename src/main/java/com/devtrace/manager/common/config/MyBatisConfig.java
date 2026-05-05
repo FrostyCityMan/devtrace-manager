@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Configuration;
         "com.devtrace.manager.board.dao",
         "com.devtrace.manager.vcs.dao",
         "com.devtrace.manager.columnspec.dao",
-        "com.devtrace.manager.artifact.dao"
+        "com.devtrace.manager.artifact.dao",
+        "com.devtrace.manager.testevidence.dao",
+        "com.devtrace.manager.wbs.dao"
 })
 public class MyBatisConfig {
 }
