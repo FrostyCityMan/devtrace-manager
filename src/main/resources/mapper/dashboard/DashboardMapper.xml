@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.dashboard.dao.DashboardDao">
+
+    <resultMap id="DashboardSummaryResultMap" type="com.devtrace.manager.dashboard.dto.DashboardSummaryResponse">
+        <result property="totalProjectCount" column="TOTAL_PROJECT_COUNT"/>
+        <result property="activeProjectCount" column="ACTIVE_PROJECT_COUNT"/>
+        <result property="totalIssueCount" column="TOTAL_ISSUE_COUNT"/>
+        <result property="delayedIssueCount" column="DELAYED_ISSUE_COUNT"/>
+        <result property="failedTestCount" column="FAILED_TEST_COUNT"/>
+        <result property="overEffortIssueCount" column="OVER_EFFORT_ISSUE_COUNT"/>
+    </resultMap>
+
+    <resultMap id="DashboardRiskIssueResultMap" type="com.devtrace.manager.dashboard.dto.DashboardRiskIssueResponse">
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="title" column="TITLE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <resultMap id="DashboardWbsSummaryResultMap" type="com.devtrace.manager.dashboard.dto.DashboardWbsSummaryResponse">
+        <id property="wbsTaskId" column="WBS_TASK_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="wbsCode" column="WBS_CODE"/>
+        <result property="taskName" column="TASK_NAME"/>
+        <result property="status" column="STATUS"/>
+        <result property="planEndDate" column="PLAN_END_DATE"/>
+        <result property="progressRate" column="PROGRESS_RATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <resultMap id="DashboardTestEvidenceSummaryResultMap" type="com.devtrace.manager.dashboard.dto.DashboardTestEvidenceSummaryResponse">
+        <id property="testEvidenceId" column="TEST_EVIDENCE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueTitle" column="ISSUE_TITLE"/>
+        <result property="testName" column="TEST_NAME"/>
+        <result property="testTarget" column="TEST_TARGET"/>
+        <result property="resultStatus" column="RESULT_STATUS"/>
+        <result property="testerName" column="TESTER_NAME"/>
+        <result property="testedAt" column="TESTED_AT"/>
+        <result property="screenshotFileName" column="SCREENSHOT_FILE_NAME"/>
+    </resultMap>
+
+    <resultMap id="DashboardProjectHealthResultMap" type="com.devtrace.manager.dashboard.dto.DashboardProjectHealthResponse">
+        <id property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="status" column="STATUS"/>
+        <result property="totalIssueCount" column="TOTAL_ISSUE_COUNT"/>
+        <result property="doneIssueCount" column="DONE_ISSUE_COUNT"/>
+        <result property="delayedIssueCount" column="DELAYED_ISSUE_COUNT"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="testTotalCount" column="TEST_TOTAL_COUNT"/>
+        <result property="testSuccessCount" column="TEST_SUCCESS_COUNT"/>
+        <result property="artifactCount" column="ARTIFACT_COUNT"/>
+    </resultMap>
+
+    <resultMap id="DashboardBoardSummaryResultMap" type="com.devtrace.manager.dashboard.dto.DashboardBoardSummaryResponse">
+        <result property="status" column="STATUS"/>
+        <result property="issueCount" column="ISSUE_COUNT"/>
+    </resultMap>
+
+    <resultMap id="DashboardRecentChangeLogResultMap" type="com.devtrace.manager.dashboard.dto.DashboardRecentChangeLogResponse">
+        <id property="changeLogId" column="CHANGE_LOG_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="vcsType" column="VCS_TYPE"/>
+        <result property="revisionNo" column="REVISION_NO"/>
+        <result property="author" column="AUTHOR"/>
+        <result property="changedAt" column="CHANGED_AT"/>
+        <result property="message" column="MESSAGE"/>
+        <result property="issueKeyText" column="ISSUE_KEY_TEXT"/>
+    </resultMap>
+
+    <resultMap id="DashboardArtifactSummaryResultMap" type="com.devtrace.manager.dashboard.dto.DashboardArtifactSummaryResponse">
+        <id property="artifactId" column="ARTIFACT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="artifactType" column="ARTIFACT_TYPE"/>
+        <result property="fileName" column="FILE_NAME"/>
+        <result property="generatedAt" column="GENERATED_AT"/>
+    </resultMap>
+
+    <select id="selectDashboardSummaryDetails" resultMap="DashboardSummaryResultMap">
+        SELECT
+            (SELECT COUNT(*) FROM PROJECT) AS TOTAL_PROJECT_COUNT,
+            (
+                SELECT COUNT(*)
+                FROM PROJECT
+                WHERE STATUS IN ('ANALYSIS', 'DESIGN', 'DEVELOPMENT', 'TEST', 'INSPECTION', 'OPERATION')
+            ) AS ACTIVE_PROJECT_COUNT,
+            (SELECT COUNT(*) FROM ISSUE) AS TOTAL_ISSUE_COUNT,
+            (
+                SELECT COUNT(*)
+                FROM ISSUE
+                WHERE DUE_DATE &lt; #{today}
+                  AND STATUS NOT IN ('DONE', 'CLOSED')
+            ) AS DELAYED_ISSUE_COUNT,
+            (
+                SELECT COUNT(*)
+                FROM TEST_EVIDENCE
+                WHERE RESULT_STATUS IN ('FAIL', 'BLOCKED')
+            ) AS FAILED_TEST_COUNT,
+            (
+                SELECT COUNT(*)
+                FROM ISSUE
+                WHERE COALESCE(ESTIMATED_MINUTES, 0) &gt; 0
+                  AND COALESCE(SPENT_MINUTES, 0) &gt; COALESCE(ESTIMATED_MINUTES, 0)
+            ) AS OVER_EFFORT_ISSUE_COUNT
+    </select>
+
+    <select id="selectTodayDueIssueList" resultMap="DashboardRiskIssueResultMap">
+        SELECT
+            I.ISSUE_ID,
+            I.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE,
+            I.STATUS,
+            I.PRIORITY,
+            I.DUE_DATE,
+            I.ESTIMATED_MINUTES,
+            I.SPENT_MINUTES,
+            COALESCE(I.UPDATED_AT, I.CREATED_AT) AS UPDATED_AT
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        WHERE I.DUE_DATE = #{today}
+          AND I.STATUS NOT IN ('DONE', 'CLOSED')
+        ORDER BY
+            CASE I.PRIORITY
+                WHEN 'URGENT' THEN 1
+                WHEN 'HIGH' THEN 2
+                WHEN 'NORMAL' THEN 3
+                WHEN 'LOW' THEN 4
+                ELSE 9
+            END,
+            I.CREATED_AT DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectDelayedIssueList" resultMap="DashboardRiskIssueResultMap">
+        SELECT
+            I.ISSUE_ID,
+            I.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE,
+            I.STATUS,
+            I.PRIORITY,
+            I.DUE_DATE,
+            I.ESTIMATED_MINUTES,
+            I.SPENT_MINUTES,
+            COALESCE(I.UPDATED_AT, I.CREATED_AT) AS UPDATED_AT
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        WHERE I.DUE_DATE &lt; #{today}
+          AND I.STATUS NOT IN ('DONE', 'CLOSED')
+        ORDER BY
+            I.DUE_DATE ASC,
+            CASE I.PRIORITY
+                WHEN 'URGENT' THEN 1
+                WHEN 'HIGH' THEN 2
+                WHEN 'NORMAL' THEN 3
+                WHEN 'LOW' THEN 4
+                ELSE 9
+            END,
+            I.CREATED_AT DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectDelayedWbsTaskList" resultMap="DashboardWbsSummaryResultMap">
+        SELECT
+            WT.WBS_TASK_ID,
+            WT.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            WT.WBS_CODE,
+            WT.TASK_NAME,
+            WT.STATUS,
+            WT.PLAN_END_DATE,
+            WT.PROGRESS_RATE,
+            WT.ESTIMATED_MINUTES,
+            WT.SPENT_MINUTES
+        FROM WBS_TASK WT
+        INNER JOIN PROJECT P ON WT.PROJECT_ID = P.PROJECT_ID
+        WHERE WT.PLAN_END_DATE &lt; #{today}
+          AND WT.STATUS &lt;&gt; 'DONE'
+        ORDER BY WT.PLAN_END_DATE ASC, WT.WBS_CODE ASC
+        LIMIT 5
+    </select>
+
+    <select id="selectFailedTestEvidenceList" resultMap="DashboardTestEvidenceSummaryResultMap">
+        SELECT
+            TE.TEST_EVIDENCE_ID,
+            TE.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE AS ISSUE_TITLE,
+            TE.TEST_NAME,
+            TE.TEST_TARGET,
+            TE.RESULT_STATUS,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS TESTER_NAME,
+            TE.TESTED_AT,
+            TE.SCREENSHOT_FILE_NAME
+        FROM TEST_EVIDENCE TE
+        INNER JOIN PROJECT P ON TE.PROJECT_ID = P.PROJECT_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        WHERE TE.RESULT_STATUS IN ('FAIL', 'BLOCKED')
+        ORDER BY TE.TESTED_AT DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectRecentChangeLogList" resultMap="DashboardRecentChangeLogResultMap">
+        SELECT
+            VCL.CHANGE_LOG_ID,
+            VCL.PROJECT_ID,
+            P.PROJECT_CODE,
+            VCL.VCS_TYPE,
+            VCL.REVISION_NO,
+            VCL.AUTHOR,
+            VCL.CHANGED_AT,
+            VCL.MESSAGE,
+            COALESCE(IK.ISSUE_KEY_TEXT, '') AS ISSUE_KEY_TEXT
+        FROM VCS_CHANGE_LOG VCL
+        INNER JOIN PROJECT P ON VCL.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN (
+            SELECT
+                ICLM.CHANGE_LOG_ID,
+                STRING_AGG(I.ISSUE_KEY, ', ' ORDER BY I.ISSUE_KEY) AS ISSUE_KEY_TEXT
+            FROM ISSUE_CHANGE_LOG_MAP ICLM
+            INNER JOIN ISSUE I ON ICLM.ISSUE_ID = I.ISSUE_ID
+            GROUP BY ICLM.CHANGE_LOG_ID
+        ) IK ON VCL.CHANGE_LOG_ID = IK.CHANGE_LOG_ID
+        ORDER BY VCL.CHANGED_AT DESC NULLS LAST, VCL.CREATED_AT DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectProjectHealthList" resultMap="DashboardProjectHealthResultMap">
+        SELECT
+            P.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            P.STATUS,
+            COALESCE(I.TOTAL_ISSUE_COUNT, 0) AS TOTAL_ISSUE_COUNT,
+            COALESCE(I.DONE_ISSUE_COUNT, 0) AS DONE_ISSUE_COUNT,
+            COALESCE(I.DELAYED_ISSUE_COUNT, 0) AS DELAYED_ISSUE_COUNT,
+            COALESCE(I.ESTIMATED_MINUTES, 0) AS ESTIMATED_MINUTES,
+            COALESCE(I.SPENT_MINUTES, 0) AS SPENT_MINUTES,
+            COALESCE(T.TEST_TOTAL_COUNT, 0) AS TEST_TOTAL_COUNT,
+            COALESCE(T.TEST_SUCCESS_COUNT, 0) AS TEST_SUCCESS_COUNT,
+            COALESCE(A.ARTIFACT_COUNT, 0) AS ARTIFACT_COUNT
+        FROM PROJECT P
+        LEFT JOIN (
+            SELECT
+                PROJECT_ID,
+                COUNT(*) AS TOTAL_ISSUE_COUNT,
+                SUM(CASE WHEN STATUS IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END) AS DONE_ISSUE_COUNT,
+                SUM(CASE WHEN DUE_DATE &lt; #{today} AND STATUS NOT IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END) AS DELAYED_ISSUE_COUNT,
+                SUM(COALESCE(ESTIMATED_MINUTES, 0)) AS ESTIMATED_MINUTES,
+                SUM(COALESCE(SPENT_MINUTES, 0)) AS SPENT_MINUTES
+            FROM ISSUE
+            GROUP BY PROJECT_ID
+        ) I ON P.PROJECT_ID = I.PROJECT_ID
+        LEFT JOIN (
+            SELECT
+                PROJECT_ID,
+                COUNT(*) AS TEST_TOTAL_COUNT,
+                SUM(CASE WHEN RESULT_STATUS = 'SUCCESS' THEN 1 ELSE 0 END) AS TEST_SUCCESS_COUNT
+            FROM TEST_EVIDENCE
+            GROUP BY PROJECT_ID
+        ) T ON P.PROJECT_ID = T.PROJECT_ID
+        LEFT JOIN (
+            SELECT
+                PROJECT_ID,
+                COUNT(*) AS ARTIFACT_COUNT
+            FROM ARTIFACT_HISTORY
+            GROUP BY PROJECT_ID
+        ) A ON P.PROJECT_ID = A.PROJECT_ID
+        ORDER BY
+            CASE P.STATUS
+                WHEN 'DEVELOPMENT' THEN 1
+                WHEN 'TEST' THEN 2
+                WHEN 'INSPECTION' THEN 3
+                WHEN 'ANALYSIS' THEN 4
+                WHEN 'DESIGN' THEN 5
+                WHEN 'OPERATION' THEN 6
+                WHEN 'READY' THEN 7
+                WHEN 'HOLD' THEN 8
+                WHEN 'CLOSED' THEN 9
+                ELSE 10
+            END,
+            P.CREATED_AT DESC
+    </select>
+
+    <select id="selectBoardSummaryList" resultMap="DashboardBoardSummaryResultMap">
+        SELECT
+            STATUS,
+            COUNT(*) AS ISSUE_COUNT
+        FROM ISSUE
+        WHERE STATUS IN ('REGISTERED', 'ANALYZING', 'IN_PROGRESS', 'DEV_DONE', 'TESTING', 'DONE')
+        GROUP BY STATUS
+    </select>
+
+    <select id="selectRecentDoneIssueList" resultMap="DashboardRiskIssueResultMap">
+        SELECT
+            I.ISSUE_ID,
+            I.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE,
+            I.STATUS,
+            I.PRIORITY,
+            I.DUE_DATE,
+            I.ESTIMATED_MINUTES,
+            I.SPENT_MINUTES,
+            COALESCE(I.UPDATED_AT, I.CREATED_AT) AS UPDATED_AT
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        WHERE I.STATUS IN ('DONE', 'CLOSED')
+        ORDER BY I.RESOLVED_DATE DESC NULLS LAST, COALESCE(I.UPDATED_AT, I.CREATED_AT) DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectRecentTestEvidenceList" resultMap="DashboardTestEvidenceSummaryResultMap">
+        SELECT
+            TE.TEST_EVIDENCE_ID,
+            TE.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE AS ISSUE_TITLE,
+            TE.TEST_NAME,
+            TE.TEST_TARGET,
+            TE.RESULT_STATUS,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS TESTER_NAME,
+            TE.TESTED_AT,
+            TE.SCREENSHOT_FILE_NAME
+        FROM TEST_EVIDENCE TE
+        INNER JOIN PROJECT P ON TE.PROJECT_ID = P.PROJECT_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        ORDER BY TE.TESTED_AT DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectRecentArtifactList" resultMap="DashboardArtifactSummaryResultMap">
+        SELECT
+            AH.ARTIFACT_ID,
+            AH.PROJECT_ID,
+            P.PROJECT_CODE,
+            AH.ARTIFACT_TYPE,
+            AH.FILE_NAME,
+            AH.GENERATED_AT
+        FROM ARTIFACT_HISTORY AH
+        INNER JOIN PROJECT P ON AH.PROJECT_ID = P.PROJECT_ID
+        ORDER BY AH.GENERATED_AT DESC
+        LIMIT 5
+    </select>
+</mapper>

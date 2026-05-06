@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('대시보드')}"></head>
+<head th:replace="~{layout :: head('통합 운영 대시보드')}"></head>
 <body>
 <nav th:replace="~{layout :: nav}"></nav>
 <main class="dt-content">
     <section class="dt-page-head">
         <div>
-            <h1>대시보드</h1>
-            <p class="dt-page-desc">프로젝트, 이슈, 공수, 변경이력, 산출물 흐름을 한 화면에서 확인합니다.</p>
+            <h1>통합 운영 대시보드</h1>
+            <p class="dt-page-desc">프로젝트 위험, 지연, 실패 테스트, 공수 초과를 한 화면에서 통제합니다.</p>
         </div>
         <a th:href="@{/artifacts}" class="dt-primary-button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 12h6M9 16h6"/></svg>
@@ -15,97 +15,223 @@
         </a>
     </section>
 
-    <section class="dt-metrics" aria-label="운영 현황">
+    <section class="dt-metrics dt-dashboard-metrics" aria-label="핵심 지표">
         <article class="dt-metric-card">
             <span class="dt-metric-icon coral"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h7l2 2h7v11H4z"/></svg></span>
-            <div><p>전체 프로젝트</p><strong><span th:text="${totalProjectCount}">0</span> <small>건</small></strong></div>
+            <div><p>전체 프로젝트</p><strong><span th:text="${summary.totalProjectCount}">0</span> <small>건</small></strong></div>
         </article>
         <article class="dt-metric-card">
             <span class="dt-metric-icon teal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
-            <div><p>진행 프로젝트</p><strong><span th:text="${activeProjectCount}">0</span> <small>건</small></strong></div>
+            <div><p>진행 프로젝트</p><strong><span th:text="${summary.activeProjectCount}">0</span> <small>건</small></strong></div>
         </article>
         <article class="dt-metric-card">
-            <span class="dt-metric-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"/></svg></span>
-            <div><p>전체 이슈</p><strong><span th:text="${totalIssueCount}">0</span> <small>건</small></strong></div>
+            <span class="dt-metric-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h11M9 12h11M9 19h11M4 5h.01M4 12h.01M4 19h.01"/></svg></span>
+            <div><p>전체 이슈</p><strong><span th:text="${summary.totalIssueCount}">0</span> <small>건</small></strong></div>
         </article>
         <article class="dt-metric-card">
-            <span class="dt-metric-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
-            <div><p>진행 이슈</p><strong><span th:text="${activeIssueCount}">0</span> <small>건</small></strong></div>
+            <span class="dt-metric-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg></span>
+            <div><p>지연 이슈</p><strong><span th:text="${summary.delayedIssueCount}">0</span> <small>건</small></strong></div>
         </article>
         <article class="dt-metric-card">
-            <span class="dt-metric-icon red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4h10l1 3h5v9h-9l-1-3H5"/></svg></span>
-            <div><p>지연 이슈</p><strong><span th:text="${delayedIssueCount}">0</span> <small>건</small></strong></div>
+            <span class="dt-metric-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.5 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.5a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg></span>
+            <div><p>실패 테스트</p><strong><span th:text="${summary.failedTestCount}">0</span> <small>건</small></strong></div>
+        </article>
+        <article class="dt-metric-card">
+            <span class="dt-metric-icon coral"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-3 3 2 5-7"/></svg></span>
+            <div><p>공수 초과</p><strong><span th:text="${summary.overEffortIssueCount}">0</span> <small>건</small></strong></div>
         </article>
     </section>
 
-    <section class="dt-widget-grid" aria-label="업무 흐름 요약">
-        <article class="dt-widget">
-            <h2>공수 현황</h2>
-            <div class="dt-effort-summary">
-                <div><span>예상 공수</span><strong th:text="${estimatedHoursText}">0.0h</strong></div>
-                <div><span>실제 공수</span><strong th:text="${spentHoursText}">0.0h</strong></div>
-                <div><span>차이</span><strong th:text="${effortDiffText}">0.0h</strong></div>
-                <div><span>완료 이슈</span><strong th:text="${completedIssueCount + '건'}">0건</strong></div>
-            </div>
+    <section class="dt-dashboard-actions" aria-label="빠른 실행">
+        <a th:href="@{/issues/new}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>이슈 등록</span></a>
+        <a th:href="@{/issues}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8M8 12h8M8 17h5M5 3h14v18H5z"/></svg><span>이슈별 공수</span></a>
+        <a th:href="@{/test-evidences/new}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>테스트 증적 등록</span></a>
+        <a th:href="@{/wbs/new}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM10 8h4M7 11v4"/></svg><span>WBS 작업 등록</span></a>
+        <a th:href="@{/boards}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v16H4zM14 4h6v10h-6z"/></svg><span>칸반 보드</span></a>
+    </section>
+
+    <section class="dt-dashboard-grid" aria-label="오늘의 주의 항목">
+        <article class="dt-widget dt-dashboard-section">
+            <h2>오늘 마감 이슈</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(todayDueIssues)}" class="dt-dashboard-empty">오늘 마감 예정인 미완료 이슈가 없습니다.</li>
+                <li th:each="issue : ${todayDueIssues}" class="dt-dashboard-list-item">
+                    <span class="dot amber"></span>
+                    <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}">
+                        <strong th:text="${issue.issueKey}">DTR-101</strong>
+                        <span th:text="${issue.title}" th:title="${issue.title}">이슈 제목</span>
+                    </a>
+                    <em th:text="${issue.priorityLabel}">보통</em>
+                </li>
+            </ul>
         </article>
-        <article class="dt-widget">
+        <article class="dt-widget dt-dashboard-section">
+            <h2>지연 이슈</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(delayedIssues)}" class="dt-dashboard-empty">기한이 지난 미완료 이슈가 없습니다.</li>
+                <li th:each="issue : ${delayedIssues}" class="dt-dashboard-list-item">
+                    <span class="dot red"></span>
+                    <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}">
+                        <strong th:text="${issue.issueKey}">DTR-101</strong>
+                        <span th:text="${issue.title}" th:title="${issue.title}">이슈 제목</span>
+                    </a>
+                    <em th:text="${issue.dueDate}">2026-05-06</em>
+                </li>
+            </ul>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
+            <h2>지연 WBS 작업</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(delayedWbsTasks)}" class="dt-dashboard-empty">지연된 WBS 작업이 없습니다.</li>
+                <li th:each="task : ${delayedWbsTasks}" class="dt-dashboard-list-item">
+                    <span class="dot red"></span>
+                    <a th:href="@{/wbs/{wbsTaskId}(wbsTaskId=${task.wbsTaskId})}">
+                        <strong th:text="${task.wbsCode}">1.1</strong>
+                        <span th:text="${task.taskName}" th:title="${task.taskName}">WBS 작업명</span>
+                    </a>
+                    <em th:text="${task.progressRate + '%'}">0%</em>
+                </li>
+            </ul>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
+            <h2>실패/차단 테스트</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(failedTestEvidences)}" class="dt-dashboard-empty">실패 또는 차단된 테스트 증적이 없습니다.</li>
+                <li th:each="test : ${failedTestEvidences}" class="dt-dashboard-list-item">
+                    <span class="dot red"></span>
+                    <a th:href="@{/test-evidences/{testEvidenceId}(testEvidenceId=${test.testEvidenceId})}">
+                        <strong th:text="${test.issueKey}">DTR-101</strong>
+                        <span th:text="${test.testName}" th:title="${test.testName}">테스트명</span>
+                    </a>
+                    <em th:text="${test.resultLabel}">실패</em>
+                </li>
+            </ul>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
             <h2>최근 변경이력</h2>
-            <ul>
-                <li th:if="${#lists.isEmpty(recentVcsLogs)}"><span class="dot blue"></span>등록된 변경이력이 없습니다.</li>
-                <li th:each="log : ${recentVcsLogs}">
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(recentChangeLogs)}" class="dt-dashboard-empty">등록된 변경이력이 없습니다.</li>
+                <li th:each="log : ${recentChangeLogs}" class="dt-dashboard-list-item">
                     <span class="dot blue"></span>
-                    <span th:text="${log.revisionNo}">r100</span>
-                    <strong th:text="${log.message}">변경 메시지</strong>
-                </li>
-            </ul>
-        </article>
-        <article class="dt-widget">
-            <h2>최근 생성 산출물</h2>
-            <ul>
-                <li th:if="${#lists.isEmpty(recentArtifacts)}"><span class="dot teal"></span>생성된 산출물이 없습니다.</li>
-                <li th:each="artifact : ${recentArtifacts}">
-                    <span class="dot teal"></span>
-                    <span th:text="${artifact.artifactType.label}">주간 업무보고</span>
-                    <strong th:text="${artifact.fileName}">weekly-report.md</strong>
+                    <a th:href="@{/vcs-logs}">
+                        <strong th:text="${log.revisionNo}">a1b2c3</strong>
+                        <span th:text="${log.message}" th:title="${log.message}">변경 메시지</span>
+                    </a>
+                    <em th:text="${log.projectCode}">DTR</em>
                 </li>
             </ul>
         </article>
     </section>
 
-    <section class="dt-table-card" aria-label="최근 이슈">
+    <section class="dt-table-card dt-dashboard-health" aria-label="프로젝트 건강도">
+        <div class="dt-dashboard-table-head">
+            <div>
+                <h2>프로젝트 건강도</h2>
+                <p>이슈 진행률, 공수, 테스트 성공률, 산출물 생성 여부를 프로젝트 기준으로 집계합니다.</p>
+            </div>
+            <a th:href="@{/projects}" class="dt-action">프로젝트 보기</a>
+        </div>
         <div class="dt-table-scroll">
-            <table class="dt-dashboard-table dt-issue-table">
+            <table class="dt-dashboard-table dt-dashboard-health-table">
                 <thead>
                 <tr>
-                    <th>이슈 키</th>
-                    <th>제목</th>
                     <th>프로젝트</th>
                     <th>상태</th>
-                    <th>우선순위</th>
-                    <th>완료 예정일</th>
-                    <th>작업</th>
+                    <th>이슈 진행률</th>
+                    <th>공수</th>
+                    <th>테스트 성공률</th>
+                    <th>위험</th>
+                    <th>산출물</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${#lists.isEmpty(recentIssues)}">
-                    <td colspan="7" data-label="최근 이슈">등록된 이슈가 없습니다.</td>
+                <tr th:if="${#lists.isEmpty(projectHealthList)}">
+                    <td colspan="7" data-label="프로젝트">등록된 프로젝트가 없습니다.</td>
                 </tr>
-                <tr th:each="issue : ${recentIssues}" class="stripe-teal">
-                    <td data-label="이슈 키" th:text="${issue.issueKey}">DTR-101</td>
-                    <td data-label="제목" th:text="${issue.title}">이슈 제목</td>
-                    <td data-label="프로젝트" th:text="${issue.projectCode}">DTR</td>
-                    <td data-label="상태"><span class="dt-chip" th:classappend="${' ' + issue.status.cssClass}" th:text="${issue.status.label}">진행 중</span></td>
-                    <td data-label="우선순위"><span class="dt-chip" th:classappend="${' ' + issue.priority.cssClass}" th:text="${issue.priority.label}">보통</span></td>
-                    <td data-label="완료 예정일" th:text="${issue.dueDate == null ? '-' : issue.dueDate}">2026-05-06</td>
-                    <td data-label="작업">
-                        <div class="dt-row-actions">
-                            <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}" class="dt-action">상세</a>
+                <tr th:each="project : ${projectHealthList}" th:classappend="${project.overEffort ? ' stripe-red' : ' stripe-teal'}">
+                    <td data-label="프로젝트">
+                        <strong th:text="${project.projectCode}">DTR</strong>
+                        <span th:text="${project.projectName}">프로젝트명</span>
+                    </td>
+                    <td data-label="상태" th:text="${project.statusLabel}">DEVELOPMENT</td>
+                    <td data-label="이슈 진행률">
+                        <div class="dt-dashboard-progress"><span th:style="${'width:' + project.issueProgressRate + '%'}"></span></div>
+                        <small th:text="${project.doneIssueCount + ' / ' + project.totalIssueCount + '건'}">0 / 0건</small>
+                    </td>
+                    <td data-label="공수">
+                        <strong th:text="${project.spentHoursText}">0.0h</strong>
+                        <small th:text="${'예상 ' + project.estimatedHoursText}">예상 0.0h</small>
+                    </td>
+                    <td data-label="테스트 성공률">
+                        <div class="dt-dashboard-progress teal"><span th:style="${'width:' + project.testSuccessRate + '%'}"></span></div>
+                        <small th:text="${project.testSuccessRate + '%'}">0%</small>
+                    </td>
+                    <td data-label="위험">
+                        <div class="dt-dashboard-risk-tags">
+                            <span th:if="${project.delayedIssueCount > 0}" class="dt-chip danger" th:text="${'지연 ' + project.delayedIssueCount + '건'}">지연 1건</span>
+                            <span th:if="${project.delayedIssueCount == 0 and !project.overEffort}" class="dt-chip safe">정상</span>
+                            <span th:if="${project.overEffort}" class="dt-chip danger">공수 초과</span>
                         </div>
                     </td>
+                    <td data-label="산출물" th:text="${project.artifactCount + '건'}">0건</td>
                 </tr>
                 </tbody>
             </table>
         </div>
+    </section>
+
+    <section class="dt-dashboard-split" aria-label="업무 흐름">
+        <article class="dt-widget dt-dashboard-section">
+            <h2>칸반 상태별 이슈 수</h2>
+            <div class="dt-board-mini">
+                <a th:each="column : ${boardSummaryList}" th:href="@{/boards}" th:attr="data-status=${column.status}">
+                    <span th:text="${column.statusLabel}">진행 중</span>
+                    <strong th:text="${column.issueCount}">0</strong>
+                </a>
+            </div>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
+            <h2>최근 완료 이슈</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(recentDoneIssues)}" class="dt-dashboard-empty">최근 완료된 이슈가 없습니다.</li>
+                <li th:each="issue : ${recentDoneIssues}" class="dt-dashboard-list-item">
+                    <span class="dot teal"></span>
+                    <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}">
+                        <strong th:text="${issue.issueKey}">DTR-101</strong>
+                        <span th:text="${issue.title}" th:title="${issue.title}">완료 이슈</span>
+                    </a>
+                    <em th:text="${issue.projectCode}">DTR</em>
+                </li>
+            </ul>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
+            <h2>최근 등록 테스트 증적</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(recentTestEvidences)}" class="dt-dashboard-empty">최근 등록된 테스트 증적이 없습니다.</li>
+                <li th:each="test : ${recentTestEvidences}" class="dt-dashboard-list-item">
+                    <span class="dot blue"></span>
+                    <a th:href="@{/test-evidences/{testEvidenceId}(testEvidenceId=${test.testEvidenceId})}">
+                        <strong th:text="${test.issueKey}">DTR-101</strong>
+                        <span th:text="${test.testName}" th:title="${test.testName}">테스트명</span>
+                    </a>
+                    <em th:text="${test.resultLabel}">성공</em>
+                </li>
+            </ul>
+        </article>
+        <article class="dt-widget dt-dashboard-section">
+            <h2>최근 생성 산출물</h2>
+            <ul class="dt-dashboard-list">
+                <li th:if="${#lists.isEmpty(recentArtifacts)}" class="dt-dashboard-empty">최근 생성된 산출물이 없습니다.</li>
+                <li th:each="artifact : ${recentArtifacts}" class="dt-dashboard-list-item">
+                    <span class="dot coral"></span>
+                    <a th:href="@{/artifacts}">
+                        <strong th:text="${artifact.artifactTypeLabel}">주간 업무보고</strong>
+                        <span th:text="${artifact.fileName}" th:title="${artifact.fileName}">report.md</span>
+                    </a>
+                    <em th:text="${artifact.projectCode}">DTR</em>
+                </li>
+            </ul>
+        </article>
     </section>
 </main>
 </body>
