@@ -9,9 +9,9 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-<nav th:fragment="nav" class="dt-chrome" aria-label="주요 탐색">
+<nav th:fragment="nav" class="dt-chrome" aria-label="주요 탐색" th:with="path=${currentPath}">
     <aside class="dt-sidebar">
-        <a class="dt-brand" th:href="@{/projects}" aria-label="DevTrace Manager 홈">
+        <a class="dt-brand" th:href="@{/dashboard}" aria-label="DevTrace Manager 홈">
             <span class="dt-brand-symbol" aria-hidden="true">
                 <span></span>
                 <span></span>
@@ -21,63 +21,64 @@
         </a>
 
         <div class="dt-nav-list">
-            <a class="dt-nav-item active" th:href="@{/projects}">
+            <a class="dt-nav-item" th:href="@{/dashboard}" title="대시보드"
+               th:classappend="${path == null or path == '/' or path == '/dashboard' ? ' active' : ''}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
-                대시보드
+                <span class="dt-nav-text">대시보드</span>
             </a>
-            <a class="dt-nav-item" th:href="@{/projects}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2H21v10.5H3z"/></svg>
-                프로젝트
-            </a>
-            <a class="dt-nav-item" href="#">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 12l2 2 5-5"/></svg>
-                업무
-            </a>
-            <a class="dt-nav-item" th:href="@{/issues}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M4.8 4.8l2.1 2.1M17.1 17.1l2.1 2.1M3 12h3M18 12h3M4.8 19.2l2.1-2.1M17.1 6.9l2.1-2.1M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"/></svg>
-                이슈
-            </a>
-            <a class="dt-nav-item" th:href="@{/boards}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v7h-6zM14 16h6v3h-6z"/></svg>
-                칸반
-            </a>
-            <a class="dt-nav-item" href="#">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v4M18 3v4M4 8h16M5 5h14v16H5z"/></svg>
-                일정
-            </a>
-            <a class="dt-nav-item" th:href="@{/column-specs}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V9M10 20V4M15 20v-7M20 20V7"/></svg>
-                컬럼명세
-            </a>
-            <a class="dt-nav-item" th:href="@{/vcs-logs}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M18 4v16M6 8h5a3 3 0 0 1 3 3v2a3 3 0 0 0 3 3h1"/></svg>
-                변경이력
-            </a>
-            <a class="dt-nav-item" th:href="@{/artifacts}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 12h6M9 16h6"/></svg>
-                산출물
-            </a>
-            <a class="dt-nav-item" th:href="@{/test-evidences}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4M5 4h14v16H5zM8 4V2M16 4V2"/></svg>
-                테스트증적
-            </a>
-            <a class="dt-nav-item" th:href="@{/wbs}">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6zM10 8h4M10 17h4"/></svg>
-                WBS
-            </a>
-            <a class="dt-nav-item" href="#">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11a4 4 0 1 1 8 0M3 21a7 7 0 0 1 10-6.3M16 14a5 5 0 0 1 5 5v2"/></svg>
-                사용자
-            </a>
-            <a class="dt-nav-item" href="#">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 12l-2-1 2-4 2 1M20 12l2-1-2-4-2 1M12 4l1-2h-2zM12 20l1 2h-2z"/></svg>
-                설정
-            </a>
+
+            <div class="dt-nav-group">
+                <span class="dt-nav-label">업무 운영</span>
+                <a class="dt-nav-item" th:href="@{/projects}" title="프로젝트"
+                   th:classappend="${path != null and #strings.startsWith(path, '/projects') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h7l2 2H21v10.5H3z"/></svg>
+                    <span class="dt-nav-text">프로젝트</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/issues}" title="이슈"
+                   th:classappend="${path != null and (#strings.startsWith(path, '/issues') or #strings.startsWith(path, '/work-logs')) ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M4.8 4.8l2.1 2.1M17.1 17.1l2.1 2.1M3 12h3M18 12h3M4.8 19.2l2.1-2.1M17.1 6.9l2.1-2.1M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z"/></svg>
+                    <span class="dt-nav-text">이슈</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/boards}" title="칸반"
+                   th:classappend="${path != null and #strings.startsWith(path, '/boards') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v7h-6zM14 16h6v3h-6z"/></svg>
+                    <span class="dt-nav-text">칸반</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/wbs}" title="WBS/Gantt"
+                   th:classappend="${path != null and #strings.startsWith(path, '/wbs') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6zM10 8h4M10 17h4"/></svg>
+                    <span class="dt-nav-text">WBS/Gantt</span>
+                </a>
+            </div>
+
+            <div class="dt-nav-group">
+                <span class="dt-nav-label">산출물</span>
+                <a class="dt-nav-item" th:href="@{/artifacts}" title="산출물"
+                   th:classappend="${path != null and #strings.startsWith(path, '/artifacts') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6zM15 3v4h4M9 12h6M9 16h6"/></svg>
+                    <span class="dt-nav-text">산출물</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/column-specs}" title="컬럼명세"
+                   th:classappend="${path != null and #strings.startsWith(path, '/column-specs') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V9M10 20V4M15 20v-7M20 20V7"/></svg>
+                    <span class="dt-nav-text">컬럼명세</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/vcs-logs}" title="변경이력"
+                   th:classappend="${path != null and #strings.startsWith(path, '/vcs-logs') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v16M18 4v16M6 8h5a3 3 0 0 1 3 3v2a3 3 0 0 0 3 3h1"/></svg>
+                    <span class="dt-nav-text">변경이력</span>
+                </a>
+                <a class="dt-nav-item" th:href="@{/test-evidences}" title="테스트 증적"
+                   th:classappend="${path != null and #strings.startsWith(path, '/test-evidences') ? ' active' : ''}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4M5 4h14v16H5zM8 4V2M16 4V2"/></svg>
+                    <span class="dt-nav-text">테스트 증적</span>
+                </a>
+            </div>
         </div>
 
-        <button type="button" class="dt-collapse">
+        <button type="button" class="dt-collapse" aria-expanded="true" aria-label="사이드바 접기">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
-            메뉴 접기
+            <span>메뉴 접기</span>
         </button>
     </aside>
 
@@ -101,6 +102,18 @@
             </form>
         </div>
     </header>
+    <script>
+        $(function () {
+            $('.dt-collapse').on('click', function () {
+                var chrome = $('.dt-chrome');
+                var compact = !chrome.hasClass('is-compact');
+                chrome.toggleClass('is-compact', compact);
+                $(this).attr('aria-expanded', String(!compact));
+                $(this).attr('aria-label', compact ? '사이드바 펼치기' : '사이드바 접기');
+                $(this).find('span').text(compact ? '메뉴 펼치기' : '메뉴 접기');
+            });
+        });
+    </script>
 </nav>
 </body>
 </html>

@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('주간 업무보고 Markdown 생성')}"></head>
+<head th:replace="~{layout :: head('산출물 생성')}"></head>
 <body>
 <nav th:replace="~{layout :: nav}"></nav>
 <main class="dt-page">
     <section class="dt-hero">
         <div>
-            <h1>주간 업무보고 Markdown 생성</h1>
-            <p>프로젝트, 이슈, 작업 공수, Git/SVN 변경이력을 기간 기준으로 집계하여 주간 업무보고를 생성합니다.</p>
+            <h1>산출물 생성</h1>
+            <p>프로젝트, 이슈, 공수, 변경이력, 테스트 증적을 제출 가능한 Markdown 및 Excel 산출물로 변환합니다.</p>
         </div>
-        <a th:href="@{/vcs-logs}" class="dt-button dt-button-ghost">변경이력</a>
+        <a th:href="@{/test-evidences}" class="dt-button dt-button-ghost">테스트 증적</a>
     </section>
 
-    <section class="dt-artifact-summary" aria-label="주간 업무보고 집계">
+    <section class="dt-artifact-summary" aria-label="산출물 집계">
         <article>
             <span>대상 이슈</span>
             <strong th:text="${markdownSummary.issueCount}">0</strong>
@@ -29,9 +29,47 @@
             <small>건</small>
         </article>
         <article>
-            <span>실제 공수</span>
-            <strong th:text="${markdownSummary.spentHoursText}">0.0h</strong>
-            <small th:text="${'예상 ' + markdownSummary.estimatedHoursText}">예상 0.0h</small>
+            <span>테스트</span>
+            <strong th:text="${markdownSummary.testCount}">0</strong>
+            <small th:text="${'성공률 ' + markdownSummary.successRateText}">성공률 0.0%</small>
+        </article>
+    </section>
+
+    <section class="dt-artifact-catalog" aria-label="산출물 지원 현황">
+        <article class="is-ready">
+            <div>
+                <span>Markdown</span>
+                <strong>주간 업무보고</strong>
+            </div>
+            <small>사용 가능</small>
+        </article>
+        <article class="is-ready">
+            <div>
+                <span>Markdown</span>
+                <strong>일일 업무보고</strong>
+            </div>
+            <small>사용 가능</small>
+        </article>
+        <article class="is-ready">
+            <div>
+                <span>Markdown · Excel</span>
+                <strong>테스트 결과 보고서</strong>
+            </div>
+            <small>사용 가능</small>
+        </article>
+        <article>
+            <div>
+                <span>Excel · Markdown</span>
+                <strong>이슈 처리 현황</strong>
+            </div>
+            <small>확장 대기</small>
+        </article>
+        <article>
+            <div>
+                <span>Excel</span>
+                <strong>공수 집계표</strong>
+            </div>
+            <small>확장 대기</small>
         </article>
     </section>
 
@@ -39,36 +77,45 @@
         <div th:if="${artifactError != null}" class="dt-form-alert danger" th:text="${artifactError}">
             산출물 생성 오류
         </div>
-        <form th:action="@{/artifacts/weekly-report/preview}" th:object="${artifact}" method="post" class="dt-form">
+
+        <div class="dt-section-head dt-artifact-section-head">
+            <div>
+                <h2>주간 업무보고 Markdown</h2>
+                <p>기간 기준 이슈, 공수, 변경이력을 업무보고 형식으로 생성합니다.</p>
+            </div>
+            <div class="dt-artifact-format-row" aria-label="출력 형식">
+                <span class="dt-artifact-format">Markdown</span>
+            </div>
+        </div>
+        <form th:action="@{/artifacts/weekly-report/preview}" th:object="${artifact}" method="post" class="dt-form dt-artifact-form"
+              th:classappend="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).WEEKLY_REPORT ? ' is-active' : ''}">
+            <input type="hidden" name="artifactType" value="WEEKLY_REPORT">
             <div class="dt-form-grid">
                 <div class="dt-field">
-                    <label for="projectId">프로젝트</label>
-                    <select id="projectId" th:field="*{projectId}" class="form-select" required>
+                    <label for="weeklyProjectId">프로젝트</label>
+                    <select id="weeklyProjectId" th:field="*{projectId}" class="form-select" required>
                         <option value="">프로젝트 선택</option>
                         <option th:each="project : ${projects}"
                                 th:value="${project.projectId}"
                                 th:text="${project.projectCode + ' - ' + project.projectName}"></option>
                     </select>
-                    <div class="dt-error" th:errors="*{projectId}"></div>
+                    <div class="dt-error"
+                         th:if="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).WEEKLY_REPORT}"
+                         th:errors="*{projectId}"></div>
                 </div>
                 <div class="dt-field">
-                    <label for="artifactType">산출물 유형</label>
-                    <select id="artifactType" th:field="*{artifactType}" class="form-select" required>
-                        <option th:each="artifactType : ${artifactTypes}"
-                                th:value="${artifactType}"
-                                th:text="${artifactType.label}"></option>
+                    <label for="weeklyArtifactType">산출물 유형</label>
+                    <select id="weeklyArtifactType" class="form-select" disabled>
+                        <option>주간 업무보고</option>
                     </select>
-                    <div class="dt-error" th:errors="*{artifactType}"></div>
                 </div>
                 <div class="dt-field">
-                    <label for="startDate">시작일</label>
-                    <input id="startDate" th:field="*{startDate}" type="date" class="form-control" required>
-                    <div class="dt-error" th:errors="*{startDate}"></div>
+                    <label for="weeklyStartDate">시작일</label>
+                    <input id="weeklyStartDate" th:field="*{startDate}" type="date" class="form-control" required>
                 </div>
                 <div class="dt-field">
-                    <label for="endDate">종료일</label>
-                    <input id="endDate" th:field="*{endDate}" type="date" class="form-control" required>
-                    <div class="dt-error" th:errors="*{endDate}"></div>
+                    <label for="weeklyEndDate">종료일</label>
+                    <input id="weeklyEndDate" th:field="*{endDate}" type="date" class="form-control" required>
                 </div>
             </div>
             <div class="dt-form-actions">
@@ -79,12 +126,124 @@
                 </button>
             </div>
         </form>
+
+        <div class="dt-artifact-divider"></div>
+
+        <div class="dt-section-head dt-artifact-section-head">
+            <div>
+                <h2>일일 업무보고 Markdown</h2>
+                <p>기준일의 작업 공수, 변경이력, 지연 이슈와 익일 업무를 생성합니다.</p>
+            </div>
+            <div class="dt-artifact-format-row" aria-label="출력 형식">
+                <span class="dt-artifact-format">Markdown</span>
+            </div>
+        </div>
+        <form th:action="@{/artifacts/daily-report/preview}" th:object="${artifact}" method="post" class="dt-form dt-artifact-form"
+              th:classappend="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).DAILY_REPORT ? ' is-active' : ''}">
+            <input type="hidden" name="artifactType" value="DAILY_REPORT">
+            <input type="hidden" th:field="*{startDate}">
+            <input type="hidden" th:field="*{endDate}">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="dailyProjectId">프로젝트</label>
+                    <select id="dailyProjectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error"
+                         th:if="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).DAILY_REPORT}"
+                         th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="baseDate">기준일</label>
+                    <input id="baseDate" th:field="*{baseDate}" type="date" class="form-control" required>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">미리보기 생성</button>
+                <button type="submit" th:formaction="@{/artifacts/daily-report/download}" class="dt-button dt-button-download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                    Markdown 다운로드
+                </button>
+            </div>
+        </form>
+
+        <div class="dt-artifact-divider"></div>
+
+        <div class="dt-section-head dt-artifact-section-head">
+            <div>
+                <h2>테스트 결과 보고서</h2>
+                <p>테스트 증적을 기간, 이슈, 판정 기준으로 집계하여 Markdown 또는 Excel로 생성합니다.</p>
+            </div>
+            <div class="dt-artifact-format-row" aria-label="출력 형식">
+                <span class="dt-artifact-format">Markdown</span>
+                <span class="dt-artifact-format excel">Excel</span>
+            </div>
+        </div>
+        <form th:action="@{/artifacts/test-result/preview}" th:object="${artifact}" method="post" class="dt-form dt-artifact-form"
+              th:classappend="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).TEST_RESULT_REPORT ? ' is-active' : ''}">
+            <input type="hidden" name="artifactType" value="TEST_RESULT_REPORT">
+            <input type="hidden" th:field="*{baseDate}">
+            <div class="dt-form-grid">
+                <div class="dt-field">
+                    <label for="testProjectId">프로젝트</label>
+                    <select id="testProjectId" th:field="*{projectId}" class="form-select" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error"
+                         th:if="${artifact.artifactType == T(com.devtrace.manager.artifact.dto.ArtifactType).TEST_RESULT_REPORT}"
+                         th:errors="*{projectId}"></div>
+                </div>
+                <div class="dt-field">
+                    <label for="issueId">이슈</label>
+                    <select id="issueId" th:field="*{issueId}" class="form-select">
+                        <option value="">전체 이슈</option>
+                        <option th:each="issue : ${issues}"
+                                th:value="${issue.issueId}"
+                                th:text="${issue.issueKey + ' - ' + issue.title}"></option>
+                    </select>
+                </div>
+                <div class="dt-field">
+                    <label for="resultStatus">판정</label>
+                    <select id="resultStatus" th:field="*{resultStatus}" class="form-select">
+                        <option value="">전체 판정</option>
+                        <option th:each="resultStatus : ${resultStatuses}"
+                                th:value="${resultStatus}"
+                                th:text="${resultStatus.label}"></option>
+                    </select>
+                </div>
+                <div class="dt-field">
+                    <label for="testStartDate">시작일</label>
+                    <input id="testStartDate" th:field="*{startDate}" type="date" class="form-control" required>
+                </div>
+                <div class="dt-field">
+                    <label for="testEndDate">종료일</label>
+                    <input id="testEndDate" th:field="*{endDate}" type="date" class="form-control" required>
+                </div>
+            </div>
+            <div class="dt-form-actions">
+                <button type="submit" class="dt-button dt-button-primary">미리보기 생성</button>
+                <button type="submit" th:formaction="@{/artifacts/test-result/download-markdown}" class="dt-button dt-button-download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                    Markdown 다운로드
+                </button>
+                <button type="submit" th:formaction="@{/artifacts/test-result/download-excel}" class="dt-button dt-button-download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                    Excel 다운로드
+                </button>
+            </div>
+        </form>
     </section>
 
     <section class="dt-panel dt-form-panel dt-columnspec-preview dt-artifact-preview">
         <div class="dt-section-head">
             <div>
-                <h2>주간 업무보고 미리보기</h2>
+                <h2>Markdown 미리보기</h2>
                 <p th:text="${#strings.isEmpty(fileName) ? '미리보기 전' : fileName}">미리보기 전</p>
             </div>
         </div>
@@ -105,6 +264,7 @@
                 <tr>
                     <th>순번</th>
                     <th>산출물 유형</th>
+                    <th>형식</th>
                     <th>파일명</th>
                     <th>생성자</th>
                     <th>생성일시</th>
@@ -112,11 +272,16 @@
                 </thead>
                 <tbody>
                 <tr th:if="${#lists.isEmpty(histories)}">
-                    <td colspan="5" data-label="산출물 이력">생성된 산출물 이력이 없습니다.</td>
+                    <td colspan="6" data-label="산출물 이력">생성된 산출물 이력이 없습니다.</td>
                 </tr>
                 <tr th:each="history, stat : ${histories}" class="stripe-teal">
                     <td data-label="순번" th:text="${stat.count}">1</td>
                     <td data-label="산출물 유형" th:text="${history.artifactType.label}">주간 업무보고</td>
+                    <td data-label="형식">
+                        <span class="dt-artifact-format"
+                              th:classappend="${history.fileName != null and #strings.endsWith(history.fileName, '.xlsx') ? ' excel' : ''}"
+                              th:text="${history.fileName != null and #strings.endsWith(history.fileName, '.xlsx') ? 'Excel' : 'Markdown'}">Markdown</span>
+                    </td>
                     <td data-label="파일명" th:text="${history.fileName}">weekly-report.md</td>
                     <td data-label="생성자" th:text="${history.generatedBy}">admin</td>
                     <td data-label="생성일시" th:text="${#temporals.format(history.generatedAt, 'yyyy-MM-dd HH:mm:ss')}">2026-05-04 09:00:00</td>

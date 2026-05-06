@@ -2,7 +2,7 @@
 
 DevTrace Manager는 SI 개발 프로젝트에서 발생하는 프로젝트 관리, 이슈 관리, 작업 공수 관리, 형상관리 로그 관리, 컬럼명세 Excel 생성, 개발 산출물 생성을 통합 지원하기 위한 스탠드얼론 웹 애플리케이션입니다.
 
-현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, WBS 기반 일정 관리 기능, 칸반 보드 기능입니다.
+현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간/일일 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, 테스트 결과 보고서 Markdown/Excel 생성 기능, WBS 기반 일정 관리 기능, 칸반 보드 기능입니다.
 
 ## 기술 스택
 
@@ -97,6 +97,12 @@ $env:DB_PASSWORD='devtrace'
 - 주간 업무보고 미리보기 화면
 - Markdown 다운로드 및 산출물 생성 이력 저장
 - WeeklyReportMarkdownGenerator 및 ArtifactService 기본 테스트
+- DAILY_REPORT, TEST_RESULT_REPORT, ISSUE_STATUS_REPORT, WORKLOG_SUMMARY 산출물 유형 확장
+- 일일 업무보고 Markdown 생성 및 다운로드
+- 테스트 결과 보고서 Markdown 미리보기 및 다운로드
+- 테스트 결과 보고서 Apache POI 기반 `.xlsx` 다운로드
+- 테스트 결과 보고서 생성 이력 저장
+- DailyReportMarkdownGenerator, TestResultReportMarkdownGenerator, TestResultReportExcelGenerator 테스트
 - TEST_EVIDENCE 테이블 Flyway 마이그레이션
 - 프로젝트/이슈 기준 테스트 증적 등록, 수정, 삭제, 상세, 목록 조회
 - 테스트 판정 SUCCESS, FAIL, BLOCKED 관리
@@ -120,8 +126,7 @@ $env:DB_PASSWORD='devtrace'
 
 ## 아직 구현하지 않은 기능
 
-- 일일 업무보고 및 기타 산출물 생성
-- 테스트 결과 보고서 Markdown/Excel 생성
+- 기타 산출물 생성
 - Gantt 드래그 앤 드롭 일정 조정
 - 자동 일정 재계산, 리소스 제약, Critical Path
 - 외부 API 연동

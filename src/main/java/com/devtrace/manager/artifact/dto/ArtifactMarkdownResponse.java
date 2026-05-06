@@ -11,6 +11,11 @@ public class ArtifactMarkdownResponse {
     private int vcsLogCount;
     private int estimatedMinutes;
     private int spentMinutes;
+    private int testCount;
+    private int successCount;
+    private int failCount;
+    private int blockedCount;
+    private int screenshotCount;
 
     public ArtifactMarkdownResponse(String fileName, String content) {
         this.fileName = fileName;
@@ -95,12 +100,59 @@ public class ArtifactMarkdownResponse {
         this.spentMinutes = spentMinutes;
     }
 
+    public int getTestCount() {
+        return testCount;
+    }
+
+    public void setTestCount(int testCount) {
+        this.testCount = testCount;
+    }
+
+    public int getSuccessCount() {
+        return successCount;
+    }
+
+    public void setSuccessCount(int successCount) {
+        this.successCount = successCount;
+    }
+
+    public int getFailCount() {
+        return failCount;
+    }
+
+    public void setFailCount(int failCount) {
+        this.failCount = failCount;
+    }
+
+    public int getBlockedCount() {
+        return blockedCount;
+    }
+
+    public void setBlockedCount(int blockedCount) {
+        this.blockedCount = blockedCount;
+    }
+
+    public int getScreenshotCount() {
+        return screenshotCount;
+    }
+
+    public void setScreenshotCount(int screenshotCount) {
+        this.screenshotCount = screenshotCount;
+    }
+
     public String getEstimatedHoursText() {
         return formatHours(estimatedMinutes);
     }
 
     public String getSpentHoursText() {
         return formatHours(spentMinutes);
+    }
+
+    public String getSuccessRateText() {
+        if (testCount == 0) {
+            return "0.0%";
+        }
+        return String.format(Locale.ROOT, "%.1f%%", successCount * 100.0 / testCount);
     }
 
     private String formatHours(int minutes) {

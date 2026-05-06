@@ -82,13 +82,14 @@ svg {
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: 268px;
-    padding: 18px 14px;
+    width: 232px;
+    padding: 16px 12px;
     border: 1px solid rgba(215, 205, 190, 0.78);
     border-radius: 8px;
     background: rgba(255, 253, 248, 0.72);
     box-shadow: 8px 0 26px rgba(71, 51, 24, 0.08);
     backdrop-filter: blur(14px);
+    transition: width 0.18s ease;
 }
 
 .dt-brand {
@@ -97,7 +98,7 @@ svg {
     gap: 8px;
     height: 36px;
     color: #101820;
-    margin: 0 8px 38px;
+    margin: 0 8px 20px;
 }
 
 .dt-brand-symbol {
@@ -134,7 +135,7 @@ svg {
 }
 
 .dt-brand-text {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
     white-space: nowrap;
 }
@@ -145,18 +146,33 @@ svg {
 
 .dt-nav-list {
     display: grid;
-    gap: 16px;
+    gap: 14px;
+    padding-bottom: 62px;
+}
+
+.dt-nav-group {
+    display: grid;
+    gap: 6px;
+}
+
+.dt-nav-label {
+    padding: 0 14px;
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .dt-nav-item {
     display: flex;
     align-items: center;
-    gap: 18px;
-    height: 48px;
-    padding: 0 18px;
+    gap: 12px;
+    height: 42px;
+    padding: 0 14px;
     border-radius: 6px;
     color: #1d252d;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
 }
 
@@ -181,12 +197,12 @@ svg {
     position: absolute;
     left: 16px;
     right: 16px;
-    bottom: 18px;
+    bottom: 14px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    height: 52px;
-    padding: 0 22px;
+    gap: 12px;
+    height: 44px;
+    padding: 0 14px;
     border-top: 1px solid var(--dt-line);
     color: #1d252d;
     background: transparent;
@@ -198,7 +214,7 @@ svg {
     z-index: 18;
     top: 6px;
     right: 7px;
-    left: 275px;
+    left: 239px;
     height: 61px;
     display: flex;
     align-items: center;
@@ -274,11 +290,56 @@ svg {
     height: 18px;
 }
 
+.dt-chrome.is-compact .dt-sidebar {
+    width: 76px;
+    padding: 16px 10px;
+}
+
+.dt-chrome.is-compact .dt-brand {
+    justify-content: center;
+    margin-inline: 0;
+}
+
+.dt-chrome.is-compact .dt-brand-text,
+.dt-chrome.is-compact .dt-nav-label,
+.dt-chrome.is-compact .dt-nav-text,
+.dt-chrome.is-compact .dt-collapse span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.dt-chrome.is-compact .dt-nav-item,
+.dt-chrome.is-compact .dt-collapse {
+    justify-content: center;
+    padding: 0;
+}
+
+.dt-chrome.is-compact .dt-nav-item {
+    gap: 0;
+}
+
+.dt-chrome.is-compact .dt-collapse svg {
+    transform: rotate(180deg);
+}
+
+.dt-chrome.is-compact .dt-topbar {
+    left: 83px;
+}
+
+.dt-chrome.is-compact ~ .dt-content,
+.dt-chrome.is-compact ~ .dt-page {
+    margin-left: 110px;
+    width: calc(100% - 142px);
+}
+
 .dt-content {
     position: relative;
     z-index: 1;
-    margin-left: 302px;
-    width: calc(100% - 334px);
+    margin-left: 266px;
+    width: calc(100% - 298px);
     max-width: 1203px;
     padding-top: 96px;
     padding-bottom: 40px;
@@ -851,9 +912,12 @@ svg {
 }
 
 .dt-widget li strong {
+    min-width: 0;
     margin-left: auto;
     color: #4e5964;
     font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .dot {
@@ -955,8 +1019,8 @@ svg {
 .dt-page {
     position: relative;
     z-index: 1;
-    margin-left: 302px;
-    width: calc(100% - 334px);
+    margin-left: 266px;
+    width: calc(100% - 298px);
     max-width: 1203px;
     padding-top: 96px;
     padding-bottom: 40px;
@@ -1283,6 +1347,78 @@ svg {
     font-weight: 900;
 }
 
+.dt-artifact-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.dt-artifact-catalog article {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 96px;
+    padding: 16px;
+    border: 1px solid #d7cdbd;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.74);
+    box-shadow: 0 8px 22px rgba(62, 45, 25, 0.04);
+}
+
+.dt-artifact-catalog span {
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.dt-artifact-catalog strong {
+    display: block;
+    margin-top: 8px;
+    color: #161f27;
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.35;
+}
+
+.dt-artifact-catalog small,
+.dt-artifact-format {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid #f6d88e;
+    border-radius: 6px;
+    color: #d17400;
+    background: #fff0c7;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.dt-artifact-catalog .is-ready small,
+.dt-artifact-format {
+    color: #00816f;
+    background: #ccefe9;
+    border-color: #a7dfd5;
+}
+
+.dt-artifact-format.excel {
+    color: #0968be;
+    background: #d8eaff;
+    border-color: #bdd8f7;
+}
+
+.dt-artifact-format-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .dt-form-alert {
     margin-bottom: 18px;
     padding: 13px 15px;
@@ -1400,8 +1536,23 @@ svg {
     margin-bottom: 14px;
 }
 
+.dt-artifact-form {
+    margin-bottom: 8px;
+}
+
+.dt-artifact-form.is-active {
+    padding-left: 14px;
+    border-left: 3px solid var(--dt-teal);
+}
+
+.dt-artifact-divider {
+    height: 1px;
+    margin: 28px 0;
+    background: var(--dt-line-soft);
+}
+
 .dt-artifact-table {
-    min-width: 980px;
+    min-width: 1060px;
 }
 
 .dt-artifact-table th:nth-child(1),
@@ -1411,8 +1562,6 @@ svg {
 
 .dt-artifact-table th:nth-child(2),
 .dt-artifact-table td:nth-child(2),
-.dt-artifact-table th:nth-child(4),
-.dt-artifact-table td:nth-child(4),
 .dt-artifact-table th:nth-child(5),
 .dt-artifact-table td:nth-child(5) {
     width: 190px;
@@ -1420,7 +1569,17 @@ svg {
 
 .dt-artifact-table th:nth-child(3),
 .dt-artifact-table td:nth-child(3) {
+    width: 120px;
+}
+
+.dt-artifact-table th:nth-child(4),
+.dt-artifact-table td:nth-child(4) {
     width: auto;
+}
+
+.dt-artifact-table th:nth-child(6),
+.dt-artifact-table td:nth-child(6) {
+    width: 190px;
 }
 
 .dt-evidence-textarea {
@@ -2131,16 +2290,17 @@ svg {
 
 @media (max-width: 1180px) {
     .dt-sidebar {
-        width: 230px;
+        width: 218px;
     }
 
     .dt-topbar {
-        left: 238px;
+        left: 225px;
     }
 
-    .dt-content {
-        margin-left: 254px;
-        width: calc(100% - 276px);
+    .dt-content,
+    .dt-page {
+        margin-left: 242px;
+        width: calc(100% - 264px);
     }
 
     .dt-metrics {
@@ -2190,6 +2350,11 @@ svg {
         box-shadow: none;
     }
 
+    .dt-chrome.is-compact .dt-sidebar {
+        width: auto;
+        padding: 14px 14px 10px;
+    }
+
     .dt-brand {
         margin: 0 0 14px;
     }
@@ -2205,12 +2370,35 @@ svg {
         padding-bottom: 4px;
     }
 
+    .dt-nav-group {
+        display: contents;
+    }
+
+    .dt-nav-label {
+        display: none;
+    }
+
+    .dt-chrome.is-compact .dt-brand-text,
+    .dt-chrome.is-compact .dt-nav-text {
+        position: static;
+        width: auto;
+        height: auto;
+        overflow: visible;
+        clip: auto;
+    }
+
     .dt-nav-item {
         flex: 0 0 auto;
         height: 42px;
         padding: 0 14px;
         gap: 8px;
         font-size: 14px;
+    }
+
+    .dt-chrome.is-compact .dt-nav-item {
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 0 14px;
     }
 
     .dt-nav-item svg {
@@ -2229,6 +2417,10 @@ svg {
         box-shadow: none;
     }
 
+    .dt-chrome.is-compact .dt-topbar {
+        left: auto;
+    }
+
     .dt-content {
         width: auto;
         max-width: none;
@@ -2241,6 +2433,12 @@ svg {
         max-width: none;
         margin: 0;
         padding: 22px 12px 34px;
+    }
+
+    .dt-chrome.is-compact ~ .dt-content,
+    .dt-chrome.is-compact ~ .dt-page {
+        width: auto;
+        margin: 0;
     }
 
     .dt-hero {
@@ -2270,6 +2468,28 @@ svg {
     .dt-test-evidence-summary,
     .dt-gantt-summary {
         grid-template-columns: 1fr;
+    }
+
+    .dt-artifact-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dt-artifact-format-row {
+        justify-content: flex-start;
+    }
+
+    .dt-artifact-catalog {
+        grid-template-columns: 1fr;
+    }
+
+    .dt-artifact-form .dt-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .dt-artifact-form .dt-button {
+        width: 100%;
     }
 
     .dt-page-head {

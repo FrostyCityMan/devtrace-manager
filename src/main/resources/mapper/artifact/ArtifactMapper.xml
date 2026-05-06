@@ -28,6 +28,21 @@
         <result property="spentMinutes" column="SPENT_MINUTES"/>
     </resultMap>
 
+    <resultMap id="DailyReportIssueResultMap" type="com.devtrace.manager.artifact.dto.DailyReportIssueRow">
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueType" column="ISSUE_TYPE"/>
+        <result property="title" column="TITLE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="resolvedDate" column="RESOLVED_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
     <resultMap id="WeeklyReportWorkLogResultMap" type="com.devtrace.manager.artifact.dto.WeeklyReportWorkLogRow">
         <result property="issueKey" column="ISSUE_KEY"/>
         <result property="issueTitle" column="ISSUE_TITLE"/>
@@ -43,6 +58,26 @@
         <result property="changedAt" column="CHANGED_AT"/>
         <result property="message" column="MESSAGE"/>
         <result property="issueKeyText" column="ISSUE_KEY_TEXT"/>
+    </resultMap>
+
+    <resultMap id="TestResultEvidenceResultMap" type="com.devtrace.manager.artifact.dto.TestResultEvidenceRow">
+        <id property="testEvidenceId" column="TEST_EVIDENCE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueTitle" column="ISSUE_TITLE"/>
+        <result property="testName" column="TEST_NAME"/>
+        <result property="testTarget" column="TEST_TARGET"/>
+        <result property="testProcedure" column="TEST_PROCEDURE"/>
+        <result property="expectedResult" column="EXPECTED_RESULT"/>
+        <result property="actualResult" column="ACTUAL_RESULT"/>
+        <result property="resultStatus" column="RESULT_STATUS"/>
+        <result property="testerName" column="TESTER_NAME"/>
+        <result property="testedAt" column="TESTED_AT"/>
+        <result property="screenshotFileName" column="SCREENSHOT_FILE_NAME"/>
+        <result property="screenshotFilePath" column="SCREENSHOT_FILE_PATH"/>
     </resultMap>
 
     <insert id="insertArtifactHistory" parameterType="com.devtrace.manager.artifact.dto.ArtifactHistoryEntity">
@@ -139,5 +174,91 @@
           AND CAST(L.CHANGED_AT AS DATE) BETWEEN #{startDate} AND #{endDate}
         GROUP BY L.CHANGE_LOG_ID, L.VCS_TYPE, L.REVISION_NO, L.AUTHOR, L.CHANGED_AT, L.MESSAGE
         ORDER BY L.CHANGED_AT ASC NULLS LAST, L.REVISION_NO ASC
+    </select>
+
+    <select id="selectDailyReportIssueList" resultMap="DailyReportIssueResultMap">
+        SELECT
+            ISSUE_KEY,
+            ISSUE_TYPE,
+            TITLE,
+            STATUS,
+            PRIORITY,
+            START_DATE,
+            DUE_DATE,
+            RESOLVED_DATE,
+            ESTIMATED_MINUTES,
+            SPENT_MINUTES,
+            CREATED_AT,
+            UPDATED_AT
+        FROM ISSUE
+        WHERE PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        ORDER BY PRIORITY ASC, DUE_DATE ASC NULLS LAST, CREATED_AT DESC
+    </select>
+
+    <select id="selectDailyReportWorkLogList" resultMap="WeeklyReportWorkLogResultMap">
+        SELECT
+            I.ISSUE_KEY,
+            I.TITLE AS ISSUE_TITLE,
+            W.WORK_DATE,
+            W.WORK_CONTENT,
+            W.SPENT_MINUTES
+        FROM WORK_LOG W
+        INNER JOIN ISSUE I ON W.ISSUE_ID = I.ISSUE_ID
+        WHERE I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND W.WORK_DATE = #{baseDate}
+        ORDER BY I.ISSUE_KEY ASC, W.CREATED_AT ASC
+    </select>
+
+    <select id="selectDailyReportVcsList" resultMap="WeeklyReportVcsResultMap">
+        SELECT
+            L.VCS_TYPE,
+            L.REVISION_NO,
+            L.AUTHOR,
+            L.CHANGED_AT,
+            L.MESSAGE,
+            COALESCE(STRING_AGG(DISTINCT I.ISSUE_KEY, ', ' ORDER BY I.ISSUE_KEY), '') AS ISSUE_KEY_TEXT
+        FROM VCS_CHANGE_LOG L
+        LEFT JOIN ISSUE_CHANGE_LOG_MAP M ON L.CHANGE_LOG_ID = M.CHANGE_LOG_ID
+        LEFT JOIN ISSUE I ON M.ISSUE_ID = I.ISSUE_ID
+        WHERE L.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND CAST(L.CHANGED_AT AS DATE) = #{baseDate}
+        GROUP BY L.CHANGE_LOG_ID, L.VCS_TYPE, L.REVISION_NO, L.AUTHOR, L.CHANGED_AT, L.MESSAGE
+        ORDER BY L.CHANGED_AT ASC NULLS LAST, L.REVISION_NO ASC
+    </select>
+
+    <select id="selectTestResultEvidenceList" resultMap="TestResultEvidenceResultMap">
+        SELECT
+            TE.TEST_EVIDENCE_ID,
+            TE.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            TE.ISSUE_ID,
+            I.ISSUE_KEY,
+            I.TITLE AS ISSUE_TITLE,
+            TE.TEST_NAME,
+            TE.TEST_TARGET,
+            TE.TEST_PROCEDURE,
+            TE.EXPECTED_RESULT,
+            TE.ACTUAL_RESULT,
+            TE.RESULT_STATUS,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS TESTER_NAME,
+            TE.TESTED_AT,
+            TE.SCREENSHOT_FILE_NAME,
+            TE.SCREENSHOT_FILE_PATH
+        FROM TEST_EVIDENCE TE
+        INNER JOIN PROJECT P ON TE.PROJECT_ID = P.PROJECT_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        <where>
+            AND TE.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            AND CAST(TE.TESTED_AT AS DATE) BETWEEN #{startDate} AND #{endDate}
+            <if test="issueId != null">
+                AND TE.ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="resultStatus != null">
+                AND TE.RESULT_STATUS = #{resultStatus}
+            </if>
+        </where>
+        ORDER BY TE.TESTED_AT ASC, I.ISSUE_KEY ASC, TE.TEST_NAME ASC
     </select>
 </mapper>

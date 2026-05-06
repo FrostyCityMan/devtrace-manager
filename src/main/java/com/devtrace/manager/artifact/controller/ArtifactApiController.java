@@ -30,12 +30,22 @@ public class ArtifactApiController {
     }
 
     @PostMapping("/weekly-report/preview")
-    public ApiResponse<ArtifactMarkdownResponse> preview(@Valid @RequestBody ArtifactRequest request) {
+    public ApiResponse<ArtifactMarkdownResponse> previewWeeklyReport(@Valid @RequestBody ArtifactRequest request) {
         return ApiResponse.success("주간 업무보고 미리보기가 생성되었습니다.", artifactService.selectWeeklyReportPreviewDetails(request));
     }
 
     @PostMapping("/weekly-report")
-    public ApiResponse<ArtifactMarkdownResponse> create(@Valid @RequestBody ArtifactRequest request) {
+    public ApiResponse<ArtifactMarkdownResponse> createWeeklyReport(@Valid @RequestBody ArtifactRequest request) {
         return ApiResponse.success("주간 업무보고 산출물이 생성되었습니다.", artifactService.insertWeeklyReportMarkdown(request));
+    }
+
+    @PostMapping("/daily-report/preview")
+    public ApiResponse<ArtifactMarkdownResponse> previewDailyReport(@Valid @RequestBody ArtifactRequest request) {
+        return ApiResponse.success("일일 업무보고 미리보기가 생성되었습니다.", artifactService.selectDailyReportPreviewDetails(request));
+    }
+
+    @PostMapping("/test-result/preview")
+    public ApiResponse<ArtifactMarkdownResponse> previewTestResultReport(@Valid @RequestBody ArtifactRequest request) {
+        return ApiResponse.success("테스트 결과 보고서 미리보기가 생성되었습니다.", artifactService.selectTestResultReportPreviewDetails(request));
     }
 }
