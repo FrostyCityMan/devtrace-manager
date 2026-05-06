@@ -2,7 +2,7 @@
 
 DevTrace Manager는 SI 개발 프로젝트에서 발생하는 프로젝트 관리, 이슈 관리, 작업 공수 관리, 형상관리 로그 관리, 컬럼명세 Excel 생성, 개발 산출물 생성을 통합 지원하기 위한 스탠드얼론 웹 애플리케이션입니다.
 
-현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, WBS 기반 일정 관리 기능입니다.
+현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, WBS 기반 일정 관리 기능, 칸반 보드 기능입니다.
 
 ## 기술 스택
 
@@ -111,10 +111,15 @@ $env:DB_PASSWORD='devtrace'
 - Thymeleaf 기반 WBS Gantt 화면
 - WBS Gantt 지연, 공수 초과, 선행 작업 미완료 위험 표시
 - WbsService 기본 단위 테스트
+- 프로젝트별 칸반 보드 조회
+- REGISTERED, ANALYZING, IN_PROGRESS, DEV_DONE, TESTING, DONE 상태 컬럼 표시
+- 담당자, 우선순위, 키워드 필터
+- 드래그 앤 드롭 기반 이슈 상태 변경 API
+- 지연 이슈 강조 및 WIP 제한 설계 표시
+- BoardService 기본 단위 테스트
 
 ## 아직 구현하지 않은 기능
 
-- 칸반 보드
 - 일일 업무보고 및 기타 산출물 생성
 - 테스트 결과 보고서 Markdown/Excel 생성
 - Gantt 드래그 앤 드롭 일정 조정

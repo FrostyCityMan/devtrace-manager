@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.board.dao.BoardDao">
+
+    <resultMap id="BoardIssueCardResultMap" type="com.devtrace.manager.board.dto.BoardIssueCardResponse">
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="title" column="TITLE"/>
+        <result property="issueType" column="ISSUE_TYPE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <resultMap id="BoardAssigneeResultMap" type="com.devtrace.manager.board.dto.BoardAssigneeResponse">
+        <id property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+    </resultMap>
+
+    <select id="selectBoardIssueCardList" parameterType="com.devtrace.manager.board.dto.BoardSearchCondition" resultMap="BoardIssueCardResultMap">
+        SELECT
+            I.ISSUE_ID,
+            I.PROJECT_ID,
+            P.PROJECT_CODE,
+            P.PROJECT_NAME,
+            I.ISSUE_KEY,
+            I.TITLE,
+            I.ISSUE_TYPE,
+            I.STATUS,
+            I.PRIORITY,
+            I.ASSIGNEE_ID,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME,
+            I.DUE_DATE,
+            I.ESTIMATED_MINUTES,
+            I.SPENT_MINUTES
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        <where>
+            AND I.STATUS IN ('REGISTERED', 'ANALYZING', 'IN_PROGRESS', 'DEV_DONE', 'TESTING', 'DONE')
+            <if test="projectId != null">
+                AND I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="assigneeId != null">
+                AND I.ASSIGNEE_ID = #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="priority != null">
+                AND I.PRIORITY = #{priority}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    I.ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_CODE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY
+            CASE I.STATUS
+                WHEN 'REGISTERED' THEN 1
+                WHEN 'ANALYZING' THEN 2
+                WHEN 'IN_PROGRESS' THEN 3
+                WHEN 'DEV_DONE' THEN 4
+                WHEN 'TESTING' THEN 5
+                WHEN 'DONE' THEN 6
+                ELSE 9
+            END,
+            CASE I.PRIORITY
+                WHEN 'URGENT' THEN 1
+                WHEN 'HIGH' THEN 2
+                WHEN 'NORMAL' THEN 3
+                WHEN 'LOW' THEN 4
+                ELSE 9
+            END,
+            CASE WHEN I.DUE_DATE IS NULL THEN 1 ELSE 0 END,
+            I.DUE_DATE ASC,
+            I.CREATED_AT DESC
+    </select>
+
+    <select id="selectBoardAssigneeList" resultMap="BoardAssigneeResultMap">
+        SELECT DISTINCT
+            U.USER_ID AS ASSIGNEE_ID,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME
+        FROM ISSUE I
+        INNER JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        <where>
+            <if test="projectId != null">
+                AND I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+        </where>
+        ORDER BY ASSIGNEE_NAME ASC
+    </select>
+</mapper>
