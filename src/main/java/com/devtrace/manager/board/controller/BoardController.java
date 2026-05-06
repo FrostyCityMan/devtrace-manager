@@ -7,6 +7,10 @@ import com.devtrace.manager.issue.dto.IssuePriority;
 import com.devtrace.manager.project.dto.ProjectResponse;
 import com.devtrace.manager.project.dto.ProjectSearchCondition;
 import com.devtrace.manager.project.service.ProjectService;
+import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintSearchCondition;
+import com.devtrace.manager.sprint.dto.SprintStatus;
+import com.devtrace.manager.sprint.service.SprintService;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,10 +24,12 @@ public class BoardController {
 
     private final BoardService boardService;
     private final ProjectService projectService;
+    private final SprintService sprintService;
 
-    public BoardController(BoardService boardService, ProjectService projectService) {
+    public BoardController(BoardService boardService, ProjectService projectService, SprintService sprintService) {
         this.boardService = boardService;
         this.projectService = projectService;
+        this.sprintService = sprintService;
     }
 
     @ModelAttribute("priorities")
@@ -44,6 +50,22 @@ public class BoardController {
         model.addAttribute("summary", BoardSummaryResponse.from(columns));
         model.addAttribute("boardStatuses", boardService.selectBoardStatusList());
         model.addAttribute("assignees", boardService.selectBoardAssigneeList(condition.getProjectId()));
+        model.addAttribute("sprints", selectSprintList(condition));
         return "board/kanban";
+    }
+
+    private List<SprintResponse> selectSprintList(BoardSearchCondition condition) {
+        SprintSearchCondition sprintCondition = new SprintSearchCondition();
+        sprintCondition.setProjectId(condition.getProjectId());
+        if (condition.getSprintId() != null) {
+            return sprintService.selectSprintList(sprintCondition);
+        }
+        sprintCondition.setStatus(SprintStatus.ACTIVE);
+        List<SprintResponse> activeSprints = sprintService.selectSprintList(sprintCondition);
+        if (!activeSprints.isEmpty()) {
+            return activeSprints;
+        }
+        sprintCondition.setStatus(null);
+        return sprintService.selectSprintList(sprintCondition);
     }
 }

@@ -6,6 +6,7 @@ import java.util.UUID;
 public class BoardSearchCondition {
 
     private UUID projectId;
+    private UUID sprintId;
     private UUID assigneeId;
     private IssuePriority priority;
     private String keyword;
@@ -16,6 +17,14 @@ public class BoardSearchCondition {
 
     public void setProjectId(UUID projectId) {
         this.projectId = projectId;
+    }
+
+    public UUID getSprintId() {
+        return sprintId;
+    }
+
+    public void setSprintId(UUID sprintId) {
+        this.sprintId = sprintId;
     }
 
     public UUID getAssigneeId() {

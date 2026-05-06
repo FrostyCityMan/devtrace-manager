@@ -14,7 +14,8 @@ import org.springframework.context.annotation.Configuration;
         "com.devtrace.manager.artifact.dao",
         "com.devtrace.manager.testevidence.dao",
         "com.devtrace.manager.wbs.dao",
-        "com.devtrace.manager.dashboard.dao"
+        "com.devtrace.manager.dashboard.dao",
+        "com.devtrace.manager.sprint.dao"
 })
 public class MyBatisConfig {
 }

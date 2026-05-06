@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.sprint.dao.SprintDao">
+
+    <resultMap id="SprintResultMap" type="com.devtrace.manager.sprint.dto.SprintEntity">
+        <id property="sprintId" column="SPRINT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="projectName" column="PROJECT_NAME"/>
+        <result property="sprintName" column="SPRINT_NAME"/>
+        <result property="goal" column="GOAL"/>
+        <result property="status" column="STATUS"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <resultMap id="SprintIssueEntityResultMap" type="com.devtrace.manager.sprint.dto.SprintIssueEntity">
+        <id property="sprintId" column="SPRINT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="displayOrder" column="DISPLAY_ORDER"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <resultMap id="SprintIssueResponseResultMap" type="com.devtrace.manager.sprint.dto.SprintIssueResponse">
+        <id property="sprintId" column="SPRINT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectId" column="PROJECT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="projectCode" column="PROJECT_CODE"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="issueType" column="ISSUE_TYPE"/>
+        <result property="title" column="TITLE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="displayOrder" column="DISPLAY_ORDER"/>
+    </resultMap>
+
+    <resultMap id="SprintSummaryResultMap" type="com.devtrace.manager.sprint.dto.SprintSummaryResponse">
+        <result property="totalIssueCount" column="TOTAL_ISSUE_COUNT"/>
+        <result property="doneIssueCount" column="DONE_ISSUE_COUNT"/>
+        <result property="activeIssueCount" column="ACTIVE_ISSUE_COUNT"/>
+        <result property="delayedIssueCount" column="DELAYED_ISSUE_COUNT"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <sql id="SprintColumns">
+        SPRINT_ID,
+        PROJECT_ID,
+        SPRINT_NAME,
+        GOAL,
+        STATUS,
+        START_DATE,
+        END_DATE,
+        CREATED_AT,
+        UPDATED_AT
+    </sql>
+
+    <sql id="SprintSelectColumns">
+        S.SPRINT_ID,
+        S.PROJECT_ID,
+        P.PROJECT_CODE,
+        P.PROJECT_NAME,
+        S.SPRINT_NAME,
+        S.GOAL,
+        S.STATUS,
+        S.START_DATE,
+        S.END_DATE,
+        S.CREATED_AT,
+        S.UPDATED_AT
+    </sql>
+
+    <sql id="SprintIssueSelectColumns">
+        SI.SPRINT_ID,
+        I.ISSUE_ID,
+        I.PROJECT_ID,
+        P.PROJECT_CODE,
+        I.ISSUE_KEY,
+        I.ISSUE_TYPE,
+        I.TITLE,
+        I.STATUS,
+        I.PRIORITY,
+        I.ASSIGNEE_ID,
+        COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME,
+        I.DUE_DATE,
+        I.ESTIMATED_MINUTES,
+        I.SPENT_MINUTES,
+        SI.DISPLAY_ORDER
+    </sql>
+
+    <insert id="insertSprint" parameterType="com.devtrace.manager.sprint.dto.SprintEntity">
+        INSERT INTO SPRINT (
+            <include refid="SprintColumns"/>
+        ) VALUES (
+            #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{sprintName},
+            #{goal},
+            #{status},
+            #{startDate},
+            #{endDate},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateSprint" parameterType="com.devtrace.manager.sprint.dto.SprintEntity">
+        UPDATE SPRINT
+        SET
+            PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            SPRINT_NAME = #{sprintName},
+            GOAL = #{goal},
+            STATUS = #{status},
+            START_DATE = #{startDate},
+            END_DATE = #{endDate},
+            UPDATED_AT = #{updatedAt}
+        WHERE SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <update id="updateSprintStatus">
+        UPDATE SPRINT
+        SET
+            STATUS = #{status},
+            UPDATED_AT = #{updatedAt}
+        WHERE SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteSprint" parameterType="java.util.UUID">
+        DELETE FROM SPRINT
+        WHERE SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+
+    <select id="selectSprintDetails" parameterType="java.util.UUID" resultMap="SprintResultMap">
+        SELECT
+            <include refid="SprintSelectColumns"/>
+        FROM SPRINT S
+        INNER JOIN PROJECT P ON S.PROJECT_ID = P.PROJECT_ID
+        WHERE S.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectActiveSprintByProjectIdDetails" parameterType="java.util.UUID" resultMap="SprintResultMap">
+        SELECT
+            <include refid="SprintSelectColumns"/>
+        FROM SPRINT S
+        INNER JOIN PROJECT P ON S.PROJECT_ID = P.PROJECT_ID
+        WHERE S.PROJECT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND S.STATUS = 'ACTIVE'
+        ORDER BY S.START_DATE DESC, S.CREATED_AT DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectSprintList" parameterType="com.devtrace.manager.sprint.dto.SprintSearchCondition" resultMap="SprintResultMap">
+        SELECT
+            <include refid="SprintSelectColumns"/>
+        FROM SPRINT S
+        INNER JOIN PROJECT P ON S.PROJECT_ID = P.PROJECT_ID
+        <where>
+            <if test="projectId != null">
+                AND S.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="status != null">
+                AND S.STATUS = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    S.SPRINT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                    OR S.GOAL ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_CODE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY S.START_DATE DESC, S.CREATED_AT DESC
+    </select>
+
+    <select id="selectBacklogIssueList" parameterType="com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition" resultMap="SprintIssueResponseResultMap">
+        SELECT
+            NULL AS SPRINT_ID,
+            I.ISSUE_ID,
+            I.PROJECT_ID,
+            P.PROJECT_CODE,
+            I.ISSUE_KEY,
+            I.ISSUE_TYPE,
+            I.TITLE,
+            I.STATUS,
+            I.PRIORITY,
+            I.ASSIGNEE_ID,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME,
+            I.DUE_DATE,
+            I.ESTIMATED_MINUTES,
+            I.SPENT_MINUTES,
+            0 AS DISPLAY_ORDER
+        FROM ISSUE I
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        <where>
+            AND I.STATUS NOT IN ('DONE', 'CLOSED')
+            AND NOT EXISTS (
+                SELECT 1
+                FROM SPRINT_ISSUE SI
+                WHERE SI.ISSUE_ID = I.ISSUE_ID
+            )
+            <if test="projectId != null">
+                AND I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    I.ISSUE_KEY ILIKE CONCAT('%', #{keyword}, '%')
+                    OR I.TITLE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_CODE ILIKE CONCAT('%', #{keyword}, '%')
+                    OR P.PROJECT_NAME ILIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY
+            CASE I.PRIORITY
+                WHEN 'URGENT' THEN 1
+                WHEN 'HIGH' THEN 2
+                WHEN 'NORMAL' THEN 3
+                WHEN 'LOW' THEN 4
+                ELSE 9
+            END,
+            CASE WHEN I.DUE_DATE IS NULL THEN 1 ELSE 0 END,
+            I.DUE_DATE ASC,
+            I.CREATED_AT DESC
+    </select>
+
+    <select id="selectSprintIssueList" parameterType="java.util.UUID" resultMap="SprintIssueResponseResultMap">
+        SELECT
+            <include refid="SprintIssueSelectColumns"/>
+        FROM SPRINT_ISSUE SI
+        INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+        INNER JOIN PROJECT P ON I.PROJECT_ID = P.PROJECT_ID
+        LEFT JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        WHERE SI.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        ORDER BY SI.DISPLAY_ORDER ASC, I.CREATED_AT DESC
+    </select>
+
+    <select id="selectSprintIssueDetails" resultMap="SprintIssueEntityResultMap">
+        SELECT
+            SPRINT_ID,
+            ISSUE_ID,
+            DISPLAY_ORDER,
+            CREATED_AT
+        FROM SPRINT_ISSUE
+        WHERE SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectSprintIssueMaxDisplayOrder" parameterType="java.util.UUID" resultType="int">
+        SELECT COALESCE(MAX(DISPLAY_ORDER), 0)
+        FROM SPRINT_ISSUE
+        WHERE SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectSprintSummaryDetails" resultMap="SprintSummaryResultMap">
+        SELECT
+            COUNT(*) AS TOTAL_ISSUE_COUNT,
+            COALESCE(SUM(CASE WHEN I.STATUS IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END), 0) AS DONE_ISSUE_COUNT,
+            COALESCE(SUM(CASE WHEN I.STATUS IN ('ANALYZING', 'IN_PROGRESS', 'DEV_DONE', 'REVIEWING', 'TESTING') THEN 1 ELSE 0 END), 0) AS ACTIVE_ISSUE_COUNT,
+            COALESCE(SUM(CASE WHEN I.DUE_DATE &lt; #{today} AND I.STATUS NOT IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END), 0) AS DELAYED_ISSUE_COUNT,
+            COALESCE(SUM(COALESCE(I.ESTIMATED_MINUTES, 0)), 0) AS ESTIMATED_MINUTES,
+            COALESCE(SUM(COALESCE(I.SPENT_MINUTES, 0)), 0) AS SPENT_MINUTES
+        FROM SPRINT_ISSUE SI
+        INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+        WHERE SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <insert id="insertSprintIssue" parameterType="com.devtrace.manager.sprint.dto.SprintIssueEntity">
+        INSERT INTO SPRINT_ISSUE (
+            SPRINT_ID,
+            ISSUE_ID,
+            DISPLAY_ORDER,
+            CREATED_AT
+        ) VALUES (
+            #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{displayOrder},
+            #{createdAt}
+        )
+    </insert>
+
+    <update id="updateSprintIssueDisplayOrder">
+        UPDATE SPRINT_ISSUE
+        SET DISPLAY_ORDER = #{displayOrder}
+        WHERE SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </update>
+
+    <delete id="deleteSprintIssue">
+        DELETE FROM SPRINT_ISSUE
+        WHERE SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND ISSUE_ID = #{issueId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </delete>
+</mapper>

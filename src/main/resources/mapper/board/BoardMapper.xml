@@ -51,6 +51,14 @@
             <if test="projectId != null">
                 AND I.PROJECT_ID = #{projectId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
             </if>
+            <if test="sprintId != null">
+                AND EXISTS (
+                    SELECT 1
+                    FROM SPRINT_ISSUE SI
+                    WHERE SI.ISSUE_ID = I.ISSUE_ID
+                      AND SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+                )
+            </if>
             <if test="assigneeId != null">
                 AND I.ASSIGNEE_ID = #{assigneeId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
             </if>

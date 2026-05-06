@@ -42,6 +42,15 @@
             </select>
         </label>
         <label class="dt-select-box">
+            <select name="sprintId">
+                <option value="">전체 스프린트</option>
+                <option th:each="sprint : ${sprints}"
+                        th:value="${sprint.sprintId}"
+                        th:selected="${condition.sprintId != null and condition.sprintId.equals(sprint.sprintId)}"
+                        th:text="${sprint.sprintName}"></option>
+            </select>
+        </label>
+        <label class="dt-select-box">
             <select name="priority">
                 <option value="">전체 우선순위</option>
                 <option th:each="priority : ${priorities}"

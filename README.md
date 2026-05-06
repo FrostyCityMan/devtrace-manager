@@ -2,7 +2,7 @@
 
 DevTrace Manager는 SI 개발 프로젝트에서 발생하는 프로젝트 관리, 이슈 관리, 작업 공수 관리, 형상관리 로그 관리, 컬럼명세 Excel 생성, 개발 산출물 생성을 통합 지원하기 위한 스탠드얼론 웹 애플리케이션입니다.
 
-현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간/일일 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, 테스트 결과 보고서 Markdown/Excel 생성 기능, WBS 기반 일정 관리 기능, 칸반 보드 기능, 통합 운영 대시보드입니다.
+현재 구축 범위는 Spring Boot 기본 골격, 프로젝트 관리 기능, 이슈 관리 CRUD 기능, 작업 공수 관리 기능, 컬럼명세 Excel 생성 기능, Git/SVN 변경이력 Excel 생성 기능, 주간/일일 업무보고 Markdown 생성 기능, 테스트 증적 관리 기능, 테스트 결과 보고서 Markdown/Excel 생성 기능, WBS 기반 일정 관리 기능, 칸반 보드 기능, 통합 운영 대시보드, 백로그·스프린트 관리 기능입니다.
 
 ## 기술 스택
 
@@ -127,16 +127,23 @@ $env:DB_PASSWORD='devtrace'
 - 핵심 지표, 오늘의 주의 항목, 프로젝트 건강도, 업무 흐름, 빠른 실행 영역
 - Dashboard 전용 DTO, DAO, Service, MyBatis Mapper
 - DashboardService 기본 단위 테스트
+- SPRINT, SPRINT_ISSUE 테이블 Flyway 마이그레이션
+- 프로젝트별 백로그 이슈 조회
+- 스프린트 생성, 수정, 시작, 종료, 삭제
+- 백로그 이슈의 스프린트 배정 및 제외
+- 스프린트 진행률, 지연, 예상/실제 공수 요약
+- 칸반 보드 스프린트 필터
+- SprintService 기본 단위 테스트
 
 ## 아직 구현하지 않은 기능
 
 - 기타 산출물 생성
 - Gantt 드래그 앤 드롭 일정 조정
 - 자동 일정 재계산, 리소스 제약, Critical Path
+- Burndown Chart
 - 외부 API 연동
 - React 전환
 - JPA 전환
 - 결제 기능
 - 메일/Slack 알림
 - Gantt Chart
-- Sprint 기능

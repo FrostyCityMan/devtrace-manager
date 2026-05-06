@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('백로그·스프린트')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-content dt-sprint-page">
+    <section class="dt-page-head">
+        <div>
+            <h1>백로그·스프린트</h1>
+            <p class="dt-page-desc">이번 기간에 실행할 이슈를 계획하고 칸반 실행 흐름으로 넘깁니다.</p>
+        </div>
+        <a th:href="@{/boards(projectId=${condition.projectId},sprintId=${selectedSprintId})}" class="dt-primary-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v7h-6zM14 16h6v3h-6z"/></svg>
+            칸반 보기
+        </a>
+    </section>
+
+    <form th:action="@{/sprints}" method="get" class="dt-toolbar dt-sprint-toolbar" aria-label="스프린트 필터">
+        <label class="dt-search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
+            <input type="search" name="keyword" th:value="${condition.keyword}" placeholder="스프린트, 목표, 이슈">
+        </label>
+        <label class="dt-select-box">
+            <select name="projectId">
+                <option value="">전체 프로젝트</option>
+                <option th:each="project : ${projects}"
+                        th:value="${project.projectId}"
+                        th:selected="${condition.projectId != null and condition.projectId.equals(project.projectId)}"
+                        th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+            </select>
+        </label>
+        <label class="dt-select-box">
+            <select name="status">
+                <option value="">전체 상태</option>
+                <option th:each="status : ${statuses}"
+                        th:value="${status}"
+                        th:selected="${condition.status == status}"
+                        th:text="${status.label}"></option>
+            </select>
+        </label>
+        <button type="submit" class="dt-filter-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4M8 6v3M16 12v3"/></svg>
+            조회
+        </button>
+        <a th:href="@{/sprints}" class="dt-reset-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6"/></svg>
+            초기화
+        </a>
+    </form>
+
+    <section class="dt-sprint-summary" aria-label="스프린트 요약">
+        <article>
+            <span>스프린트 이슈</span>
+            <strong th:text="${summary.totalIssueCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>진행률</span>
+            <strong th:text="${summary.progressRate}">0</strong>
+            <small>%</small>
+        </article>
+        <article>
+            <span>진행 중</span>
+            <strong th:text="${summary.activeIssueCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>지연</span>
+            <strong th:text="${summary.delayedIssueCount}">0</strong>
+            <small>건</small>
+        </article>
+        <article>
+            <span>공수</span>
+            <strong th:text="${summary.spentHoursLabel}">0h</strong>
+            <small th:text="${'예상 ' + summary.estimatedHoursLabel}">예상 0h</small>
+        </article>
+    </section>
+
+    <section class="dt-sprint-admin-grid" aria-label="스프린트 관리">
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>스프린트 생성</h2>
+            </header>
+            <form th:action="@{/sprints}" method="post" th:object="${newSprint}" class="dt-sprint-form">
+                <label>
+                    <span>프로젝트</span>
+                    <select th:field="*{projectId}" required>
+                        <option value="">프로젝트 선택</option>
+                        <option th:each="project : ${projects}"
+                                th:value="${project.projectId}"
+                                th:text="${project.projectCode + ' - ' + project.projectName}"></option>
+                    </select>
+                    <div class="dt-error" th:errors="*{projectId}"></div>
+                </label>
+                <label>
+                    <span>스프린트명</span>
+                    <input type="text" th:field="*{sprintName}" placeholder="예: 2026년 5월 1차 스프린트" required>
+                    <div class="dt-error" th:errors="*{sprintName}"></div>
+                </label>
+                <label>
+                    <span>목표</span>
+                    <textarea th:field="*{goal}" rows="3" placeholder="이번 기간의 핵심 목표"></textarea>
+                </label>
+                <div class="dt-sprint-date-row">
+                    <label>
+                        <span>시작일</span>
+                        <input type="date" th:field="*{startDate}" required>
+                        <div class="dt-error" th:errors="*{startDate}"></div>
+                    </label>
+                    <label>
+                        <span>종료일</span>
+                        <input type="date" th:field="*{endDate}" required>
+                        <div class="dt-error" th:errors="*{endDate}"></div>
+                    </label>
+                </div>
+                <input type="hidden" th:field="*{status}">
+                <button type="submit" class="dt-button primary">생성</button>
+            </form>
+        </article>
+
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>스프린트 목록</h2>
+            </header>
+            <ul class="dt-sprint-list">
+                <li th:if="${#lists.isEmpty(sprints)}" class="dt-sprint-empty">등록된 스프린트가 없습니다.</li>
+                <li th:each="sprint : ${sprints}" th:classappend="${selectedSprintId != null and selectedSprintId.equals(sprint.sprintId) ? ' active' : ''}">
+                    <a th:href="@{/sprints(projectId=${sprint.projectId},sprintId=${sprint.sprintId},status=${condition.status},keyword=${condition.keyword})}">
+                        <strong th:text="${sprint.sprintName}" th:title="${sprint.sprintName}">스프린트명</strong>
+                        <span th:text="${sprint.startDate + ' ~ ' + sprint.endDate}">2026-05-01 ~ 2026-05-14</span>
+                    </a>
+                    <em th:classappend="${' ' + sprint.statusCssClass}" th:text="${sprint.statusLabel}">계획</em>
+                </li>
+            </ul>
+        </article>
+    </section>
+
+    <section class="dt-sprint-layout" aria-label="백로그와 스프린트 이슈">
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>백로그</h2>
+                <span th:text="${#lists.size(backlogIssues) + '건'}">0건</span>
+            </header>
+            <div class="dt-sprint-card-list">
+                <div th:if="${#lists.isEmpty(backlogIssues)}" class="dt-sprint-empty">배정 가능한 백로그 이슈가 없습니다.</div>
+                <article th:each="issue : ${backlogIssues}" class="dt-sprint-issue-card" th:classappend="${issue.delayed ? ' delayed' : ''}">
+                    <div class="dt-sprint-card-head">
+                        <strong th:text="${issue.issueKey}">DTR-101</strong>
+                        <span class="dt-chip" th:classappend="${' ' + issue.priorityCssClass}" th:text="${issue.priorityLabel}">보통</span>
+                    </div>
+                    <h3 th:text="${issue.title}" th:title="${issue.title}">이슈 제목</h3>
+                    <div class="dt-sprint-card-meta">
+                        <span th:text="${issue.assigneeDisplayName}">담당자</span>
+                        <span th:text="${issue.dueDate == null ? '예정일 없음' : issue.dueDate}">2026-05-06</span>
+                    </div>
+                    <div class="dt-sprint-card-foot">
+                        <span th:text="${issue.spentHoursLabel + ' / ' + issue.estimatedHoursLabel}">0h / 0h</span>
+                        <form th:if="${selectedSprint != null and selectedSprint.status.name() != 'CLOSED'}"
+                              th:action="@{/sprints/{sprintId}/issues(sprintId=${selectedSprint.sprintId})}"
+                              method="post">
+                            <input type="hidden" name="issueId" th:value="${issue.issueId}">
+                            <button type="submit" class="dt-action">배정</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </article>
+
+        <article class="dt-sprint-panel">
+            <header>
+                <div>
+                    <h2 th:text="${selectedSprint == null ? '선택된 스프린트 없음' : selectedSprint.sprintName}"
+                        th:title="${selectedSprint == null ? '' : selectedSprint.sprintName}">선택 스프린트</h2>
+                    <p th:if="${selectedSprint != null}"
+                       th:text="${selectedSprint.goal == null or selectedSprint.goal.isBlank() ? '목표 미입력' : selectedSprint.goal}"
+                       th:title="${selectedSprint.goal}">목표</p>
+                </div>
+                <span th:if="${selectedSprint != null}" class="dt-chip" th:classappend="${' ' + selectedSprint.statusCssClass}" th:text="${selectedSprint.statusLabel}">계획</span>
+            </header>
+
+            <div th:if="${selectedSprint != null}" class="dt-sprint-selected-actions">
+                <form th:if="${selectedSprint.status.name() == 'PLANNED'}" th:action="@{/sprints/{sprintId}/start(sprintId=${selectedSprint.sprintId})}" method="post">
+                    <button type="submit" class="dt-action">시작</button>
+                </form>
+                <form th:if="${selectedSprint.status.name() != 'CLOSED'}" th:action="@{/sprints/{sprintId}/close(sprintId=${selectedSprint.sprintId})}" method="post">
+                    <button type="submit" class="dt-action">종료</button>
+                </form>
+                <form th:action="@{/sprints/{sprintId}/delete(sprintId=${selectedSprint.sprintId})}" method="post">
+                    <button type="submit" class="dt-action danger">삭제</button>
+                </form>
+            </div>
+
+            <form th:if="${selectedSprint != null}" th:action="@{/sprints/{sprintId}(sprintId=${selectedSprint.sprintId})}" method="post" th:object="${selectedSprintRequest}" class="dt-sprint-form compact">
+                <input type="hidden" th:field="*{projectId}">
+                <div class="dt-sprint-date-row">
+                    <label>
+                        <span>스프린트명</span>
+                        <input type="text" th:field="*{sprintName}" required>
+                        <div class="dt-error" th:errors="*{sprintName}"></div>
+                    </label>
+                    <label>
+                        <span>상태</span>
+                        <select th:field="*{status}">
+                            <option th:each="status : ${statuses}" th:value="${status}" th:text="${status.label}"></option>
+                        </select>
+                    </label>
+                </div>
+                <label>
+                    <span>목표</span>
+                    <textarea th:field="*{goal}" rows="2"></textarea>
+                </label>
+                <div class="dt-sprint-date-row">
+                    <label>
+                        <span>시작일</span>
+                        <input type="date" th:field="*{startDate}" required>
+                        <div class="dt-error" th:errors="*{startDate}"></div>
+                    </label>
+                    <label>
+                        <span>종료일</span>
+                        <input type="date" th:field="*{endDate}" required>
+                        <div class="dt-error" th:errors="*{endDate}"></div>
+                    </label>
+                </div>
+                <button type="submit" class="dt-button">수정</button>
+            </form>
+
+            <div class="dt-sprint-card-list selected">
+                <div th:if="${selectedSprint == null}" class="dt-sprint-empty">프로젝트와 스프린트를 선택하십시오.</div>
+                <div th:if="${selectedSprint != null and #lists.isEmpty(sprintIssues)}" class="dt-sprint-empty">스프린트에 배정된 이슈가 없습니다.</div>
+                <article th:each="issue : ${sprintIssues}" class="dt-sprint-issue-card" th:classappend="${issue.delayed ? ' delayed' : ''}">
+                    <div class="dt-sprint-card-head">
+                        <strong th:text="${issue.displayOrder + '. ' + issue.issueKey}">1. DTR-101</strong>
+                        <span class="dt-chip" th:classappend="${' ' + issue.statusCssClass}" th:text="${issue.statusLabel}">진행 중</span>
+                    </div>
+                    <h3 th:text="${issue.title}" th:title="${issue.title}">이슈 제목</h3>
+                    <div class="dt-sprint-card-meta">
+                        <span th:text="${issue.assigneeDisplayName}">담당자</span>
+                        <span th:text="${issue.spentHoursLabel + ' / ' + issue.estimatedHoursLabel}">0h / 0h</span>
+                    </div>
+                    <div class="dt-sprint-card-foot">
+                        <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}" class="dt-action">상세</a>
+                        <form th:if="${selectedSprint.status.name() != 'CLOSED'}"
+                              th:action="@{/sprints/{sprintId}/issues/{issueId}/delete(sprintId=${selectedSprint.sprintId},issueId=${issue.issueId})}"
+                              method="post">
+                            <button type="submit" class="dt-action danger">제외</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>
