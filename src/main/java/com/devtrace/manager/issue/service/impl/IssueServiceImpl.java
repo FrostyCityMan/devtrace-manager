@@ -16,6 +16,11 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 이슈 관리 업무 규칙을 구현합니다.
+ *
+ * <p>이슈 키 생성, 프로젝트 정합성 검증, 상태 변경, 완료일 보정 로직을 담당합니다.</p>
+ */
 @Service
 @Transactional(readOnly = true)
 public class IssueServiceImpl implements IssueService {
@@ -23,11 +28,25 @@ public class IssueServiceImpl implements IssueService {
     private final IssueDao issueDao;
     private final ProjectDao projectDao;
 
+    /**
+     * 이슈 서비스 구현체를 생성한다.
+     *
+     * @param issueDao 이슈 SQL 호출 DAO
+     * @param projectDao 프로젝트 존재 검증 DAO
+     */
     public IssueServiceImpl(IssueDao issueDao, ProjectDao projectDao) {
         this.issueDao = issueDao;
         this.projectDao = projectDao;
     }
 
+    /**
+     * 이슈를 등록한다.
+     *
+     * <p>프로젝트 존재 여부를 검증하고, 실제 공수는 작업 공수 합산 대상이므로 0분으로 시작한다.</p>
+     *
+     * @param request 이슈 등록 요청
+     * @return 등록된 이슈 응답
+     */
     @Override
     @Transactional
     public IssueResponse insertIssue(IssueRequest request) {
@@ -44,6 +63,16 @@ public class IssueServiceImpl implements IssueService {
         return issue.toResponse();
     }
 
+    /**
+     * 이슈 기본 정보를 수정한다.
+     *
+     * <p>프로젝트 정합성을 확인한 뒤 요청 값을 반영한다. 실제 공수는 WorkLog 합계로 관리하므로
+     * 이 수정 흐름에서 직접 변경하지 않는다.</p>
+     *
+     * @param issueId 수정 대상 이슈 ID
+     * @param request 이슈 수정 요청
+     * @return 수정된 이슈 응답
+     */
     @Override
     @Transactional
     public IssueResponse updateIssue(UUID issueId, IssueRequest request) {
@@ -57,6 +86,15 @@ public class IssueServiceImpl implements IssueService {
         return issue.toResponse();
     }
 
+    /**
+     * 이슈 상태를 변경한다.
+     *
+     * <p>완료 계열 상태로 전환하면서 실제 완료일이 비어 있으면 현재일로 보정한다.</p>
+     *
+     * @param issueId 상태 변경 대상 이슈 ID
+     * @param status 변경할 상태
+     * @return 상태 변경 후 이슈 응답
+     */
     @Override
     @Transactional
     public IssueResponse updateIssueStatus(UUID issueId, IssueStatus status) {
@@ -76,6 +114,11 @@ public class IssueServiceImpl implements IssueService {
         return issue.toResponse();
     }
 
+    /**
+     * 이슈를 삭제한다.
+     *
+     * @param issueId 삭제 대상 이슈 ID
+     */
     @Override
     @Transactional
     public void deleteIssue(UUID issueId) {
@@ -83,11 +126,23 @@ public class IssueServiceImpl implements IssueService {
         issueDao.deleteIssue(issue.getIssueId());
     }
 
+    /**
+     * 이슈 상세 정보를 조회한다.
+     *
+     * @param issueId 조회 대상 이슈 ID
+     * @return 이슈 상세 응답
+     */
     @Override
     public IssueResponse selectIssueDetails(UUID issueId) {
         return selectIssueEntityDetails(issueId).toResponse();
     }
 
+    /**
+     * 검색 조건에 맞는 이슈 목록을 조회한다.
+     *
+     * @param condition 이슈 검색 조건
+     * @return 이슈 목록
+     */
     @Override
     public List<IssueResponse> selectIssueList(IssueSearchCondition condition) {
         return issueDao.selectIssueList(condition).stream()
@@ -95,16 +150,35 @@ public class IssueServiceImpl implements IssueService {
                 .toList();
     }
 
+    /**
+     * 이슈 엔티티를 조회하고 없으면 업무 예외를 발생시킨다.
+     *
+     * @param issueId 조회 대상 이슈 ID
+     * @return 이슈 엔티티
+     */
     private IssueEntity selectIssueEntityDetails(UUID issueId) {
         return issueDao.selectIssueByIdDetails(issueId)
                 .orElseThrow(() -> new BusinessException("이슈를 찾을 수 없습니다.", "ISSUE_NOT_FOUND"));
     }
 
+    /**
+     * 이슈가 속할 프로젝트의 존재 여부를 검증한다.
+     *
+     * @param projectId 프로젝트 ID
+     */
     private void validateProject(UUID projectId) {
         projectDao.selectProjectById(projectId)
                 .orElseThrow(() -> new BusinessException("프로젝트를 찾을 수 없습니다.", "PROJECT_NOT_FOUND"));
     }
 
+    /**
+     * 요청 DTO의 값을 이슈 엔티티에 반영한다.
+     *
+     * <p>예상 공수가 비어 있으면 0분으로 보정한다.</p>
+     *
+     * @param issue 값이 반영될 이슈 엔티티
+     * @param request 사용자 요청 DTO
+     */
     private void applyRequest(IssueEntity issue, IssueRequest request) {
         issue.setProjectId(request.getProjectId());
         issue.setIssueKey(request.getIssueKey());

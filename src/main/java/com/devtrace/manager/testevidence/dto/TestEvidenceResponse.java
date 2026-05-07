@@ -26,6 +26,11 @@ public class TestEvidenceResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 테스트 증적 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return 테스트 증적 수정 요청 DTO
+     */
     public TestEvidenceRequest toRequest() {
         TestEvidenceRequest request = new TestEvidenceRequest();
         request.setProjectId(projectId);

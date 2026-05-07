@@ -17,6 +17,11 @@ public class ProjectEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 프로젝트 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 프로젝트 응답 DTO
+     */
     public ProjectResponse toResponse() {
         ProjectResponse response = new ProjectResponse();
         response.setProjectId(projectId);

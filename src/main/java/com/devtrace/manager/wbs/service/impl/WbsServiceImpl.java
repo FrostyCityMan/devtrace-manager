@@ -31,6 +31,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * WBS 작업과 Gantt 조회 업무 규칙을 구현합니다.
+ *
+ * <p>작업 등록 시 WBS 코드를 계층 기준으로 생성하고, 이슈 연결 시 실제 공수는
+ * 이슈의 누적 공수를 기준으로 반영합니다. Gantt 조회에서는 부모 작업 집계,
+ * 지연/공수초과/선행작업 미완료 위험, 타임라인 표시 비율을 계산합니다.</p>
+ */
 @Service
 @Transactional(readOnly = true)
 public class WbsServiceImpl implements WbsService {
@@ -39,12 +46,22 @@ public class WbsServiceImpl implements WbsService {
     private final ProjectDao projectDao;
     private final IssueDao issueDao;
 
+    /**
+     * WBS 서비스 구현체를 생성합니다.
+     *
+     * @param wbsDao WBS DAO
+     * @param projectDao 프로젝트 검증 DAO
+     * @param issueDao 이슈 검증 DAO
+     */
     public WbsServiceImpl(WbsDao wbsDao, ProjectDao projectDao, IssueDao issueDao) {
         this.wbsDao = wbsDao;
         this.projectDao = projectDao;
         this.issueDao = issueDao;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public WbsTaskResponse insertWbsTask(WbsTaskRequest request) {
@@ -65,6 +82,9 @@ public class WbsServiceImpl implements WbsService {
         return task.toResponse();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public WbsTaskResponse updateWbsTask(UUID wbsTaskId, WbsTaskRequest request) {
@@ -81,6 +101,9 @@ public class WbsServiceImpl implements WbsService {
         return task.toResponse();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void deleteWbsTask(UUID wbsTaskId) {
@@ -92,11 +115,17 @@ public class WbsServiceImpl implements WbsService {
         wbsDao.deleteWbsTask(task.getWbsTaskId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public WbsTaskResponse selectWbsTaskDetails(UUID wbsTaskId) {
         return selectWbsTaskEntity(wbsTaskId).toResponse();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<WbsTaskResponse> selectWbsTaskList(WbsTaskSearchCondition condition) {
         WbsTaskSearchCondition safeCondition = condition == null ? new WbsTaskSearchCondition() : condition;
@@ -105,6 +134,9 @@ public class WbsServiceImpl implements WbsService {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public WbsTaskDependencyResponse insertWbsTaskDependency(WbsTaskDependencyRequest request) {
@@ -125,12 +157,18 @@ public class WbsServiceImpl implements WbsService {
         return dependency.toResponse();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void deleteWbsTaskDependency(UUID dependencyId) {
         wbsDao.deleteWbsTaskDependency(dependencyId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<WbsTaskDependencyResponse> selectWbsTaskDependencyList(WbsTaskDependencySearchCondition condition) {
         WbsTaskDependencySearchCondition safeCondition = condition == null ? new WbsTaskDependencySearchCondition() : condition;
@@ -139,6 +177,9 @@ public class WbsServiceImpl implements WbsService {
                 .toList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public WbsGanttResponse selectWbsGanttDetails(UUID projectId) {
         validateProject(projectId);
@@ -157,6 +198,11 @@ public class WbsServiceImpl implements WbsService {
         return createGanttResponse(projectId, tasks);
     }
 
+    /**
+     * WBS 작업 등록/수정 요청의 필수 조건과 계획 기간을 검증합니다.
+     *
+     * @param request 검증 대상 요청
+     */
     private void validateTaskRequest(WbsTaskRequest request) {
         if (request == null || request.getProjectId() == null) {
             throw new BusinessException("WBS 작업 요청이 올바르지 않습니다.", "WBS_TASK_REQUEST_INVALID");
@@ -167,11 +213,22 @@ public class WbsServiceImpl implements WbsService {
         }
     }
 
+    /**
+     * 프로젝트 존재 여부를 검증합니다.
+     *
+     * @param projectId 프로젝트 ID
+     */
     private void validateProject(UUID projectId) {
         projectDao.selectProjectById(projectId)
                 .orElseThrow(() -> new BusinessException("프로젝트를 찾을 수 없습니다.", "PROJECT_NOT_FOUND"));
     }
 
+    /**
+     * 상위 WBS 작업을 조회하고 동일 프로젝트 소속인지 검증합니다.
+     *
+     * @param request WBS 작업 요청
+     * @return 상위 작업, 루트 작업이면 {@code null}
+     */
     private WbsTaskEntity selectParentTask(WbsTaskRequest request) {
         if (request.getParentTaskId() == null) {
             return null;
@@ -183,6 +240,12 @@ public class WbsServiceImpl implements WbsService {
         return parentTask;
     }
 
+    /**
+     * 연결 이슈를 조회하고 동일 프로젝트 소속인지 검증합니다.
+     *
+     * @param request WBS 작업 요청
+     * @return 연결 이슈, 미연결 작업이면 {@code null}
+     */
     private IssueEntity selectIssue(WbsTaskRequest request) {
         if (request.getIssueId() == null) {
             return null;
@@ -195,11 +258,24 @@ public class WbsServiceImpl implements WbsService {
         return issue;
     }
 
+    /**
+     * WBS 작업 엔티티를 조회하고 존재하지 않으면 업무 예외를 발생시킵니다.
+     *
+     * @param wbsTaskId WBS 작업 ID
+     * @return WBS 작업 엔티티
+     */
     private WbsTaskEntity selectWbsTaskEntity(UUID wbsTaskId) {
         return wbsDao.selectWbsTaskDetails(wbsTaskId)
                 .orElseThrow(() -> new BusinessException("WBS 작업을 찾을 수 없습니다.", "WBS_TASK_NOT_FOUND"));
     }
 
+    /**
+     * 부모 WBS 코드와 표시 순서를 기준으로 신규 WBS 코드를 생성합니다.
+     *
+     * @param parentTask 상위 작업
+     * @param displayOrder 동일 계층 내 표시 순서
+     * @return 자동 생성된 WBS 코드
+     */
     private String createWbsCode(WbsTaskEntity parentTask, int displayOrder) {
         if (parentTask == null) {
             return String.valueOf(displayOrder);
@@ -207,6 +283,13 @@ public class WbsServiceImpl implements WbsService {
         return parentTask.getWbsCode() + "." + displayOrder;
     }
 
+    /**
+     * 요청 값을 WBS 작업 엔티티에 반영합니다.
+     *
+     * @param task 저장 또는 수정 대상 작업
+     * @param request 입력 요청
+     * @param issue 연결 이슈
+     */
     private void applyRequest(WbsTaskEntity task, WbsTaskRequest request, IssueEntity issue) {
         task.setProjectId(request.getProjectId());
         task.setIssueId(request.getIssueId());
@@ -224,10 +307,21 @@ public class WbsServiceImpl implements WbsService {
         task.setProgressRate(valueOrZero(request.getProgressRate()));
     }
 
+    /**
+     * 정수 값이 {@code null}이면 0으로 보정합니다.
+     *
+     * @param value 보정 대상 값
+     * @return 보정된 정수 값
+     */
     private int valueOrZero(Integer value) {
         return value == null ? 0 : value;
     }
 
+    /**
+     * WBS 의존성 요청의 필수 조건과 지원 유형을 검증합니다.
+     *
+     * @param request 검증 대상 요청
+     */
     private void validateDependencyRequest(WbsTaskDependencyRequest request) {
         if (request == null || request.getProjectId() == null || request.getPredecessorTaskId() == null || request.getSuccessorTaskId() == null) {
             throw new BusinessException("WBS 의존성 요청이 올바르지 않습니다.", "WBS_DEPENDENCY_REQUEST_INVALID");
@@ -241,12 +335,24 @@ public class WbsServiceImpl implements WbsService {
         validateProject(request.getProjectId());
     }
 
+    /**
+     * 선행 작업과 후행 작업이 같은 프로젝트에 속하는지 검증합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param predecessor 선행 작업
+     * @param successor 후행 작업
+     */
     private void validateDependencyTaskProject(UUID projectId, WbsTaskEntity predecessor, WbsTaskEntity successor) {
         if (!projectId.equals(predecessor.getProjectId()) || !projectId.equals(successor.getProjectId())) {
             throw new BusinessException("선후행 작업은 동일 프로젝트에 속해야 합니다.", "WBS_DEPENDENCY_PROJECT_MISMATCH");
         }
     }
 
+    /**
+     * 하위 작업을 기준으로 부모 작업의 기간, 공수, 진행률을 집계합니다.
+     *
+     * @param tasks Gantt 작업 목록
+     */
     private void applyParentAggregate(List<WbsGanttTaskResponse> tasks) {
         Map<UUID, List<WbsGanttTaskResponse>> childrenByParentId = tasks.stream()
                 .filter(task -> task.getParentTaskId() != null)
@@ -272,6 +378,12 @@ public class WbsServiceImpl implements WbsService {
                 });
     }
 
+    /**
+     * 하위 작업의 예상 공수 가중치를 기준으로 부모 진행률을 계산합니다.
+     *
+     * @param children 하위 작업 목록
+     * @return 계산된 진행률
+     */
     private int selectWeightedProgress(List<WbsGanttTaskResponse> children) {
         int totalEstimated = children.stream().mapToInt(child -> valueOrZero(child.getEstimatedMinutes())).sum();
         if (totalEstimated > 0) {
@@ -283,6 +395,12 @@ public class WbsServiceImpl implements WbsService {
         return Math.round((float) children.stream().mapToInt(child -> valueOrZero(child.getProgressRate())).sum() / children.size());
     }
 
+    /**
+     * Gantt 작업별 지연, 공수 초과, 선행 작업 미완료 위험을 계산합니다.
+     *
+     * @param tasks Gantt 작업 목록
+     * @param dependencies WBS 의존성 목록
+     */
     private void applyGanttRisk(List<WbsGanttTaskResponse> tasks, List<WbsTaskDependencyResponse> dependencies) {
         LocalDate today = LocalDate.now();
         Map<UUID, WbsTaskStatus> predecessorStatusBySuccessorId = dependencies.stream()
@@ -302,6 +420,12 @@ public class WbsServiceImpl implements WbsService {
         }
     }
 
+    /**
+     * Gantt 막대 표시를 위한 좌측 위치와 너비 비율을 계산합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param tasks Gantt 작업 목록
+     */
     private void applyGanttTimeline(UUID projectId, List<WbsGanttTaskResponse> tasks) {
         WbsGanttResponse response = createGanttResponse(projectId, tasks);
         LocalDate startDate = response.getTimelineStartDate();
@@ -316,6 +440,13 @@ public class WbsServiceImpl implements WbsService {
         }
     }
 
+    /**
+     * 작업 기간을 기준으로 Gantt 전체 타임라인 응답을 생성합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param tasks Gantt 작업 목록
+     * @return Gantt 응답
+     */
     private WbsGanttResponse createGanttResponse(UUID projectId, List<WbsGanttTaskResponse> tasks) {
         LocalDate timelineStart = tasks.stream()
                 .map(WbsGanttTaskResponse::getPlanStartDate)

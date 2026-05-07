@@ -23,6 +23,12 @@ public class WbsGanttTaskResponse {
     private double leftPercent;
     private double widthPercent;
 
+    /**
+     * WBS 작업 응답을 Gantt 표시용 작업 DTO로 변환합니다.
+     *
+     * @param task WBS 작업 응답
+     * @return Gantt 작업 응답
+     */
     public static WbsGanttTaskResponse from(WbsTaskResponse task) {
         WbsGanttTaskResponse response = new WbsGanttTaskResponse();
         response.setWbsTaskId(task.getWbsTaskId());

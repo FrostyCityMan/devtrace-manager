@@ -18,6 +18,12 @@ public class TestEvidenceSummary {
         this.screenshotCount = screenshotCount;
     }
 
+    /**
+     * 테스트 증적 목록에서 판정별 건수 요약을 집계합니다.
+     *
+     * @param evidences 테스트 증적 목록
+     * @return 테스트 증적 요약
+     */
     public static TestEvidenceSummary from(List<TestEvidenceResponse> evidences) {
         List<TestEvidenceResponse> safeEvidences = evidences == null ? List.of() : evidences;
         int successCount = 0;

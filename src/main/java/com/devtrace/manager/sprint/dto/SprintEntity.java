@@ -18,6 +18,11 @@ public class SprintEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 스프린트 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 스프린트 응답 DTO
+     */
     public SprintResponse toResponse() {
         SprintResponse response = new SprintResponse();
         response.setSprintId(sprintId);

@@ -13,6 +13,11 @@ public class ArtifactHistoryEntity {
     private UUID generatedBy;
     private LocalDateTime generatedAt;
 
+    /**
+     * 산출물 이력 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 산출물 이력 응답 DTO
+     */
     public ArtifactHistoryResponse toResponse() {
         ArtifactHistoryResponse response = new ArtifactHistoryResponse();
         response.setArtifactId(artifactId);

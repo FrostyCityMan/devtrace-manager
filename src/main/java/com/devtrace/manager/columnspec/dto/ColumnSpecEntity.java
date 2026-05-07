@@ -20,6 +20,11 @@ public class ColumnSpecEntity {
     private String remark;
     private LocalDateTime createdAt;
 
+    /**
+     * 컬럼명세 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 컬럼명세 응답 DTO
+     */
     public ColumnSpecResponse toResponse() {
         ColumnSpecResponse response = new ColumnSpecResponse();
         response.setColumnSpecId(columnSpecId);

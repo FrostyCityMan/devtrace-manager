@@ -18,6 +18,12 @@ public class BoardSummaryResponse {
         this.unassignedCount = unassignedCount;
     }
 
+    /**
+     * 보드 컬럼 목록을 기준으로 카드 수, 지연 수, 공수 합계를 집계합니다.
+     *
+     * @param columns 보드 컬럼 목록
+     * @return 보드 요약 응답
+     */
     public static BoardSummaryResponse from(List<BoardColumnResponse> columns) {
         List<BoardColumnResponse> safeColumns = columns == null ? List.of() : columns;
         int totalCount = 0;

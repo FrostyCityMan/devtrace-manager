@@ -18,6 +18,11 @@ public class SprintResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 스프린트 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return 스프린트 수정 요청 DTO
+     */
     public SprintRequest toRequest() {
         SprintRequest request = new SprintRequest();
         request.setProjectId(projectId);

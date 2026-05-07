@@ -18,6 +18,11 @@ public class VcsChangeLogEntity {
     private List<VcsChangeFileEntity> changedFiles = new ArrayList<>();
     private List<String> issueKeys = new ArrayList<>();
 
+    /**
+     * 변경이력 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 변경이력 응답 DTO
+     */
     public VcsChangeLogResponse toResponse() {
         VcsChangeLogResponse response = new VcsChangeLogResponse();
         response.setChangeLogId(changeLogId);

@@ -16,11 +16,23 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+/**
+ * Git/SVN 변경이력 데이터를 Apache POI 기반 Excel 파일로 생성합니다.
+ *
+ * <p>산출물 규칙에 맞춰 변경이력 시트 하나를 만들고, 리비전, 작성자, 변경일시,
+ * 이슈 키, 메시지, 변경 파일을 제출 가능한 표 형식으로 정리합니다.</p>
+ */
 @Component
 public class VcsChangeLogExcelGenerator {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /**
+     * 변경이력 목록을 Excel 바이너리로 생성합니다.
+     *
+     * @param logs 변경이력 목록
+     * @return Excel 파일 바이트 배열
+     */
     public byte[] generate(List<VcsChangeLogResponse> logs) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("변경이력");
@@ -48,6 +60,13 @@ public class VcsChangeLogExcelGenerator {
         }
     }
 
+    /**
+     * 변경이력 시트의 헤더 행을 작성합니다.
+     *
+     * @param sheet 대상 시트
+     * @param headerStyle 헤더 셀 스타일
+     * @param headers 헤더 문자열 목록
+     */
     private void writeHeader(Sheet sheet, CellStyle headerStyle, String... headers) {
         Row header = sheet.createRow(0);
         for (int i = 0; i < headers.length; i++) {
@@ -57,6 +76,12 @@ public class VcsChangeLogExcelGenerator {
         }
     }
 
+    /**
+     * Excel 헤더 셀 스타일을 생성합니다.
+     *
+     * @param workbook Excel 워크북
+     * @return 헤더 셀 스타일
+     */
     private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -67,14 +92,34 @@ public class VcsChangeLogExcelGenerator {
         return style;
     }
 
+    /**
+     * 문자열 셀 값을 작성합니다.
+     *
+     * @param row 대상 행
+     * @param index 컬럼 인덱스
+     * @param value 셀 값
+     */
     private void writeCell(Row row, int index, String value) {
         row.createCell(index).setCellValue(value == null ? "" : value);
     }
 
+    /**
+     * 정수 셀 값을 작성합니다.
+     *
+     * @param row 대상 행
+     * @param index 컬럼 인덱스
+     * @param value 셀 값
+     */
     private void writeCell(Row row, int index, int value) {
         row.createCell(index).setCellValue(value);
     }
 
+    /**
+     * 지정 컬럼 수만큼 너비를 자동 조정하고 최소/최대 너비를 보정합니다.
+     *
+     * @param sheet 대상 시트
+     * @param columnCount 조정할 컬럼 수
+     */
     private void autoSize(Sheet sheet, int columnCount) {
         for (int i = 0; i < columnCount; i++) {
             sheet.autoSizeColumn(i);

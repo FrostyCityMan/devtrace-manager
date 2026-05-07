@@ -26,6 +26,11 @@ public class IssueEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 이슈 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 이슈 응답 DTO
+     */
     public IssueResponse toResponse() {
         IssueResponse response = new IssueResponse();
         response.setIssueId(issueId);

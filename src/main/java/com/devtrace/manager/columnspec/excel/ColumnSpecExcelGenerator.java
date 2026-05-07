@@ -18,9 +18,21 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+/**
+ * 컬럼명세 데이터를 Apache POI 기반 {@code .xlsx} 파일로 생성합니다.
+ *
+ * <p>Excel 산출물은 테이블 목록, 컬럼 명세, 변경 이력 시트로 구성되며,
+ * 헤더 스타일과 컬럼 너비 자동 조정을 공통 규칙으로 적용합니다.</p>
+ */
 @Component
 public class ColumnSpecExcelGenerator {
 
+    /**
+     * 컬럼명세 응답 목록을 Excel 바이너리로 생성합니다.
+     *
+     * @param specs 컬럼명세 목록
+     * @return Excel 파일 바이트 배열
+     */
     public byte[] generate(List<ColumnSpecResponse> specs) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             CellStyle headerStyle = createHeaderStyle(workbook);
@@ -34,6 +46,13 @@ public class ColumnSpecExcelGenerator {
         }
     }
 
+    /**
+     * 테이블 목록 시트를 작성합니다.
+     *
+     * @param workbook Excel 워크북
+     * @param headerStyle 헤더 셀 스타일
+     * @param specs 컬럼명세 목록
+     */
     private void writeTableListSheet(Workbook workbook, CellStyle headerStyle, List<ColumnSpecResponse> specs) {
         Sheet sheet = workbook.createSheet("테이블 목록");
         writeHeader(sheet, headerStyle, "순번", "테이블명", "테이블 설명", "비고");
@@ -55,6 +74,13 @@ public class ColumnSpecExcelGenerator {
         autoSize(sheet, 4);
     }
 
+    /**
+     * 컬럼 명세 시트를 작성합니다.
+     *
+     * @param workbook Excel 워크북
+     * @param headerStyle 헤더 셀 스타일
+     * @param specs 컬럼명세 목록
+     */
     private void writeColumnSpecSheet(Workbook workbook, CellStyle headerStyle, List<ColumnSpecResponse> specs) {
         Sheet sheet = workbook.createSheet("컬럼 명세");
         writeHeader(sheet, headerStyle, "순번", "테이블명", "테이블 설명", "컬럼명", "컬럼 설명", "데이터 타입", "길이", "Nullable", "PK", "FK", "기본값", "비고");
@@ -79,6 +105,12 @@ public class ColumnSpecExcelGenerator {
         autoSize(sheet, 12);
     }
 
+    /**
+     * 컬럼명세서 생성 이력을 표시하는 기본 변경 이력 시트를 작성합니다.
+     *
+     * @param workbook Excel 워크북
+     * @param headerStyle 헤더 셀 스타일
+     */
     private void writeChangeHistorySheet(Workbook workbook, CellStyle headerStyle) {
         Sheet sheet = workbook.createSheet("변경 이력");
         writeHeader(sheet, headerStyle, "순번", "변경일자", "변경자", "변경 구분", "테이블명", "컬럼명", "변경 내용");
@@ -94,6 +126,13 @@ public class ColumnSpecExcelGenerator {
         autoSize(sheet, 7);
     }
 
+    /**
+     * 지정 시트의 헤더 행을 작성합니다.
+     *
+     * @param sheet 대상 시트
+     * @param headerStyle 헤더 셀 스타일
+     * @param headers 헤더 문자열 목록
+     */
     private void writeHeader(Sheet sheet, CellStyle headerStyle, String... headers) {
         Row header = sheet.createRow(0);
         for (int i = 0; i < headers.length; i++) {
@@ -103,6 +142,12 @@ public class ColumnSpecExcelGenerator {
         }
     }
 
+    /**
+     * Excel 헤더 셀 스타일을 생성합니다.
+     *
+     * @param workbook Excel 워크북
+     * @return 헤더 셀 스타일
+     */
     private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -113,14 +158,34 @@ public class ColumnSpecExcelGenerator {
         return style;
     }
 
+    /**
+     * 문자열 셀 값을 작성합니다.
+     *
+     * @param row 대상 행
+     * @param index 컬럼 인덱스
+     * @param value 셀 값
+     */
     private void writeCell(Row row, int index, String value) {
         row.createCell(index).setCellValue(value == null ? "" : value);
     }
 
+    /**
+     * 정수 셀 값을 작성합니다.
+     *
+     * @param row 대상 행
+     * @param index 컬럼 인덱스
+     * @param value 셀 값
+     */
     private void writeCell(Row row, int index, int value) {
         row.createCell(index).setCellValue(value);
     }
 
+    /**
+     * 지정 컬럼 수만큼 너비를 자동 조정하고 최소/최대 너비를 보정합니다.
+     *
+     * @param sheet 대상 시트
+     * @param columnCount 조정할 컬럼 수
+     */
     private void autoSize(Sheet sheet, int columnCount) {
         for (int i = 0; i < columnCount; i++) {
             sheet.autoSizeColumn(i);

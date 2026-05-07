@@ -9,6 +9,11 @@ public class VcsChangeFileEntity {
     private String filePath;
     private String changeType;
 
+    /**
+     * 변경 파일 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 변경 파일 응답 DTO
+     */
     public VcsChangeFileResponse toResponse() {
         VcsChangeFileResponse response = new VcsChangeFileResponse();
         response.setChangeFileId(changeFileId);

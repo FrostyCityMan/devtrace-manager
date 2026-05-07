@@ -15,6 +15,11 @@ public class WorkLogResponse {
     private Integer spentMinutes;
     private LocalDateTime createdAt;
 
+    /**
+     * 작업 공수 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return 작업 공수 수정 요청 DTO
+     */
     public WorkLogRequest toRequest() {
         WorkLogRequest request = new WorkLogRequest();
         request.setIssueId(issueId);

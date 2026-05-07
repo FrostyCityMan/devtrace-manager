@@ -15,6 +15,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
+/**
+ * PostgreSQL, Oracle, MySQL의 기본 {@code CREATE TABLE} DDL을 해석하는 기본 파서입니다.
+ *
+ * <p>테이블/컬럼 주석, 인라인 PK/FK, 테이블 제약 PK/FK, 기본값, 타입 길이를 추출하여
+ * 컬럼명세 Excel 생성에 필요한 표준 모델로 변환합니다.</p>
+ */
 @Component
 public class DefaultDdlParser implements DdlParser {
 
@@ -25,6 +31,9 @@ public class DefaultDdlParser implements DdlParser {
     private static final Pattern TABLE_OPTION_COMMENT_PATTERN = Pattern.compile("(?is)\\bCOMMENT\\s*=\\s*'((?:''|[^'])*)'");
     private static final Pattern DEFAULT_PATTERN = Pattern.compile("(?is)\\bDEFAULT\\s+(.+?)(?=\\s+(?:NOT\\s+NULL|NULL|PRIMARY\\s+KEY|UNIQUE|COMMENT|CONSTRAINT|REFERENCES)\\b|$)");
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<ColumnSpecEntity> parse(UUID projectId, DatabaseType databaseType, String ddl) {
         if (projectId == null) {
@@ -60,6 +69,17 @@ public class DefaultDdlParser implements DdlParser {
         return result;
     }
 
+    /**
+     * 단일 테이블 정의 본문을 컬럼명세 목록으로 변환합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param databaseType DB 유형
+     * @param tableName 테이블명
+     * @param tableComment 테이블 설명
+     * @param body 괄호 내부 컬럼 및 제약 정의
+     * @param columnComments COMMENT ON COLUMN 문에서 추출한 컬럼 설명 맵
+     * @return 테이블 내 컬럼명세 목록
+     */
     private List<ColumnSpecEntity> parseTableBody(
             UUID projectId,
             DatabaseType databaseType,
@@ -121,6 +141,12 @@ public class DefaultDdlParser implements DdlParser {
         return columns;
     }
 
+    /**
+     * {@code COMMENT ON TABLE} 구문에서 테이블 설명을 추출합니다.
+     *
+     * @param ddl 전체 DDL 문자열
+     * @return 정규화된 테이블명별 설명 맵
+     */
     private Map<String, String> extractTableComments(String ddl) {
         Map<String, String> comments = new LinkedHashMap<>();
         Matcher matcher = COMMENT_ON_TABLE_PATTERN.matcher(ddl);
@@ -130,6 +156,12 @@ public class DefaultDdlParser implements DdlParser {
         return comments;
     }
 
+    /**
+     * {@code COMMENT ON COLUMN} 구문에서 컬럼 설명을 추출합니다.
+     *
+     * @param ddl 전체 DDL 문자열
+     * @return 정규화된 테이블명과 컬럼명별 설명 맵
+     */
     private Map<String, Map<String, String>> extractColumnComments(String ddl) {
         Map<String, Map<String, String>> comments = new LinkedHashMap<>();
         Matcher matcher = COMMENT_ON_COLUMN_PATTERN.matcher(ddl);
@@ -142,6 +174,13 @@ public class DefaultDdlParser implements DdlParser {
         return comments;
     }
 
+    /**
+     * CREATE TABLE 시작 괄호와 짝이 되는 닫는 괄호 위치를 찾습니다.
+     *
+     * @param text 전체 DDL 문자열
+     * @param openParenIndex 시작 괄호 위치
+     * @return 닫는 괄호 위치, 찾지 못하면 -1
+     */
     private int findMatchingParen(String text, int openParenIndex) {
         int depth = 0;
         boolean inSingleQuote = false;
@@ -167,6 +206,12 @@ public class DefaultDdlParser implements DdlParser {
         return -1;
     }
 
+    /**
+     * 최상위 콤마만 기준으로 컬럼/제약 정의를 분리합니다.
+     *
+     * @param body CREATE TABLE 괄호 내부 문자열
+     * @return 분리된 정의 목록
+     */
     private List<String> splitTopLevel(String body) {
         List<String> parts = new ArrayList<>();
         int depth = 0;
@@ -195,6 +240,12 @@ public class DefaultDdlParser implements DdlParser {
         return parts;
     }
 
+    /**
+     * 주어진 정의가 테이블 수준 제약 조건인지 판단합니다.
+     *
+     * @param definition 컬럼 또는 제약 정의
+     * @return 테이블 수준 제약이면 true
+     */
     private boolean isTableConstraint(String definition) {
         String upper = definition.trim().toUpperCase(Locale.ROOT);
         return upper.startsWith("PRIMARY KEY")
@@ -204,6 +255,12 @@ public class DefaultDdlParser implements DdlParser {
                 || upper.startsWith("CONSTRAINT");
     }
 
+    /**
+     * 컬럼 정의에서 컬럼명 토큰과 나머지 정의를 분리합니다.
+     *
+     * @param definition 컬럼 정의 문자열
+     * @return 컬럼 토큰, 해석할 수 없으면 {@code null}
+     */
     private ColumnToken readColumnToken(String definition) {
         String trimmed = definition.trim();
         if (trimmed.isBlank()) {
@@ -228,6 +285,13 @@ public class DefaultDdlParser implements DdlParser {
         return new ColumnToken(cleanName(trimmed.substring(0, end)), trimmed.substring(end).trim());
     }
 
+    /**
+     * 컬럼 정의에서 데이터 타입과 길이 표현을 추출합니다.
+     *
+     * @param definition 컬럼명 이후 정의 문자열
+     * @param databaseType DB 유형
+     * @return 데이터 타입 토큰
+     */
     private TypeToken readTypeToken(String definition, DatabaseType databaseType) {
         String trimmed = definition.trim();
         int end = 0;
@@ -259,6 +323,12 @@ public class DefaultDdlParser implements DdlParser {
         return new TypeToken(normalizeTypeName(rawType, databaseType), null);
     }
 
+    /**
+     * 컬럼 타입 뒤에 올 수 있는 컬럼 제약/수식어인지 판단합니다.
+     *
+     * @param text 타입 이후 문자열
+     * @return 컬럼 수식어이면 true
+     */
     private boolean isColumnModifier(String text) {
         return text.startsWith("NOT NULL")
                 || text.startsWith("NULL")
@@ -271,6 +341,13 @@ public class DefaultDdlParser implements DdlParser {
                 || text.startsWith("COLLATE");
     }
 
+    /**
+     * DB 유형 차이를 반영하여 데이터 타입명을 정규화합니다.
+     *
+     * @param dataType 원본 데이터 타입
+     * @param databaseType DB 유형
+     * @return 정규화된 데이터 타입
+     */
     private String normalizeTypeName(String dataType, DatabaseType databaseType) {
         String normalized = dataType.trim().replaceAll("\\s+", " ").toUpperCase(Locale.ROOT);
         if (databaseType == DatabaseType.MYSQL && normalized.equals("INTEGER")) {
@@ -279,6 +356,12 @@ public class DefaultDdlParser implements DdlParser {
         return normalized;
     }
 
+    /**
+     * 괄호 안 컬럼명 목록을 추출합니다.
+     *
+     * @param definition PRIMARY KEY 또는 FOREIGN KEY 정의
+     * @return 정규화된 컬럼명 목록
+     */
     private List<String> extractNamesInParentheses(String definition) {
         int open = definition.indexOf('(');
         int close = definition.indexOf(')', open + 1);
@@ -292,16 +375,34 @@ public class DefaultDdlParser implements DdlParser {
         return names;
     }
 
+    /**
+     * 컬럼 정의에 포함된 인라인 COMMENT 값을 추출합니다.
+     *
+     * @param definition 컬럼 정의 문자열
+     * @return 컬럼 설명, 없으면 {@code null}
+     */
     private String extractInlineComment(String definition) {
         Matcher matcher = INLINE_COMMENT_PATTERN.matcher(definition);
         return matcher.find() ? unescapeSqlString(matcher.group(1)) : null;
     }
 
+    /**
+     * MySQL 테이블 옵션 COMMENT 값을 추출합니다.
+     *
+     * @param tableOptions CREATE TABLE 닫는 괄호 뒤 옵션 문자열
+     * @return 테이블 설명, 없으면 {@code null}
+     */
     private String extractTableOptionComment(String tableOptions) {
         Matcher matcher = TABLE_OPTION_COMMENT_PATTERN.matcher(tableOptions);
         return matcher.find() ? unescapeSqlString(matcher.group(1)) : null;
     }
 
+    /**
+     * 컬럼 정의에서 DEFAULT 값을 추출합니다.
+     *
+     * @param definition 컬럼 정의 문자열
+     * @return 기본값, 없으면 {@code null}
+     */
     private String extractDefaultValue(String definition) {
         Matcher matcher = DEFAULT_PATTERN.matcher(definition);
         if (!matcher.find()) {
@@ -310,6 +411,13 @@ public class DefaultDdlParser implements DdlParser {
         return matcher.group(1).trim().replaceAll(",$", "");
     }
 
+    /**
+     * 지정 위치부터 세미콜론까지의 테이블 옵션 문자열을 읽습니다.
+     *
+     * @param text 전체 DDL 문자열
+     * @param start 읽기 시작 위치
+     * @return 테이블 옵션 문자열
+     */
     private String readUntilSemicolon(String text, int start) {
         int end = text.indexOf(';', start);
         if (end < 0) {
@@ -318,11 +426,24 @@ public class DefaultDdlParser implements DdlParser {
         return text.substring(start, end);
     }
 
+    /**
+     * 공백 차이를 허용하여 특정 단어 시퀀스 포함 여부를 판단합니다.
+     *
+     * @param text 검사 대상 문자열
+     * @param sequence 검사할 단어 시퀀스
+     * @return 포함되어 있으면 true
+     */
     private boolean containsWordSequence(String text, String sequence) {
         String regex = "(?is).*\\b" + sequence.replace(" ", "\\s+") + "\\b.*";
         return text.matches(regex);
     }
 
+    /**
+     * 스키마명과 인용 부호를 제거하여 객체명을 정리합니다.
+     *
+     * @param name 원본 객체명
+     * @return 정리된 객체명
+     */
     private String cleanName(String name) {
         String cleaned = name.trim();
         if (cleaned.contains(".")) {
@@ -336,14 +457,33 @@ public class DefaultDdlParser implements DdlParser {
         return cleaned.trim();
     }
 
+    /**
+     * 비교용 객체명을 대문자로 정규화합니다.
+     *
+     * @param name 원본 객체명
+     * @return 정규화된 객체명
+     */
     private String normalizeName(String name) {
         return cleanName(name).toUpperCase(Locale.ROOT);
     }
 
+    /**
+     * SQL 문자열 리터럴의 이스케이프된 작은따옴표를 복원합니다.
+     *
+     * @param value SQL 문자열 값
+     * @return 복원된 문자열
+     */
     private String unescapeSqlString(String value) {
         return value == null ? null : value.replace("''", "'");
     }
 
+    /**
+     * 첫 번째 문자열이 비어 있으면 두 번째 문자열을 사용합니다.
+     *
+     * @param first 우선 사용할 문자열
+     * @param second 대체 문자열
+     * @return 공백이 아닌 문자열 또는 {@code null}
+     */
     private String firstNotBlank(String first, String second) {
         if (first != null && !first.isBlank()) {
             return first;
@@ -351,9 +491,21 @@ public class DefaultDdlParser implements DdlParser {
         return second == null || second.isBlank() ? null : second;
     }
 
+    /**
+     * 컬럼명과 나머지 컬럼 정의를 함께 보관하는 내부 토큰입니다.
+     *
+     * @param columnName 컬럼명
+     * @param remainingDefinition 컬럼명 이후 정의
+     */
     private record ColumnToken(String columnName, String remainingDefinition) {
     }
 
+    /**
+     * 데이터 타입명과 길이 표현을 함께 보관하는 내부 토큰입니다.
+     *
+     * @param dataType 데이터 타입명
+     * @param dataLength 길이 또는 정밀도 표현
+     */
     private record TypeToken(String dataType, String dataLength) {
     }
 }

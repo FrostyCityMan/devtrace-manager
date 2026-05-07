@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Thymeleaf 기반 작업 공수 관리 화면을 제공하는 컨트롤러입니다.
+ *
+ * <p>이슈별 작업 공수 등록, 수정, 삭제와 목록 검색 화면 흐름을 담당합니다.</p>
+ */
 @Controller
 @RequestMapping("/work-logs")
 public class WorkLogController {
@@ -26,11 +31,25 @@ public class WorkLogController {
     private final WorkLogService workLogService;
     private final IssueService issueService;
 
+    /**
+     * 작업 공수 화면 컨트롤러를 생성한다.
+     *
+     * @param workLogService 작업 공수 업무 서비스
+     * @param issueService 이슈 상세 조회 서비스
+     */
     public WorkLogController(WorkLogService workLogService, IssueService issueService) {
         this.workLogService = workLogService;
         this.issueService = issueService;
     }
 
+    /**
+     * 이슈 상세 화면에서 작업 공수를 등록한다.
+     *
+     * @param request 작업 공수 등록 요청
+     * @param bindingResult 검증 결과
+     * @param model Thymeleaf 모델
+     * @return 이슈 상세 리다이렉트 또는 검증 오류가 반영된 이슈 상세 화면
+     */
     @PostMapping
     public String create(
             @Valid @ModelAttribute("workLog") WorkLogRequest request,
@@ -44,6 +63,13 @@ public class WorkLogController {
         return "redirect:/issues/" + request.getIssueId();
     }
 
+    /**
+     * 작업 공수 수정 화면을 표시한다.
+     *
+     * @param workLogId 수정 대상 작업 공수 ID
+     * @param model Thymeleaf 모델
+     * @return 작업 공수 수정 화면명
+     */
     @GetMapping("/{workLogId}/edit")
     public String editForm(@PathVariable UUID workLogId, Model model) {
         WorkLogRequest request = workLogService.selectWorkLogDetails(workLogId).toRequest();
@@ -53,6 +79,15 @@ public class WorkLogController {
         return "worklog/form";
     }
 
+    /**
+     * 작업 공수를 수정한다.
+     *
+     * @param workLogId 수정 대상 작업 공수 ID
+     * @param request 작업 공수 수정 요청
+     * @param bindingResult 검증 결과
+     * @param model Thymeleaf 모델
+     * @return 이슈 상세 리다이렉트 또는 수정 화면명
+     */
     @PostMapping("/{workLogId}")
     public String update(
             @PathVariable UUID workLogId,
@@ -69,6 +104,12 @@ public class WorkLogController {
         return "redirect:/issues/" + request.getIssueId();
     }
 
+    /**
+     * 작업 공수를 삭제한다.
+     *
+     * @param workLogId 삭제 대상 작업 공수 ID
+     * @return 원 이슈 상세 화면 리다이렉트
+     */
     @PostMapping("/{workLogId}/delete")
     public String delete(@PathVariable UUID workLogId) {
         UUID issueId = workLogService.selectWorkLogDetails(workLogId).getIssueId();
@@ -76,6 +117,14 @@ public class WorkLogController {
         return "redirect:/issues/" + issueId;
     }
 
+    /**
+     * 작업 공수 등록 검증 오류 시 이슈 상세 화면 모델을 다시 구성한다.
+     *
+     * @param issueId 이슈 ID
+     * @param request 사용자가 입력한 작업 공수 요청
+     * @param model Thymeleaf 모델
+     * @return 이슈 상세 화면명 또는 이슈 목록 리다이렉트
+     */
     private String renderIssueDetail(UUID issueId, WorkLogRequest request, Model model) {
         if (issueId == null) {
             return "redirect:/issues";

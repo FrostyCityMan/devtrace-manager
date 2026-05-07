@@ -28,6 +28,11 @@ public class TestResultEvidenceRow {
         return resultStatus == TestEvidenceResult.FAIL || resultStatus == TestEvidenceResult.BLOCKED;
     }
 
+    /**
+     * 스크린샷 파일명이 존재하는지 판단합니다.
+     *
+     * @return 스크린샷이 있으면 true
+     */
     public boolean hasScreenshot() {
         return screenshotFileName != null && !screenshotFileName.isBlank();
     }

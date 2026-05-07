@@ -40,6 +40,11 @@ public class ArtifactMarkdownResponse {
         this.spentMinutes = spentMinutes;
     }
 
+    /**
+     * 미리보기 실패 또는 최초 화면 표시 시 사용할 빈 Markdown 응답을 생성합니다.
+     *
+     * @return 빈 Markdown 응답
+     */
     public static ArtifactMarkdownResponse empty() {
         return new ArtifactMarkdownResponse("", "");
     }

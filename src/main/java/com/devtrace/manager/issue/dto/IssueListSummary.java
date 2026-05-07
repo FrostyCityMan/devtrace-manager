@@ -32,6 +32,12 @@ public class IssueListSummary {
         this.spentMinutes = spentMinutes;
     }
 
+    /**
+     * 이슈 목록에서 상태별 요약 수치를 집계합니다.
+     *
+     * @param issues 이슈 목록
+     * @return 이슈 목록 요약
+     */
     public static IssueListSummary from(List<IssueResponse> issues) {
         LocalDate today = LocalDate.now();
         int totalCount = issues.size();

@@ -13,9 +13,19 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
+/**
+ * Git 로그 텍스트를 변경이력 모델로 파싱합니다.
+ *
+ * <p>지원 입력은 {@code hash|author|date|message} 형식과
+ * {@code commit|hash|author|date|message}에 파일 상태가 뒤따르는 {@code --name-status}
+ * 형식입니다.</p>
+ */
 @Component
 public class GitLogParser implements VcsLogParser {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<VcsChangeLogEntity> parse(UUID projectId, String logText) {
         if (logText == null || logText.isBlank()) {
@@ -31,6 +41,13 @@ public class GitLogParser implements VcsLogParser {
         return logs;
     }
 
+    /**
+     * 파이프 구분 한 줄 Git 로그를 파싱합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param logText Git 로그 문자열
+     * @return 변경이력 목록
+     */
     private List<VcsChangeLogEntity> parsePipeLines(UUID projectId, String logText) {
         List<VcsChangeLogEntity> logs = new ArrayList<>();
         for (String line : logText.split("\\n")) {
@@ -46,6 +63,13 @@ public class GitLogParser implements VcsLogParser {
         return logs;
     }
 
+    /**
+     * {@code --name-status} 형식의 Git 로그를 파싱합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param logText Git 로그 문자열
+     * @return 변경 파일이 포함된 변경이력 목록
+     */
     private List<VcsChangeLogEntity> parseNameStatus(UUID projectId, String logText) {
         List<VcsChangeLogEntity> logs = new ArrayList<>();
         VcsChangeLogEntity current = null;
@@ -72,6 +96,12 @@ public class GitLogParser implements VcsLogParser {
         return logs;
     }
 
+    /**
+     * Git 변경 파일 행을 변경 파일 엔티티로 변환합니다.
+     *
+     * @param line 파일 상태 행
+     * @return 변경 파일 엔티티, 인식할 수 없으면 {@code null}
+     */
     private VcsChangeFileEntity parseGitFile(String line) {
         String[] parts = line.split("\\s+", 3);
         if (parts.length < 2 || !parts[0].matches("[AMDR].*")) {
@@ -83,6 +113,16 @@ public class GitLogParser implements VcsLogParser {
         return file;
     }
 
+    /**
+     * Git 커밋 정보를 공통 변경이력 엔티티로 생성합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param revisionNo 커밋 해시
+     * @param author 작성자
+     * @param changedAt 변경 일시 문자열
+     * @param message 커밋 메시지
+     * @return 변경이력 엔티티
+     */
     private VcsChangeLogEntity createLog(UUID projectId, String revisionNo, String author, String changedAt, String message) {
         VcsChangeLogEntity log = new VcsChangeLogEntity();
         log.setProjectId(projectId);
@@ -95,6 +135,12 @@ public class GitLogParser implements VcsLogParser {
         return log;
     }
 
+    /**
+     * Git 로그의 ISO 계열 일시 문자열을 {@link LocalDateTime}으로 변환합니다.
+     *
+     * @param value 일시 문자열
+     * @return 로컬 일시
+     */
     private LocalDateTime parseDateTime(String value) {
         try {
             return OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDateTime();

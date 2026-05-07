@@ -26,6 +26,11 @@ public class IssueResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 이슈 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return 이슈 수정 요청 DTO
+     */
     public IssueRequest toRequest() {
         IssueRequest request = new IssueRequest();
         request.setProjectId(projectId);

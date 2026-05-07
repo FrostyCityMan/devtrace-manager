@@ -18,6 +18,12 @@ public class ColumnSpecSummary {
         this.foreignKeyCount = foreignKeyCount;
     }
 
+    /**
+     * 컬럼명세 목록에서 테이블 수, 컬럼 수, PK/FK 수를 집계합니다.
+     *
+     * @param specs 컬럼명세 목록
+     * @return 컬럼명세 요약
+     */
     public static ColumnSpecSummary from(List<ColumnSpecResponse> specs) {
         Set<String> tableNames = new LinkedHashSet<>();
         int primaryKeyCount = 0;

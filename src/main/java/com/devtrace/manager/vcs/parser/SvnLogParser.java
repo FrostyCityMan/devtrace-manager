@@ -17,9 +17,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+/**
+ * SVN XML 로그를 변경이력 모델로 파싱합니다.
+ *
+ * <p>초기 MVP에서는 {@code svn log --xml -v} 출력만 지원하며,
+ * XML 외부 엔티티 공격을 막기 위해 DOCTYPE 선언을 비활성화합니다.</p>
+ */
 @Component
 public class SvnLogParser implements VcsLogParser {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<VcsChangeLogEntity> parse(UUID projectId, String logText) {
         if (logText == null || logText.isBlank()) {
@@ -35,6 +44,13 @@ public class SvnLogParser implements VcsLogParser {
         return logs;
     }
 
+    /**
+     * SVN XML 문자열을 DOM으로 읽어 변경이력 목록을 생성합니다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param xml SVN XML 로그 문자열
+     * @return 변경이력 목록
+     */
     private List<VcsChangeLogEntity> parseXml(UUID projectId, String xml) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -62,6 +78,12 @@ public class SvnLogParser implements VcsLogParser {
         }
     }
 
+    /**
+     * SVN {@code path} 노드를 변경 파일 목록으로 변환합니다.
+     *
+     * @param entry SVN logentry 엘리먼트
+     * @return 변경 파일 목록
+     */
     private List<VcsChangeFileEntity> parsePaths(Element entry) {
         List<VcsChangeFileEntity> files = new ArrayList<>();
         NodeList paths = entry.getElementsByTagName("path");
@@ -77,6 +99,13 @@ public class SvnLogParser implements VcsLogParser {
         return files;
     }
 
+    /**
+     * 지정 태그의 텍스트 값을 읽습니다.
+     *
+     * @param parent 부모 엘리먼트
+     * @param tagName 조회할 태그명
+     * @return 텍스트 값, 태그가 없으면 빈 문자열
+     */
     private String text(Element parent, String tagName) {
         NodeList nodes = parent.getElementsByTagName(tagName);
         if (nodes.getLength() == 0) {

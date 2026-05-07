@@ -17,6 +17,11 @@ public class ProjectResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 프로젝트 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return 프로젝트 수정 요청 DTO
+     */
     public ProjectRequest toRequest() {
         ProjectRequest request = new ProjectRequest();
         request.setProjectCode(projectCode);

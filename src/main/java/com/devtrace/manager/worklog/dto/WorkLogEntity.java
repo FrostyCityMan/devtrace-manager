@@ -14,6 +14,11 @@ public class WorkLogEntity {
     private Integer spentMinutes;
     private LocalDateTime createdAt;
 
+    /**
+     * 작업 공수 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 작업 공수 응답 DTO
+     */
     public WorkLogResponse toResponse() {
         WorkLogResponse response = new WorkLogResponse();
         response.setWorkLogId(workLogId);

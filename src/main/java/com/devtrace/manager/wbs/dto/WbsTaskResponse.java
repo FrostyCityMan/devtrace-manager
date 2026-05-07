@@ -32,6 +32,11 @@ public class WbsTaskResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * WBS 작업 응답 DTO를 수정 화면 입력 요청 DTO로 변환합니다.
+     *
+     * @return WBS 작업 수정 요청 DTO
+     */
     public WbsTaskRequest toRequest() {
         WbsTaskRequest request = new WbsTaskRequest();
         request.setProjectId(projectId);

@@ -26,6 +26,11 @@ public class TestEvidenceEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * 테스트 증적 엔티티를 화면/API 응답 DTO로 변환합니다.
+     *
+     * @return 테스트 증적 응답 DTO
+     */
     public TestEvidenceResponse toResponse() {
         TestEvidenceResponse response = new TestEvidenceResponse();
         response.setTestEvidenceId(testEvidenceId);

@@ -16,6 +16,12 @@ public class WorkLogSummary {
         this.latestWorkDate = latestWorkDate;
     }
 
+    /**
+     * 작업 공수 목록에서 건수, 총 공수, 최근 작업일을 집계합니다.
+     *
+     * @param workLogs 작업 공수 목록
+     * @return 작업 공수 요약
+     */
     public static WorkLogSummary from(List<WorkLogResponse> workLogs) {
         int totalMinutes = 0;
         LocalDate latestWorkDate = null;
