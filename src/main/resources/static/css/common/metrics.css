@@ -1,0 +1,78 @@
+.dt-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.dt-metric-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 102px;
+    padding: 18px;
+    border: 1px solid var(--dt-line);
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.82);
+    box-shadow: var(--dt-shadow);
+}
+
+.dt-metric-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    place-items: center;
+    border-radius: 16px;
+}
+
+.dt-metric-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke-width: 1.8;
+}
+
+.dt-metric-icon.coral {
+    color: #ff671f;
+    background: #ffe1ca;
+}
+
+.dt-metric-icon.teal {
+    color: #0f9e8c;
+    background: #d4f0eb;
+}
+
+.dt-metric-icon.blue {
+    color: #1672dc;
+    background: #d5e7ff;
+}
+
+.dt-metric-icon.amber {
+    color: #e48d06;
+    background: #ffe8c3;
+}
+
+.dt-metric-icon.red {
+    color: #ed302b;
+    background: #ffd7d4;
+}
+
+.dt-metric-card p {
+    margin: 0 0 7px;
+    color: #1e252d;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.dt-metric-card strong {
+    color: #0b0f14;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.dt-metric-card small {
+    font-size: 15px;
+    font-weight: 800;
+}
+

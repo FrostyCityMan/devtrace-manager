@@ -1,0 +1,38 @@
+.dt-vcs-table {
+    min-width: 1320px;
+}
+
+.dt-vcs-table th:nth-child(1),
+.dt-vcs-table td:nth-child(1) {
+    width: 72px;
+}
+
+.dt-vcs-table th:nth-child(2),
+.dt-vcs-table td:nth-child(2) {
+    width: 90px;
+}
+
+.dt-vcs-table th:nth-child(3),
+.dt-vcs-table td:nth-child(3) {
+    width: 160px;
+}
+
+.dt-vcs-table th:nth-child(4),
+.dt-vcs-table td:nth-child(4),
+.dt-vcs-table th:nth-child(6),
+.dt-vcs-table td:nth-child(6) {
+    width: 140px;
+}
+
+.dt-vcs-table th:nth-child(5),
+.dt-vcs-table td:nth-child(5) {
+    width: 180px;
+}
+
+.dt-vcs-table th:nth-child(7),
+.dt-vcs-table td:nth-child(7),
+.dt-vcs-table th:nth-child(8),
+.dt-vcs-table td:nth-child(8) {
+    width: 270px;
+}
+

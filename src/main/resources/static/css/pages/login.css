@@ -1,0 +1,241 @@
+.dt-login-body {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.dt-login-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 430px;
+    gap: clamp(36px, 7vw, 96px);
+    align-items: center;
+    width: min(1180px, calc(100% - 48px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 46px 0;
+}
+
+.dt-login-intro {
+    min-width: 0;
+}
+
+.dt-login-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 64px;
+}
+
+.dt-login-copy h1 {
+    margin: 0;
+    color: #111820;
+    font-size: clamp(42px, 7vw, 76px);
+    font-weight: 900;
+    line-height: 1.02;
+}
+
+.dt-login-copy p {
+    max-width: 520px;
+    margin: 22px 0 0;
+    color: #645d54;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+.dt-login-preview {
+    width: min(100%, 650px);
+    margin-top: 42px;
+    padding: 18px;
+    border: 1px solid #d8cebf;
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.72);
+    box-shadow: var(--dt-shadow);
+}
+
+.dt-preview-top {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.dt-preview-top span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e6dac9;
+}
+
+.dt-preview-top span:nth-child(1) {
+    background: var(--dt-coral);
+}
+
+.dt-preview-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.dt-preview-stats div {
+    min-height: 74px;
+    padding: 14px;
+    border: 1px solid #e4dbcf;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.82);
+}
+
+.dt-preview-stats strong,
+.dt-preview-stats small {
+    display: block;
+}
+
+.dt-preview-stats strong {
+    color: #101820;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.dt-preview-stats small {
+    margin-top: 4px;
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dt-preview-row {
+    height: 42px;
+    margin-top: 8px;
+    border: 1px solid #e4dbcf;
+    border-left-width: 4px;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.78);
+}
+
+.dt-preview-row.teal {
+    border-left-color: var(--dt-teal);
+}
+
+.dt-preview-row.blue {
+    border-left-color: var(--dt-blue);
+}
+
+.dt-preview-row.amber {
+    border-left-color: var(--dt-amber);
+}
+
+.dt-login-card {
+    padding: 34px;
+    border: 1px solid #d5cbbb;
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.82);
+    box-shadow: 0 22px 55px rgba(75, 51, 22, 0.14);
+    backdrop-filter: blur(16px);
+}
+
+.dt-login-card-head h2 {
+    margin: 0;
+    color: #101820;
+    font-size: 34px;
+    font-weight: 900;
+}
+
+.dt-login-card-head p {
+    margin: 10px 0 0;
+    color: var(--dt-muted);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.dt-login-alert {
+    margin-top: 20px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.dt-login-alert.error {
+    color: #d8231b;
+    background: #ffe3df;
+    border: 1px solid #ffc4bb;
+}
+
+.dt-login-alert.success {
+    color: #00816f;
+    background: #d9f4ee;
+    border: 1px solid #aee2d9;
+}
+
+.dt-login-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 26px;
+}
+
+.dt-login-form label {
+    display: grid;
+    gap: 8px;
+}
+
+.dt-login-form label > span {
+    color: #2e2a25;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.dt-login-form input[type="text"],
+.dt-login-form input[type="password"] {
+    width: 100%;
+    height: 50px;
+    border: 1px solid #d1c7b8;
+    border-radius: 6px;
+    outline: 0;
+    padding: 0 14px;
+    color: var(--dt-text);
+    background: rgba(255, 253, 248, 0.86);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dt-login-form input[type="text"]:focus,
+.dt-login-form input[type="password"]:focus {
+    border-color: var(--dt-coral);
+    box-shadow: 0 0 0 4px rgba(243, 90, 69, 0.14);
+}
+
+.dt-login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dt-check {
+    display: inline-flex !important;
+    grid-template-columns: none !important;
+    align-items: center;
+    gap: 8px !important;
+}
+
+.dt-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--dt-coral);
+}
+
+.dt-login-submit {
+    height: 52px;
+    border-radius: 6px;
+    color: #fffaf5;
+    background: linear-gradient(135deg, #ff6652, #e94636);
+    box-shadow: 0 14px 26px rgba(232, 75, 56, 0.24);
+    font-size: 17px;
+    font-weight: 900;
+}
+

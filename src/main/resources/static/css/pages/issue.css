@@ -1,0 +1,125 @@
+.dt-detail-head strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.dt-detail-grid > div {
+    padding: 18px;
+    border: 1px solid #e3dbcf;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.58);
+}
+
+.dt-detail-grid dd {
+    margin: 0;
+    font-weight: 800;
+}
+
+.dt-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 6px;
+    color: #00816f;
+    background: #ccefe9;
+    border: 1px solid #a7dfd5;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.dt-status.hold {
+    color: #0968be;
+    background: #d8eaff;
+    border-color: #bdd8f7;
+}
+
+.dt-status.planned {
+    color: #d17400;
+    background: #fff0c7;
+    border-color: #f6d88e;
+}
+
+.dt-status.done {
+    color: #e32a21;
+    background: #ffe0de;
+    border-color: #ffc9c4;
+}
+
+.dt-pre {
+    min-height: 120px;
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+
+.dt-issue-flow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    padding: 24px 18px;
+}
+
+.dt-issue-flow span {
+    display: grid;
+    min-height: 48px;
+    place-items: center;
+    border: 1px solid #e1d8ca;
+    border-radius: 6px;
+    color: #2a3138;
+    background: rgba(255, 253, 248, 0.72);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-effort-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 22px 18px;
+}
+
+.dt-effort-summary div {
+    min-height: 74px;
+    padding: 14px;
+    border: 1px solid #e1d8ca;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.72);
+}
+
+.dt-effort-summary span,
+.dt-risk-summary span {
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-effort-summary strong {
+    display: block;
+    margin-top: 6px;
+    color: #101820;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.dt-risk-summary {
+    display: grid;
+    gap: 12px;
+    padding: 24px 20px;
+}
+
+.dt-risk-summary div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1f2933;
+    font-weight: 900;
+}
+
+.dt-risk-summary strong {
+    margin-left: auto;
+}
+

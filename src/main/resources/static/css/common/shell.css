@@ -1,0 +1,259 @@
+.dt-sidebar {
+    position: fixed;
+    z-index: 20;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: 232px;
+    padding: 16px 12px;
+    border: 1px solid rgba(215, 205, 190, 0.78);
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.72);
+    box-shadow: 8px 0 26px rgba(71, 51, 24, 0.08);
+    backdrop-filter: blur(14px);
+    transition: width 0.18s ease;
+}
+
+.dt-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    color: #101820;
+    margin: 0 8px 20px;
+}
+
+.dt-brand-symbol {
+    position: relative;
+    width: 30px;
+    height: 26px;
+    flex: 0 0 30px;
+    overflow: hidden;
+}
+
+.dt-brand-symbol span {
+    position: absolute;
+    left: 2px;
+    width: 23px;
+    height: 7px;
+    border: 3px solid var(--dt-coral);
+    transform: skewY(-30deg) rotate(-30deg);
+    border-left: 0;
+    border-right: 0;
+}
+
+.dt-brand-symbol span:nth-child(1) {
+    top: 0;
+}
+
+.dt-brand-symbol span:nth-child(2) {
+    top: 9px;
+    opacity: 0.78;
+}
+
+.dt-brand-symbol span:nth-child(3) {
+    top: 18px;
+    opacity: 0.54;
+}
+
+.dt-brand-text {
+    font-size: 20px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.dt-brand-text strong {
+    font-weight: 900;
+}
+
+.dt-nav-list {
+    display: grid;
+    gap: 14px;
+    padding-bottom: 62px;
+}
+
+.dt-nav-group {
+    display: grid;
+    gap: 6px;
+}
+
+.dt-nav-label {
+    padding: 0 14px;
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dt-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 6px;
+    color: #1d252d;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.dt-nav-item svg {
+    flex: 0 0 auto;
+    color: #4e555c;
+}
+
+.dt-nav-item.active {
+    color: #fffaf4;
+    background: linear-gradient(135deg, #ff6652, #ed4437);
+    box-shadow: 0 10px 24px rgba(242, 80, 61, 0.25);
+}
+
+.dt-nav-item.active svg {
+    color: #fffaf4;
+    fill: currentColor;
+    stroke-width: 0;
+}
+
+.dt-collapse {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    padding: 0 14px;
+    border-top: 1px solid var(--dt-line);
+    color: #1d252d;
+    background: transparent;
+    font-weight: 800;
+}
+
+.dt-topbar {
+    position: fixed;
+    z-index: 18;
+    top: 6px;
+    right: 7px;
+    left: 239px;
+    height: 61px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px 0 26px;
+    border: 1px solid rgba(215, 205, 190, 0.76);
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.78);
+    box-shadow: 0 4px 14px rgba(62, 45, 25, 0.08);
+    backdrop-filter: blur(14px);
+}
+
+.dt-icon-button {
+    position: relative;
+    display: inline-grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    color: #171c22;
+    background: transparent;
+}
+
+.dt-icon-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.dt-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.dt-bell span {
+    position: absolute;
+    top: 2px;
+    right: 1px;
+    display: grid;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border-radius: 999px;
+    color: white;
+    background: var(--dt-coral);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.dt-user-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    color: #251e18;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.dt-avatar {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 50%;
+    color: white;
+    background: #8b724f;
+}
+
+.dt-avatar svg,
+.dt-user-menu button > svg {
+    width: 18px;
+    height: 18px;
+}
+
+.dt-chrome.is-compact .dt-sidebar {
+    width: 76px;
+    padding: 16px 10px;
+}
+
+.dt-chrome.is-compact .dt-brand {
+    justify-content: center;
+    margin-inline: 0;
+}
+
+.dt-chrome.is-compact .dt-brand-text,
+.dt-chrome.is-compact .dt-nav-label,
+.dt-chrome.is-compact .dt-nav-text,
+.dt-chrome.is-compact .dt-collapse span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.dt-chrome.is-compact .dt-nav-item,
+.dt-chrome.is-compact .dt-collapse {
+    justify-content: center;
+    padding: 0;
+}
+
+.dt-chrome.is-compact .dt-nav-item {
+    gap: 0;
+}
+
+.dt-chrome.is-compact .dt-collapse svg {
+    transform: rotate(180deg);
+}
+
+.dt-chrome.is-compact .dt-topbar {
+    left: 83px;
+}
+
+.dt-chrome.is-compact ~ .dt-content,
+.dt-chrome.is-compact ~ .dt-page {
+    margin-left: 110px;
+    width: calc(100% - 142px);
+}
+

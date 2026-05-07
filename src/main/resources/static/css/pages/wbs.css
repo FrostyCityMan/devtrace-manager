@@ -1,0 +1,242 @@
+.dt-wbs-table {
+    min-width: 1380px;
+}
+
+.dt-wbs-table th:nth-child(1),
+.dt-wbs-table td:nth-child(1),
+.dt-wbs-table th:nth-child(3),
+.dt-wbs-table td:nth-child(3),
+.dt-wbs-table th:nth-child(4),
+.dt-wbs-table td:nth-child(4),
+.dt-wbs-table th:nth-child(8),
+.dt-wbs-table td:nth-child(8) {
+    width: 110px;
+}
+
+.dt-wbs-table th:nth-child(2),
+.dt-wbs-table td:nth-child(2) {
+    width: 280px;
+}
+
+.dt-wbs-table th:nth-child(5),
+.dt-wbs-table td:nth-child(5),
+.dt-wbs-table th:nth-child(7),
+.dt-wbs-table td:nth-child(7),
+.dt-wbs-table th:nth-child(9),
+.dt-wbs-table td:nth-child(9) {
+    width: 160px;
+}
+
+.dt-wbs-table th:nth-child(6),
+.dt-wbs-table td:nth-child(6) {
+    width: 220px;
+}
+
+.dt-wbs-tree-name {
+    display: inline-block;
+    font-weight: 900;
+}
+
+.dt-wbs-dependency-form {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) 120px auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.dt-wbs-dependency-table {
+    min-width: 900px;
+}
+
+.dt-gantt {
+    overflow-x: auto;
+    border: 1px solid var(--dt-line-soft);
+    border-radius: 6px;
+}
+
+.dt-gantt-head,
+.dt-gantt-row {
+    display: grid;
+    grid-template-columns: 320px minmax(620px, 1fr);
+}
+
+.dt-gantt-head {
+    min-height: 46px;
+    color: #2f2a24;
+    background: rgba(254, 247, 237, 0.78);
+    border-bottom: 1px solid #ded6c9;
+    font-weight: 900;
+}
+
+.dt-gantt-head > div,
+.dt-gantt-row > div {
+    padding: 12px 16px;
+}
+
+.dt-gantt-head > div:first-child,
+.dt-gantt-row > div:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: rgba(255, 253, 248, 0.96);
+}
+
+.dt-gantt-head > div:first-child {
+    z-index: 2;
+    background: rgba(254, 247, 237, 0.98);
+}
+
+.dt-gantt-head > div:last-child {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dt-gantt-row {
+    min-height: 48px;
+    background: rgba(255, 253, 248, 0.72);
+    border-bottom: 1px solid #e3dbcf;
+}
+
+.dt-gantt-row:last-child {
+    border-bottom: 0;
+}
+
+.dt-gantt-name {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-weight: 800;
+}
+
+.dt-gantt-name strong {
+    flex: 0 0 auto;
+    color: var(--dt-muted);
+}
+
+.dt-gantt-name-main {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.dt-gantt-name-main span {
+    overflow-wrap: anywhere;
+}
+
+.dt-gantt-name-main small {
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.dt-gantt-risks {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 5px;
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dt-gantt-risk {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 7px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.dt-gantt-risk.danger {
+    background: var(--dt-red);
+}
+
+.dt-gantt-risk.blocked {
+    background: var(--dt-amber);
+}
+
+.dt-gantt-track {
+    position: relative;
+    min-height: 42px;
+    background: linear-gradient(90deg, rgba(222, 213, 198, 0.5) 1px, transparent 1px);
+    background-size: 8.33% 100%;
+}
+
+.dt-gantt-bar {
+    position: absolute;
+    top: 10px;
+    min-width: 22px;
+    height: 24px;
+    border-radius: 6px;
+    color: white;
+    background: var(--dt-teal);
+    font-size: 12px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 24px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.dt-gantt-bar span {
+    display: block;
+    padding: 0 6px;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.dt-gantt-bar.danger {
+    background: var(--dt-red);
+}
+
+.dt-gantt-bar.blocked {
+    background: var(--dt-amber);
+}
+
+.dt-gantt-bar.done {
+    background: var(--dt-blue);
+}
+
+.dt-gantt-empty {
+    padding: 22px;
+    color: var(--dt-muted);
+    font-weight: 900;
+}
+
+.dt-gantt-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.dt-gantt-legend span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    color: white;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-gantt-legend .progress {
+    background: var(--dt-teal);
+}
+
+.dt-gantt-legend .danger {
+    background: var(--dt-red);
+}
+
+.dt-gantt-legend .blocked {
+    background: var(--dt-amber);
+}
+
+.dt-gantt-legend .done {
+    background: var(--dt-blue);
+}
+

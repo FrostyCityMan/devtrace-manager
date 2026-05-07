@@ -1,0 +1,59 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-width: 320px;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--dt-text);
+    font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0;
+    background:
+        linear-gradient(130deg, rgba(246, 232, 207, 0.94), rgba(250, 246, 237, 0.88) 43%, rgba(244, 236, 221, 0.96)),
+        radial-gradient(circle at 87% 12%, rgba(187, 169, 136, 0.16), transparent 26rem);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(45deg, transparent 0 48%, rgba(176, 160, 132, 0.10) 48% 52%, transparent 52% 100%),
+        linear-gradient(-45deg, transparent 0 47%, rgba(176, 160, 132, 0.08) 47% 51%, transparent 51% 100%);
+    background-size: 132px 132px, 150px 150px;
+    opacity: 0.24;
+}
+
+a,
+button {
+    font: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+[th\:if] {
+    display: none !important;
+}

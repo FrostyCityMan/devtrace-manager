@@ -1,0 +1,175 @@
+.dt-widget-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.15fr;
+    gap: 16px;
+    margin-top: 21px;
+}
+
+.dt-widget {
+    min-height: 154px;
+    border: 1px solid #ddd4c7;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.70);
+    box-shadow: 0 8px 22px rgba(62, 45, 25, 0.04);
+}
+
+.dt-widget h2 {
+    height: 58px;
+    margin: 0;
+    padding: 20px;
+    border-bottom: 1px solid #e4ddd3;
+    color: #161f27;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.dt-donut-row {
+    display: grid;
+    grid-template-columns: 138px 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 10px 18px 18px;
+}
+
+.dt-donut {
+    width: 114px;
+    height: 114px;
+    border-radius: 50%;
+    background: conic-gradient(var(--dt-teal) 0 43%, var(--dt-blue) 43% 54%, var(--dt-amber) 54% 72%, var(--dt-red) 72% 100%);
+    position: relative;
+}
+
+.dt-donut::after {
+    content: "";
+    position: absolute;
+    inset: 31px;
+    border-radius: 50%;
+    background: var(--dt-panel-solid);
+}
+
+.dt-widget ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+}
+
+.dt-widget li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #1f2933;
+    white-space: nowrap;
+}
+
+.dt-widget li strong {
+    min-width: 0;
+    margin-left: auto;
+    color: #4e5964;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dot {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+.dot.teal {
+    background: var(--dt-teal);
+}
+
+.dot.blue {
+    background: var(--dt-blue);
+}
+
+.dot.amber {
+    background: var(--dt-amber);
+}
+
+.dot.red {
+    background: var(--dt-red);
+}
+
+.dot.coral {
+    background: var(--dt-coral);
+}
+
+.dt-update-line {
+    display: grid;
+    grid-template-columns: 12px 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 18px 20px 0;
+    font-size: 14px;
+}
+
+.dt-update-line span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--dt-teal);
+}
+
+.dt-update-line strong {
+    font-weight: 800;
+}
+
+.dt-update-line em {
+    padding: 4px 9px;
+    border-radius: 999px;
+    color: #00816f;
+    background: #d8f2ec;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.dt-update-line time,
+.dt-schedule time {
+    color: #6c7580;
+    font-size: 13px;
+}
+
+.dt-schedule {
+    display: grid;
+    grid-template-columns: 66px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 18px 16px;
+}
+
+.dt-date-box {
+    display: grid;
+    width: 66px;
+    height: 62px;
+    place-items: center;
+    border: 1px solid #e1dbd2;
+    border-radius: 6px;
+    background: #f2eee7;
+}
+
+.dt-date-box strong {
+    font-size: 16px;
+}
+
+.dt-date-box span {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.dt-schedule strong {
+    font-size: 14px;
+}
+
+.dt-schedule p {
+    margin: 7px 0 0;
+    color: #6f7780;
+    font-size: 13px;
+}
+

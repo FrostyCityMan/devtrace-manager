@@ -1,0 +1,95 @@
+.dt-artifact-catalog {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.dt-artifact-catalog article {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 96px;
+    padding: 16px;
+    border: 1px solid #d7cdbd;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.74);
+    box-shadow: 0 8px 22px rgba(62, 45, 25, 0.04);
+}
+
+.dt-artifact-catalog span {
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.dt-artifact-catalog strong {
+    display: block;
+    margin-top: 8px;
+    color: #161f27;
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.35;
+}
+
+.dt-artifact-catalog small,
+.dt-artifact-format {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid #f6d88e;
+    border-radius: 6px;
+    color: #d17400;
+    background: #fff0c7;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.dt-artifact-catalog .is-ready small,
+.dt-artifact-format {
+    color: #00816f;
+    background: #ccefe9;
+    border-color: #a7dfd5;
+}
+
+.dt-artifact-format.excel {
+    color: #0968be;
+    background: #d8eaff;
+    border-color: #bdd8f7;
+}
+
+.dt-artifact-format-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dt-form-alert {
+    margin-bottom: 18px;
+    padding: 13px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.dt-form-alert.danger {
+    color: #d9241d;
+    background: #ffe2dc;
+    border: 1px solid #ffc4ba;
+}
+
+.dt-button-download {
+    gap: 8px;
+}
+
+.dt-button-download svg {
+    width: 17px;
+    height: 17px;
+}
+

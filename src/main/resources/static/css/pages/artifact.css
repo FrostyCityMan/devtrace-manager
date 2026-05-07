@@ -1,0 +1,59 @@
+.dt-markdown-preview {
+    min-height: 520px;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    resize: vertical;
+}
+
+.dt-artifact-preview .dt-section-head {
+    margin-bottom: 14px;
+}
+
+.dt-artifact-form {
+    margin-bottom: 8px;
+}
+
+.dt-artifact-form.is-active {
+    padding-left: 14px;
+    border-left: 3px solid var(--dt-teal);
+}
+
+.dt-artifact-divider {
+    height: 1px;
+    margin: 28px 0;
+    background: var(--dt-line-soft);
+}
+
+.dt-artifact-table {
+    min-width: 1060px;
+}
+
+.dt-artifact-table th:nth-child(1),
+.dt-artifact-table td:nth-child(1) {
+    width: 72px;
+}
+
+.dt-artifact-table th:nth-child(2),
+.dt-artifact-table td:nth-child(2),
+.dt-artifact-table th:nth-child(5),
+.dt-artifact-table td:nth-child(5) {
+    width: 190px;
+}
+
+.dt-artifact-table th:nth-child(3),
+.dt-artifact-table td:nth-child(3) {
+    width: 120px;
+}
+
+.dt-artifact-table th:nth-child(4),
+.dt-artifact-table td:nth-child(4) {
+    width: auto;
+}
+
+.dt-artifact-table th:nth-child(6),
+.dt-artifact-table td:nth-child(6) {
+    width: 190px;
+}
+

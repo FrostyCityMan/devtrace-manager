@@ -1,0 +1,48 @@
+.dt-content {
+    position: relative;
+    z-index: 1;
+    margin-left: 266px;
+    width: calc(100% - 298px);
+    max-width: 1203px;
+    padding-top: 96px;
+    padding-bottom: 40px;
+}
+
+.dt-page-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.dt-page-head h1 {
+    margin: 0;
+    color: #141b23;
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.12;
+}
+
+.dt-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 160px;
+    height: 45px;
+    padding: 0 20px;
+    border-radius: 6px;
+    color: #fffaf5;
+    background: linear-gradient(135deg, #ff6652, #e94636);
+    box-shadow: 0 12px 22px rgba(232, 75, 56, 0.22);
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.dt-primary-button svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
+}
+

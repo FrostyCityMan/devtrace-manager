@@ -1,0 +1,111 @@
+.dt-toolbar {
+    display: grid;
+    grid-template-columns: minmax(280px, 441px) 213px 123px 1fr 108px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.dt-issue-toolbar {
+    grid-template-columns: minmax(210px, 1.35fr) minmax(180px, 1fr) minmax(120px, 0.7fr) minmax(120px, 0.7fr) minmax(128px, 0.65fr) minmax(128px, 0.65fr) 86px 86px;
+}
+
+.dt-issue-toolbar .dt-reset-button {
+    grid-column: auto;
+}
+
+.dt-test-evidence-toolbar {
+    grid-template-columns: minmax(210px, 1.2fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(128px, 0.7fr) minmax(128px, 0.6fr) minmax(128px, 0.6fr) 86px 86px;
+}
+
+.dt-test-evidence-toolbar .dt-reset-button {
+    grid-column: auto;
+}
+
+.dt-wbs-toolbar {
+    grid-template-columns: minmax(240px, 1.5fr) minmax(190px, 1fr) minmax(140px, 0.7fr) minmax(140px, 0.7fr) 86px 86px;
+}
+
+.dt-wbs-toolbar .dt-reset-button {
+    grid-column: auto;
+}
+
+.dt-search-box,
+.dt-select-box,
+.dt-date-filter,
+.dt-filter-button,
+.dt-reset-button {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    border: 1px solid #d1c7b8;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.82);
+    color: #1c242c;
+}
+
+.dt-date-filter {
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.dt-date-filter span {
+    flex: 0 0 auto;
+    color: var(--dt-muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.dt-date-filter input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: #1f2933;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.dt-search-box {
+    gap: 12px;
+    padding: 0 14px;
+}
+
+.dt-search-box svg {
+    width: 22px;
+    height: 22px;
+    color: #243142;
+}
+
+.dt-search-box input,
+.dt-select-box select {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: #1f2933;
+    background: transparent;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.dt-search-box input::placeholder {
+    color: #8d877f;
+}
+
+.dt-select-box {
+    padding: 0 12px;
+}
+
+.dt-filter-button,
+.dt-reset-button {
+    justify-content: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.dt-reset-button {
+    grid-column: 5;
+}
+

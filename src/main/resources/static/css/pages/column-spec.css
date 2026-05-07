@@ -1,0 +1,43 @@
+.dt-columnspec-preview {
+    margin-top: 22px;
+}
+
+.dt-columnspec-table {
+    min-width: 1500px;
+}
+
+.dt-columnspec-table th:nth-child(1),
+.dt-columnspec-table td:nth-child(1) {
+    width: 72px;
+}
+
+.dt-columnspec-table th:nth-child(2),
+.dt-columnspec-table td:nth-child(2),
+.dt-columnspec-table th:nth-child(4),
+.dt-columnspec-table td:nth-child(4) {
+    width: 150px;
+}
+
+.dt-columnspec-table th:nth-child(3),
+.dt-columnspec-table td:nth-child(3),
+.dt-columnspec-table th:nth-child(5),
+.dt-columnspec-table td:nth-child(5) {
+    width: 190px;
+}
+
+.dt-columnspec-table th:nth-child(6),
+.dt-columnspec-table td:nth-child(6) {
+    width: 130px;
+}
+
+.dt-columnspec-table th:nth-child(7),
+.dt-columnspec-table td:nth-child(7),
+.dt-columnspec-table th:nth-child(8),
+.dt-columnspec-table td:nth-child(8),
+.dt-columnspec-table th:nth-child(9),
+.dt-columnspec-table td:nth-child(9),
+.dt-columnspec-table th:nth-child(10),
+.dt-columnspec-table td:nth-child(10) {
+    width: 96px;
+}
+

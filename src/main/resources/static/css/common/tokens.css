@@ -1,0 +1,17 @@
+:root {
+    --dt-bg: #f5efe4;
+    --dt-panel: rgba(255, 253, 248, 0.86);
+    --dt-panel-solid: #fffdf8;
+    --dt-line: #ded5c6;
+    --dt-line-soft: #eee7dc;
+    --dt-text: #1e252d;
+    --dt-muted: #6b6257;
+    --dt-coral: #f35a45;
+    --dt-coral-dark: #e64b3a;
+    --dt-teal: #20b39f;
+    --dt-blue: #5b9de8;
+    --dt-amber: #f1a529;
+    --dt-red: #ff4638;
+    --dt-brown: #8a6d48;
+    --dt-shadow: 0 12px 32px rgba(65, 45, 21, 0.10);
+}

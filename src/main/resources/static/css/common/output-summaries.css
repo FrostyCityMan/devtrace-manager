@@ -1,0 +1,57 @@
+.dt-ddl-input {
+    min-height: 340px;
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    line-height: 1.6;
+}
+
+.dt-columnspec-summary,
+.dt-artifact-summary,
+.dt-test-evidence-summary,
+.dt-gantt-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.dt-test-evidence-summary,
+.dt-gantt-summary {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.dt-columnspec-summary article,
+.dt-artifact-summary article,
+.dt-test-evidence-summary article,
+.dt-gantt-summary article {
+    min-height: 92px;
+    padding: 16px;
+    border: 1px solid #d7cdbd;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.78);
+    box-shadow: 0 8px 22px rgba(62, 45, 25, 0.04);
+}
+
+.dt-columnspec-summary span,
+.dt-columnspec-summary small,
+.dt-artifact-summary span,
+.dt-artifact-summary small,
+.dt-test-evidence-summary span,
+.dt-test-evidence-summary small,
+.dt-gantt-summary span,
+.dt-gantt-summary small {
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-columnspec-summary strong,
+.dt-artifact-summary strong,
+.dt-test-evidence-summary strong,
+.dt-gantt-summary strong {
+    display: inline-block;
+    margin: 6px 4px 0 0;
+    color: #101820;
+    font-size: 28px;
+    font-weight: 900;
+}
+

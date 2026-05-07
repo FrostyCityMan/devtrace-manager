@@ -1,0 +1,83 @@
+.dt-worklog-panel {
+    margin-top: 22px;
+}
+
+.dt-worklog-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.dt-worklog-summary div {
+    min-height: 86px;
+    padding: 16px;
+    border: 1px solid #e1d8ca;
+    border-radius: 6px;
+    background: rgba(255, 253, 248, 0.72);
+}
+
+.dt-worklog-summary span,
+.dt-worklog-summary small {
+    display: block;
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-worklog-summary strong {
+    display: block;
+    margin: 5px 0 2px;
+    color: #101820;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.dt-worklog-form {
+    display: grid;
+    grid-template-columns: 180px 160px minmax(260px, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.dt-worklog-form label {
+    display: grid;
+    gap: 8px;
+}
+
+.dt-worklog-form label > span {
+    color: var(--dt-muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dt-worklog-table {
+    min-width: 900px;
+}
+
+.dt-worklog-table th:nth-child(1),
+.dt-worklog-table td:nth-child(1) {
+    width: 140px;
+}
+
+.dt-worklog-table th:nth-child(2),
+.dt-worklog-table td:nth-child(2) {
+    width: auto;
+}
+
+.dt-worklog-table th:nth-child(3),
+.dt-worklog-table td:nth-child(3) {
+    width: 120px;
+}
+
+.dt-worklog-table th:nth-child(4),
+.dt-worklog-table td:nth-child(4) {
+    width: 190px;
+}
+
+.dt-worklog-table th:nth-child(5),
+.dt-worklog-table td:nth-child(5) {
+    width: 170px;
+}
+
