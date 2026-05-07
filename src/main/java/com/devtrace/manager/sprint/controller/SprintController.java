@@ -8,6 +8,7 @@ import com.devtrace.manager.sprint.dto.SprintIssueRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintRequest;
 import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintReportResponse;
 import com.devtrace.manager.sprint.dto.SprintSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintStatus;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
@@ -56,6 +57,13 @@ public class SprintController {
     ) {
         populateModel(condition, sprintId, model);
         return "sprint/list";
+    }
+
+    @GetMapping("/{sprintId}/report")
+    public String report(@PathVariable UUID sprintId, Model model) {
+        SprintReportResponse report = sprintService.selectSprintReportDetails(sprintId);
+        model.addAttribute("report", report);
+        return "sprint/report";
     }
 
     @PostMapping

@@ -1,12 +1,17 @@
 package com.devtrace.manager.sprint.dao;
 
 import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
+import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
+import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
+import com.devtrace.manager.sprint.dto.SprintRiskIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintStatus;
+import com.devtrace.manager.sprint.dto.SprintStatusDistributionResponse;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
+import com.devtrace.manager.sprint.dto.SprintTestEvidenceRiskResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +54,19 @@ public interface SprintDao {
             @Param("sprintId") UUID sprintId,
             @Param("today") LocalDate today
     );
+
+    List<SprintStatusDistributionResponse> selectSprintStatusDistributionList(UUID sprintId);
+
+    List<SprintAssigneeWorkloadResponse> selectSprintAssigneeWorkloadList(UUID sprintId);
+
+    List<SprintRiskIssueResponse> selectSprintRiskIssueList(
+            @Param("sprintId") UUID sprintId,
+            @Param("today") LocalDate today
+    );
+
+    List<SprintTestEvidenceRiskResponse> selectSprintTestEvidenceRiskList(UUID sprintId);
+
+    List<SprintBurndownPointResponse> selectSprintDailySpentList(UUID sprintId);
 
     void insertSprintIssue(SprintIssueEntity sprintIssue);
 

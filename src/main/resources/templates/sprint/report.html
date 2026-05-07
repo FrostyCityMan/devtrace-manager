@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('스프린트 분석')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<main class="dt-content dt-sprint-report-page">
+    <section class="dt-page-head">
+        <div>
+            <h1>스프린트 분석</h1>
+            <p class="dt-page-desc"
+               th:text="${report.sprint.sprintName + ' 실행 현황과 소진 추이를 확인합니다.'}">스프린트 실행 현황과 소진 추이를 확인합니다.</p>
+        </div>
+        <div class="dt-sprint-report-actions">
+            <a th:href="@{/sprints(projectId=${report.sprint.projectId},sprintId=${report.sprint.sprintId})}" class="dt-action">스프린트로 돌아가기</a>
+            <a th:href="@{/boards(projectId=${report.sprint.projectId},sprintId=${report.sprint.sprintId})}" class="dt-primary-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v7h-6zM14 16h6v3h-6z"/></svg>
+                칸반 보기
+            </a>
+        </div>
+    </section>
+
+    <section class="dt-sprint-report-summary" aria-label="스프린트 분석 요약">
+        <article>
+            <span>기간</span>
+            <strong th:text="${report.sprint.startDate + ' ~ ' + report.sprint.endDate}"
+                    th:title="${report.sprint.startDate + ' ~ ' + report.sprint.endDate}">2026-05-06 ~ 2026-05-19</strong>
+            <small th:text="${report.sprint.statusLabel}">진행 중</small>
+        </article>
+        <article>
+            <span>전체 이슈</span>
+            <strong th:text="${report.summary.totalIssueCount}">0</strong>
+            <small th:text="${'완료 ' + report.summary.doneIssueCount + '건'}">완료 0건</small>
+        </article>
+        <article>
+            <span>남은 이슈</span>
+            <strong th:text="${report.remainingIssueCount}">0</strong>
+            <small th:text="${'지연 ' + report.summary.delayedIssueCount + '건'}">지연 0건</small>
+        </article>
+        <article>
+            <span>공수</span>
+            <strong th:text="${report.summary.spentHoursLabel}">0h</strong>
+            <small th:text="${'예상 ' + report.summary.estimatedHoursLabel}">예상 0h</small>
+        </article>
+        <article>
+            <span>진행률</span>
+            <strong th:text="${report.summary.progressRate + '%'}">0%</strong>
+            <small th:text="${'기간 경과 ' + report.elapsedRate + '%'}">기간 경과 0%</small>
+        </article>
+        <article>
+            <span>완료 전망</span>
+            <strong th:text="${report.forecastLabel}" th:title="${report.forecastLabel}">정상</strong>
+            <small class="dt-chip"
+                   th:classappend="${' ' + report.forecastCssClass}"
+                   th:text="${report.forecastLabel}">정상</small>
+        </article>
+    </section>
+
+    <section class="dt-sprint-report-grid main" aria-label="스프린트 차트">
+        <article class="dt-sprint-panel dt-burndown-panel">
+            <header>
+                <div>
+                    <h2>Burndown Chart</h2>
+                    <p>스프린트 기간의 이상 잔여 공수와 실제 잔여 공수를 비교합니다.</p>
+                </div>
+                <span th:text="${#lists.size(report.burndownPoints) + '일'}">0일</span>
+            </header>
+            <div th:if="${#lists.isEmpty(report.burndownPoints)}" class="dt-sprint-empty">스프린트 기간 데이터가 없습니다.</div>
+            <div th:if="${!#lists.isEmpty(report.burndownPoints)}" class="dt-burndown-chart">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="dt-burndown-svg" role="img" aria-label="스프린트 Burndown Chart">
+                    <line x1="0" y1="10" x2="100" y2="10" class="grid"></line>
+                    <line x1="0" y1="30" x2="100" y2="30" class="grid"></line>
+                    <line x1="0" y1="50" x2="100" y2="50" class="grid"></line>
+                    <line x1="0" y1="70" x2="100" y2="70" class="grid"></line>
+                    <line x1="0" y1="90" x2="100" y2="90" class="axis"></line>
+                    <polyline th:attr="points=${report.idealPolylinePoints}" class="ideal"></polyline>
+                    <polyline th:attr="points=${report.actualPolylinePoints}" class="actual"></polyline>
+                </svg>
+                <div class="dt-burndown-legend">
+                    <span><i class="ideal"></i> 이상 잔여</span>
+                    <span><i class="actual"></i> 실제 잔여</span>
+                </div>
+            </div>
+            <div class="dt-burndown-points" th:if="${!#lists.isEmpty(report.burndownPoints)}">
+                <span th:each="point : ${report.burndownPoints}"
+                      th:text="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel}"
+                      th:title="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel}">2026-05-06 / 실제 0h / 이상 0h</span>
+            </div>
+        </article>
+
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>상태별 분포</h2>
+                <span th:text="${#lists.size(report.statusDistributions) + '개 상태'}">0개 상태</span>
+            </header>
+            <div class="dt-report-list">
+                <div th:if="${#lists.isEmpty(report.statusDistributions)}" class="dt-sprint-empty">상태별 이슈가 없습니다.</div>
+                <div th:each="distribution : ${report.statusDistributions}" class="dt-report-bar-row">
+                    <div>
+                        <span class="dt-chip" th:classappend="${' ' + distribution.statusCssClass}" th:text="${distribution.statusLabel}">진행 중</span>
+                        <strong th:text="${distribution.issueCount + '건'}">0건</strong>
+                    </div>
+                    <div class="dt-report-bar"><span th:style="${'width:' + distribution.issueRate + '%'}"></span></div>
+                    <small th:text="${distribution.issueRate + '%'}">0%</small>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dt-sprint-report-grid" aria-label="담당자별 작업량과 위험 이슈">
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>담당자별 작업량</h2>
+                <span th:text="${#lists.size(report.assigneeWorkloads) + '명'}">0명</span>
+            </header>
+            <div class="dt-report-list">
+                <div th:if="${#lists.isEmpty(report.assigneeWorkloads)}" class="dt-sprint-empty">담당자별 작업량 데이터가 없습니다.</div>
+                <div th:each="workload : ${report.assigneeWorkloads}" class="dt-workload-row" th:classappend="${workload.overEffort ? ' over' : ''}">
+                    <div>
+                        <strong th:text="${workload.assigneeDisplayName}">담당자</strong>
+                        <span th:text="${workload.issueCount + '건'}">0건</span>
+                    </div>
+                    <div>
+                        <span th:text="${workload.spentHoursLabel + ' / ' + workload.estimatedHoursLabel}">0h / 0h</span>
+                        <small th:if="${workload.overEffort}">공수 초과</small>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="dt-sprint-panel">
+            <header>
+                <h2>위험 이슈</h2>
+                <span th:text="${#lists.size(report.riskIssues) + '건'}">0건</span>
+            </header>
+            <div class="dt-table-scroll">
+                <table class="dt-dashboard-table dt-sprint-risk-table">
+                    <thead>
+                    <tr>
+                        <th>이슈</th>
+                        <th>상태</th>
+                        <th>우선순위</th>
+                        <th>담당자</th>
+                        <th>예정일</th>
+                        <th>공수</th>
+                        <th>위험</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(report.riskIssues)}">
+                        <td colspan="7" data-label="위험 이슈" class="dt-dashboard-empty">지연, 고우선순위, 공수 초과 이슈가 없습니다.</td>
+                    </tr>
+                    <tr th:each="issue : ${report.riskIssues}" th:classappend="${issue.delayed ? ' stripe-red' : issue.overEffort ? ' stripe-amber' : ' stripe-blue'}">
+                        <td data-label="이슈">
+                            <a th:href="@{/issues/{issueId}(issueId=${issue.issueId})}">
+                                <strong th:text="${issue.issueKey}">DTR-101</strong>
+                                <small th:text="${issue.title}" th:title="${issue.title}">이슈 제목</small>
+                            </a>
+                        </td>
+                        <td data-label="상태"><span class="dt-chip" th:classappend="${' ' + issue.statusCssClass}" th:text="${issue.statusLabel}">진행 중</span></td>
+                        <td data-label="우선순위"><span class="dt-chip" th:classappend="${' ' + issue.priorityCssClass}" th:text="${issue.priorityLabel}">높음</span></td>
+                        <td data-label="담당자" th:text="${issue.assigneeDisplayName}">담당자</td>
+                        <td data-label="예정일" th:text="${issue.dueDate == null ? '-' : issue.dueDate}">2026-05-06</td>
+                        <td data-label="공수" th:text="${issue.effortLabel}">0h / 0h</td>
+                        <td data-label="위험"><span class="dt-board-risk" th:text="${issue.riskLabel}">지연</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="dt-sprint-panel" aria-label="실패 및 차단 테스트 증적">
+        <header>
+            <div>
+                <h2>실패·차단 테스트 증적</h2>
+                <p>스프린트 이슈에 연결된 테스트 증적 중 실패 또는 차단 판정을 표시합니다.</p>
+            </div>
+            <span th:text="${#lists.size(report.failedTestEvidences) + '건'}">0건</span>
+        </header>
+        <div class="dt-table-scroll">
+            <table class="dt-dashboard-table dt-sprint-evidence-table">
+                <thead>
+                <tr>
+                    <th>이슈</th>
+                    <th>테스트명</th>
+                    <th>대상</th>
+                    <th>판정</th>
+                    <th>수행자</th>
+                    <th>수행일시</th>
+                    <th>상세</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(report.failedTestEvidences)}">
+                    <td colspan="7" data-label="테스트 증적" class="dt-dashboard-empty">실패 또는 차단 테스트 증적이 없습니다.</td>
+                </tr>
+                <tr th:each="evidence : ${report.failedTestEvidences}" th:classappend="${evidence.resultStatus != null and evidence.resultStatus.name() == 'FAIL' ? ' stripe-red' : ' stripe-amber'}">
+                    <td data-label="이슈" th:text="${evidence.issueKey}">DTR-101</td>
+                    <td data-label="테스트명" th:text="${evidence.testName}" th:title="${evidence.testName}">테스트명</td>
+                    <td data-label="대상" th:text="${evidence.testTarget}" th:title="${evidence.testTarget}">화면명</td>
+                    <td data-label="판정"><span class="dt-chip" th:classappend="${' ' + evidence.resultCssClass}" th:text="${evidence.resultLabel}">실패</span></td>
+                    <td data-label="수행자" th:text="${evidence.testerName == null or evidence.testerName.isBlank() ? '-' : evidence.testerName}">tester</td>
+                    <td data-label="수행일시" th:text="${evidence.testedAt == null ? '-' : #temporals.format(evidence.testedAt, 'yyyy-MM-dd HH:mm')}">2026-05-06 09:00</td>
+                    <td data-label="상세"><a th:href="@{/test-evidences/{testEvidenceId}(testEvidenceId=${evidence.testEvidenceId})}" class="dt-action">증적</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

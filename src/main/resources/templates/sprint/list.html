@@ -179,6 +179,7 @@
             </header>
 
             <div th:if="${selectedSprint != null}" class="dt-sprint-selected-actions">
+                <a th:href="@{/sprints/{sprintId}/report(sprintId=${selectedSprint.sprintId})}" class="dt-action">분석</a>
                 <form th:if="${selectedSprint.status.name() == 'PLANNED'}" th:action="@{/sprints/{sprintId}/start(sprintId=${selectedSprint.sprintId})}" method="post">
                     <button type="submit" class="dt-action">시작</button>
                 </form>

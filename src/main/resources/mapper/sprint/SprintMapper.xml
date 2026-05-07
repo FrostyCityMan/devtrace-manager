@@ -53,6 +53,50 @@
         <result property="spentMinutes" column="SPENT_MINUTES"/>
     </resultMap>
 
+    <resultMap id="SprintStatusDistributionResultMap" type="com.devtrace.manager.sprint.dto.SprintStatusDistributionResponse">
+        <result property="status" column="STATUS"/>
+        <result property="issueCount" column="ISSUE_COUNT"/>
+    </resultMap>
+
+    <resultMap id="SprintAssigneeWorkloadResultMap" type="com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse">
+        <result property="assigneeId" column="ASSIGNEE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+        <result property="issueCount" column="ISSUE_COUNT"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
+    <resultMap id="SprintRiskIssueResultMap" type="com.devtrace.manager.sprint.dto.SprintRiskIssueResponse">
+        <id property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="title" column="TITLE"/>
+        <result property="status" column="STATUS"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="assigneeName" column="ASSIGNEE_NAME"/>
+        <result property="dueDate" column="DUE_DATE"/>
+        <result property="estimatedMinutes" column="ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="delayed" column="DELAYED"/>
+        <result property="highPriority" column="HIGH_PRIORITY"/>
+        <result property="overEffort" column="OVER_EFFORT"/>
+    </resultMap>
+
+    <resultMap id="SprintTestEvidenceRiskResultMap" type="com.devtrace.manager.sprint.dto.SprintTestEvidenceRiskResponse">
+        <id property="testEvidenceId" column="TEST_EVIDENCE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueId" column="ISSUE_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="issueKey" column="ISSUE_KEY"/>
+        <result property="testName" column="TEST_NAME"/>
+        <result property="testTarget" column="TEST_TARGET"/>
+        <result property="resultStatus" column="RESULT_STATUS"/>
+        <result property="testerName" column="TESTER_NAME"/>
+        <result property="testedAt" column="TESTED_AT"/>
+    </resultMap>
+
+    <resultMap id="SprintBurndownPointResultMap" type="com.devtrace.manager.sprint.dto.SprintBurndownPointResponse">
+        <result property="snapshotDate" column="SNAPSHOT_DATE"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+    </resultMap>
+
     <sql id="SprintColumns">
         SPRINT_ID,
         PROJECT_ID,
@@ -273,6 +317,117 @@
         FROM SPRINT_ISSUE SI
         INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
         WHERE SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <select id="selectSprintStatusDistributionList" parameterType="java.util.UUID" resultMap="SprintStatusDistributionResultMap">
+        SELECT
+            I.STATUS,
+            COUNT(*) AS ISSUE_COUNT
+        FROM SPRINT_ISSUE SI
+        INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+        WHERE SI.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        GROUP BY I.STATUS
+        ORDER BY
+            CASE I.STATUS
+                WHEN 'REGISTERED' THEN 1
+                WHEN 'ANALYZING' THEN 2
+                WHEN 'IN_PROGRESS' THEN 3
+                WHEN 'DEV_DONE' THEN 4
+                WHEN 'REVIEWING' THEN 5
+                WHEN 'TESTING' THEN 6
+                WHEN 'REJECTED' THEN 7
+                WHEN 'DONE' THEN 8
+                WHEN 'HOLD' THEN 9
+                WHEN 'CLOSED' THEN 10
+                ELSE 99
+            END
+    </select>
+
+    <select id="selectSprintAssigneeWorkloadList" parameterType="java.util.UUID" resultMap="SprintAssigneeWorkloadResultMap">
+        SELECT
+            I.ASSIGNEE_ID,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME,
+            COUNT(*) AS ISSUE_COUNT,
+            COALESCE(SUM(COALESCE(I.ESTIMATED_MINUTES, 0)), 0) AS ESTIMATED_MINUTES,
+            COALESCE(SUM(COALESCE(I.SPENT_MINUTES, 0)), 0) AS SPENT_MINUTES
+        FROM SPRINT_ISSUE SI
+        INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+        LEFT JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        WHERE SI.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        GROUP BY I.ASSIGNEE_ID, U.DISPLAY_NAME, U.USERNAME
+        ORDER BY SPENT_MINUTES DESC, ISSUE_COUNT DESC, ASSIGNEE_NAME ASC
+    </select>
+
+    <select id="selectSprintRiskIssueList" resultMap="SprintRiskIssueResultMap">
+        SELECT
+            I.ISSUE_ID,
+            I.ISSUE_KEY,
+            I.TITLE,
+            I.STATUS,
+            I.PRIORITY,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS ASSIGNEE_NAME,
+            I.DUE_DATE,
+            COALESCE(I.ESTIMATED_MINUTES, 0) AS ESTIMATED_MINUTES,
+            COALESCE(I.SPENT_MINUTES, 0) AS SPENT_MINUTES,
+            (I.DUE_DATE &lt; #{today} AND I.STATUS NOT IN ('DONE', 'CLOSED')) AS DELAYED,
+            (I.PRIORITY IN ('URGENT', 'HIGH') AND I.STATUS NOT IN ('DONE', 'CLOSED')) AS HIGH_PRIORITY,
+            (COALESCE(I.ESTIMATED_MINUTES, 0) &gt; 0 AND COALESCE(I.SPENT_MINUTES, 0) &gt; COALESCE(I.ESTIMATED_MINUTES, 0)) AS OVER_EFFORT
+        FROM SPRINT_ISSUE SI
+        INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+        LEFT JOIN APP_USER U ON I.ASSIGNEE_ID = U.USER_ID
+        WHERE SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND I.STATUS NOT IN ('DONE', 'CLOSED')
+          AND (
+              I.DUE_DATE &lt; #{today}
+              OR I.PRIORITY IN ('URGENT', 'HIGH')
+              OR (COALESCE(I.ESTIMATED_MINUTES, 0) &gt; 0 AND COALESCE(I.SPENT_MINUTES, 0) &gt; COALESCE(I.ESTIMATED_MINUTES, 0))
+          )
+        ORDER BY
+            CASE WHEN I.DUE_DATE &lt; #{today} THEN 0 ELSE 1 END,
+            CASE I.PRIORITY
+                WHEN 'URGENT' THEN 1
+                WHEN 'HIGH' THEN 2
+                WHEN 'NORMAL' THEN 3
+                WHEN 'LOW' THEN 4
+                ELSE 9
+            END,
+            CASE WHEN I.DUE_DATE IS NULL THEN 1 ELSE 0 END,
+            I.DUE_DATE ASC,
+            I.ISSUE_KEY ASC
+    </select>
+
+    <select id="selectSprintTestEvidenceRiskList" parameterType="java.util.UUID" resultMap="SprintTestEvidenceRiskResultMap">
+        SELECT
+            TE.TEST_EVIDENCE_ID,
+            TE.ISSUE_ID,
+            I.ISSUE_KEY,
+            TE.TEST_NAME,
+            TE.TEST_TARGET,
+            TE.RESULT_STATUS,
+            COALESCE(U.DISPLAY_NAME, U.USERNAME) AS TESTER_NAME,
+            TE.TESTED_AT
+        FROM SPRINT_ISSUE SI
+        INNER JOIN TEST_EVIDENCE TE ON SI.ISSUE_ID = TE.ISSUE_ID
+        INNER JOIN ISSUE I ON TE.ISSUE_ID = I.ISSUE_ID
+        LEFT JOIN APP_USER U ON TE.TESTER_ID = U.USER_ID
+        WHERE SI.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND TE.RESULT_STATUS IN ('FAIL', 'BLOCKED')
+        ORDER BY TE.TESTED_AT DESC, I.ISSUE_KEY ASC
+        LIMIT 30
+    </select>
+
+    <select id="selectSprintDailySpentList" parameterType="java.util.UUID" resultMap="SprintBurndownPointResultMap">
+        SELECT
+            WL.WORK_DATE AS SNAPSHOT_DATE,
+            COALESCE(SUM(WL.SPENT_MINUTES), 0) AS SPENT_MINUTES
+        FROM SPRINT S
+        INNER JOIN SPRINT_ISSUE SI ON S.SPRINT_ID = SI.SPRINT_ID
+        INNER JOIN WORK_LOG WL ON SI.ISSUE_ID = WL.ISSUE_ID
+        WHERE S.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+          AND (S.START_DATE IS NULL OR WL.WORK_DATE &gt;= S.START_DATE)
+          AND (S.END_DATE IS NULL OR WL.WORK_DATE &lt;= S.END_DATE)
+        GROUP BY WL.WORK_DATE
+        ORDER BY WL.WORK_DATE ASC
     </select>
 
     <insert id="insertSprintIssue" parameterType="com.devtrace.manager.sprint.dto.SprintIssueEntity">

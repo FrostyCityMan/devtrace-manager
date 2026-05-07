@@ -7,7 +7,9 @@ import com.devtrace.manager.issue.dto.IssueEntity;
 import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.project.dao.ProjectDao;
 import com.devtrace.manager.sprint.dao.SprintDao;
+import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
 import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
+import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueOrderRequest;
@@ -15,14 +17,22 @@ import com.devtrace.manager.sprint.dto.SprintIssueRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintRequest;
 import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintReportResponse;
+import com.devtrace.manager.sprint.dto.SprintRiskIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintStatus;
+import com.devtrace.manager.sprint.dto.SprintStatusDistributionResponse;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
+import com.devtrace.manager.sprint.dto.SprintTestEvidenceRiskResponse;
 import com.devtrace.manager.sprint.service.SprintService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,6 +152,34 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Override
+    public SprintReportResponse selectSprintReportDetails(UUID sprintId) {
+        SprintEntity sprint = selectSprintEntityDetails(sprintId);
+        LocalDate today = LocalDate.now();
+        SprintSummaryResponse summary = selectSummary(sprintId, today);
+        List<SprintStatusDistributionResponse> statusDistributions = selectStatusDistributions(sprintId, summary);
+        List<SprintAssigneeWorkloadResponse> assigneeWorkloads = emptyIfNull(sprintDao.selectSprintAssigneeWorkloadList(sprintId));
+        List<SprintRiskIssueResponse> riskIssues = emptyIfNull(sprintDao.selectSprintRiskIssueList(sprintId, today));
+        List<SprintTestEvidenceRiskResponse> testEvidenceRisks = emptyIfNull(sprintDao.selectSprintTestEvidenceRiskList(sprintId));
+
+        SprintReportResponse report = new SprintReportResponse();
+        report.setSprint(sprint.toResponse());
+        report.setSummary(summary);
+        report.setBurndownPoints(buildBurndownPoints(sprint, summary, sprintDao.selectSprintDailySpentList(sprintId), today));
+        report.setStatusDistributions(statusDistributions);
+        report.setAssigneeWorkloads(assigneeWorkloads);
+        report.setRiskIssues(riskIssues);
+        report.setFailedTestEvidences(testEvidenceRisks);
+        return report;
+    }
+
+    @Override
+    public List<SprintBurndownPointResponse> selectSprintBurndownList(UUID sprintId) {
+        SprintEntity sprint = selectSprintEntityDetails(sprintId);
+        LocalDate today = LocalDate.now();
+        return buildBurndownPoints(sprint, selectSummary(sprintId, today), sprintDao.selectSprintDailySpentList(sprintId), today);
+    }
+
+    @Override
     @Transactional
     public SprintIssueResponse insertSprintIssue(UUID sprintId, SprintIssueRequest request) {
         SprintEntity sprint = selectSprintEntityDetails(sprintId);
@@ -227,6 +265,95 @@ public class SprintServiceImpl implements SprintService {
             return requestedDisplayOrder;
         }
         return sprintDao.selectSprintIssueMaxDisplayOrder(sprintId) + 1;
+    }
+
+    private SprintSummaryResponse selectSummary(UUID sprintId, LocalDate today) {
+        SprintSummaryResponse summary = sprintDao.selectSprintSummaryDetails(sprintId, today);
+        return summary == null ? new SprintSummaryResponse() : summary;
+    }
+
+    private List<SprintStatusDistributionResponse> selectStatusDistributions(UUID sprintId, SprintSummaryResponse summary) {
+        List<SprintStatusDistributionResponse> distributions = emptyIfNull(sprintDao.selectSprintStatusDistributionList(sprintId));
+        int totalCount = summary.getTotalIssueCount();
+        distributions.forEach(distribution -> distribution.setIssueRate(totalCount == 0
+                ? 0
+                : Math.round(distribution.getIssueCount() * 100.0f / totalCount)));
+        return distributions;
+    }
+
+    private List<SprintBurndownPointResponse> buildBurndownPoints(
+            SprintEntity sprint,
+            SprintSummaryResponse summary,
+            List<SprintBurndownPointResponse> dailySpentList,
+            LocalDate today
+    ) {
+        if (sprint.getStartDate() == null || sprint.getEndDate() == null || sprint.getEndDate().isBefore(sprint.getStartDate())) {
+            return List.of();
+        }
+        Map<LocalDate, Integer> spentByDate = emptyIfNull(dailySpentList).stream()
+                .filter(point -> point.getSnapshotDate() != null)
+                .collect(Collectors.toMap(
+                        SprintBurndownPointResponse::getSnapshotDate,
+                        SprintBurndownPointResponse::getSpentMinutes,
+                        Integer::sum
+                ));
+
+        int estimatedMinutes = summary.getEstimatedMinutes();
+        int maxRemainingMinutes = Math.max(1, estimatedMinutes);
+        long totalDays = ChronoUnit.DAYS.between(sprint.getStartDate(), sprint.getEndDate()) + 1;
+        List<SprintBurndownPointResponse> points = new ArrayList<>();
+        int cumulativeSpentMinutes = 0;
+
+        for (int dayIndex = 0; dayIndex < totalDays; dayIndex++) {
+            LocalDate snapshotDate = sprint.getStartDate().plusDays(dayIndex);
+            int spentMinutes = spentByDate.getOrDefault(snapshotDate, 0);
+            cumulativeSpentMinutes += spentMinutes;
+            int idealRemainingMinutes = calculateIdealRemainingMinutes(estimatedMinutes, dayIndex, totalDays);
+            Integer actualRemainingMinutes = snapshotDate.isAfter(today)
+                    ? null
+                    : Math.max(0, estimatedMinutes - cumulativeSpentMinutes);
+
+            SprintBurndownPointResponse point = new SprintBurndownPointResponse();
+            point.setSnapshotDate(snapshotDate);
+            point.setSpentMinutes(spentMinutes);
+            point.setCumulativeSpentMinutes(cumulativeSpentMinutes);
+            point.setIdealRemainingMinutes(idealRemainingMinutes);
+            point.setActualRemainingMinutes(actualRemainingMinutes);
+            point.setXPercent(calculateXPercent(dayIndex, totalDays));
+            point.setIdealYPercent(calculateYPercent(idealRemainingMinutes, maxRemainingMinutes));
+            point.setActualYPercent(actualRemainingMinutes == null
+                    ? null
+                    : calculateYPercent(actualRemainingMinutes, maxRemainingMinutes));
+            points.add(point);
+        }
+        return points;
+    }
+
+    private int calculateIdealRemainingMinutes(int estimatedMinutes, int dayIndex, long totalDays) {
+        if (estimatedMinutes <= 0) {
+            return 0;
+        }
+        if (totalDays <= 1) {
+            return estimatedMinutes;
+        }
+        double burnRatio = dayIndex / (double) (totalDays - 1);
+        return Math.max(0, (int) Math.round(estimatedMinutes - (estimatedMinutes * burnRatio)));
+    }
+
+    private int calculateXPercent(int dayIndex, long totalDays) {
+        if (totalDays <= 1) {
+            return 0;
+        }
+        return (int) Math.round(dayIndex * 100.0 / (totalDays - 1));
+    }
+
+    private int calculateYPercent(int remainingMinutes, int maxRemainingMinutes) {
+        double ratio = Math.max(0.0, Math.min(1.0, remainingMinutes / (double) maxRemainingMinutes));
+        return 10 + (int) Math.round(80.0 * (1.0 - ratio));
+    }
+
+    private <T> List<T> emptyIfNull(List<T> items) {
+        return items == null ? List.of() : items;
     }
 
     private void markDelayed(SprintIssueResponse issue) {

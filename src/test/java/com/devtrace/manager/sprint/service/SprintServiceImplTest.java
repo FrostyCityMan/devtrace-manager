@@ -3,6 +3,7 @@ package com.devtrace.manager.sprint.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,14 +17,22 @@ import com.devtrace.manager.project.dao.ProjectDao;
 import com.devtrace.manager.project.dto.ProjectEntity;
 import com.devtrace.manager.project.dto.ProjectStatus;
 import com.devtrace.manager.sprint.dao.SprintDao;
+import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
+import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintRequest;
 import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintReportResponse;
+import com.devtrace.manager.sprint.dto.SprintRiskIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintStatus;
+import com.devtrace.manager.sprint.dto.SprintStatusDistributionResponse;
+import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
+import com.devtrace.manager.sprint.dto.SprintTestEvidenceRiskResponse;
 import com.devtrace.manager.sprint.service.impl.SprintServiceImpl;
+import com.devtrace.manager.testevidence.dto.TestEvidenceResult;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -107,6 +116,40 @@ class SprintServiceImplTest {
         assertThat(response.getDisplayOrder()).isEqualTo(3);
     }
 
+    @Test
+    void selectSprintReportDetailsBuildsBurndownAndRiskSummary() {
+        UUID projectId = UUID.randomUUID();
+        UUID sprintId = UUID.randomUUID();
+        SprintEntity sprint = createSprint(sprintId, projectId, SprintStatus.ACTIVE);
+        sprint.setStartDate(LocalDate.of(2026, 5, 4));
+        sprint.setEndDate(LocalDate.of(2026, 5, 6));
+        when(sprintDao.selectSprintDetails(sprintId)).thenReturn(Optional.of(sprint));
+        when(sprintDao.selectSprintSummaryDetails(eq(sprintId), any(LocalDate.class))).thenReturn(createSummary());
+        when(sprintDao.selectSprintStatusDistributionList(sprintId)).thenReturn(List.of(createDistribution()));
+        when(sprintDao.selectSprintAssigneeWorkloadList(sprintId)).thenReturn(List.of(createWorkload()));
+        when(sprintDao.selectSprintRiskIssueList(eq(sprintId), any(LocalDate.class))).thenReturn(List.of(createRiskIssue()));
+        when(sprintDao.selectSprintTestEvidenceRiskList(sprintId)).thenReturn(List.of(createTestEvidenceRisk()));
+        when(sprintDao.selectSprintDailySpentList(sprintId)).thenReturn(List.of(
+                createDailySpent(LocalDate.of(2026, 5, 4), 120),
+                createDailySpent(LocalDate.of(2026, 5, 5), 180)
+        ));
+
+        SprintReportResponse report = sprintService.selectSprintReportDetails(sprintId);
+
+        assertThat(report.getSprint().getSprintId()).isEqualTo(sprintId);
+        assertThat(report.getRemainingIssueCount()).isEqualTo(2);
+        assertThat(report.getBurndownPoints()).hasSize(3);
+        assertThat(report.getBurndownPoints().get(0).getIdealRemainingMinutes()).isEqualTo(600);
+        assertThat(report.getBurndownPoints().get(2).getIdealRemainingMinutes()).isZero();
+        assertThat(report.getBurndownPoints().get(2).getActualRemainingMinutes()).isEqualTo(300);
+        assertThat(report.getStatusDistributions().get(0).getIssueRate()).isEqualTo(50);
+        assertThat(report.getAssigneeWorkloads()).hasSize(1);
+        assertThat(report.getRiskIssues()).hasSize(1);
+        assertThat(report.getFailedTestEvidences()).hasSize(1);
+        assertThat(report.getIdealPolylinePoints()).isNotBlank();
+        assertThat(report.getActualPolylinePoints()).isNotBlank();
+    }
+
     private SprintRequest createSprintRequest(UUID projectId) {
         SprintRequest request = new SprintRequest();
         request.setProjectId(projectId);
@@ -166,5 +209,69 @@ class SprintServiceImplTest {
         response.setPriority(IssuePriority.NORMAL);
         response.setDisplayOrder(displayOrder);
         return response;
+    }
+
+    private SprintSummaryResponse createSummary() {
+        SprintSummaryResponse summary = new SprintSummaryResponse();
+        summary.setTotalIssueCount(4);
+        summary.setDoneIssueCount(2);
+        summary.setActiveIssueCount(2);
+        summary.setDelayedIssueCount(1);
+        summary.setEstimatedMinutes(600);
+        summary.setSpentMinutes(300);
+        return summary;
+    }
+
+    private SprintStatusDistributionResponse createDistribution() {
+        SprintStatusDistributionResponse distribution = new SprintStatusDistributionResponse();
+        distribution.setStatus(IssueStatus.DONE);
+        distribution.setIssueCount(2);
+        return distribution;
+    }
+
+    private SprintAssigneeWorkloadResponse createWorkload() {
+        SprintAssigneeWorkloadResponse workload = new SprintAssigneeWorkloadResponse();
+        workload.setAssigneeId(UUID.randomUUID());
+        workload.setAssigneeName("관리자");
+        workload.setIssueCount(2);
+        workload.setEstimatedMinutes(300);
+        workload.setSpentMinutes(360);
+        return workload;
+    }
+
+    private SprintRiskIssueResponse createRiskIssue() {
+        SprintRiskIssueResponse riskIssue = new SprintRiskIssueResponse();
+        riskIssue.setIssueId(UUID.randomUUID());
+        riskIssue.setIssueKey("DTR-201");
+        riskIssue.setTitle("지연 이슈");
+        riskIssue.setStatus(IssueStatus.IN_PROGRESS);
+        riskIssue.setPriority(IssuePriority.HIGH);
+        riskIssue.setDueDate(LocalDate.of(2026, 5, 5));
+        riskIssue.setEstimatedMinutes(120);
+        riskIssue.setSpentMinutes(180);
+        riskIssue.setDelayed(true);
+        riskIssue.setHighPriority(true);
+        riskIssue.setOverEffort(true);
+        return riskIssue;
+    }
+
+    private SprintTestEvidenceRiskResponse createTestEvidenceRisk() {
+        SprintTestEvidenceRiskResponse risk = new SprintTestEvidenceRiskResponse();
+        risk.setTestEvidenceId(UUID.randomUUID());
+        risk.setIssueId(UUID.randomUUID());
+        risk.setIssueKey("DTR-201");
+        risk.setTestName("로그인 실패 케이스");
+        risk.setTestTarget("/login");
+        risk.setResultStatus(TestEvidenceResult.FAIL);
+        risk.setTesterName("관리자");
+        risk.setTestedAt(LocalDateTime.of(2026, 5, 6, 10, 0));
+        return risk;
+    }
+
+    private SprintBurndownPointResponse createDailySpent(LocalDate snapshotDate, int spentMinutes) {
+        SprintBurndownPointResponse point = new SprintBurndownPointResponse();
+        point.setSnapshotDate(snapshotDate);
+        point.setSpentMinutes(spentMinutes);
+        return point;
     }
 }

@@ -4,8 +4,10 @@ import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintIssueOrderRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
+import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintRequest;
 import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintReportResponse;
 import com.devtrace.manager.sprint.dto.SprintSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
 import java.util.List;
@@ -32,6 +34,10 @@ public interface SprintService {
     List<SprintIssueResponse> selectSprintIssueList(UUID sprintId);
 
     SprintSummaryResponse selectSprintSummaryDetails(UUID sprintId);
+
+    SprintReportResponse selectSprintReportDetails(UUID sprintId);
+
+    List<SprintBurndownPointResponse> selectSprintBurndownList(UUID sprintId);
 
     SprintIssueResponse insertSprintIssue(UUID sprintId, SprintIssueRequest request);
 

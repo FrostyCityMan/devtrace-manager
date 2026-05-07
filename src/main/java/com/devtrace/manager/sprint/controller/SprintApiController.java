@@ -2,11 +2,13 @@ package com.devtrace.manager.sprint.controller;
 
 import com.devtrace.manager.common.response.ApiResponse;
 import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
+import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintIssueOrderRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueRequest;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
 import com.devtrace.manager.sprint.dto.SprintRequest;
 import com.devtrace.manager.sprint.dto.SprintResponse;
+import com.devtrace.manager.sprint.dto.SprintReportResponse;
 import com.devtrace.manager.sprint.dto.SprintSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
 import com.devtrace.manager.sprint.service.SprintService;
@@ -81,6 +83,16 @@ public class SprintApiController {
     @GetMapping("/{sprintId}/summary")
     public ApiResponse<SprintSummaryResponse> summary(@PathVariable UUID sprintId) {
         return ApiResponse.success(sprintService.selectSprintSummaryDetails(sprintId));
+    }
+
+    @GetMapping("/{sprintId}/report")
+    public ApiResponse<SprintReportResponse> report(@PathVariable UUID sprintId) {
+        return ApiResponse.success(sprintService.selectSprintReportDetails(sprintId));
+    }
+
+    @GetMapping("/{sprintId}/burndown")
+    public ApiResponse<List<SprintBurndownPointResponse>> burndown(@PathVariable UUID sprintId) {
+        return ApiResponse.success(sprintService.selectSprintBurndownList(sprintId));
     }
 
     @PostMapping("/{sprintId}/issues")
