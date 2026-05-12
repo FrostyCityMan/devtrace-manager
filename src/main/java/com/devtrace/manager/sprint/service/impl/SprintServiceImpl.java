@@ -10,6 +10,7 @@ import com.devtrace.manager.sprint.dao.SprintDao;
 import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
 import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
 import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
+import com.devtrace.manager.sprint.dto.SprintDailySnapshotResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueOrderRequest;
@@ -25,6 +26,7 @@ import com.devtrace.manager.sprint.dto.SprintStatusDistributionResponse;
 import com.devtrace.manager.sprint.dto.SprintSummaryResponse;
 import com.devtrace.manager.sprint.dto.SprintTestEvidenceRiskResponse;
 import com.devtrace.manager.sprint.service.SprintService;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -39,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 스프린트 계획과 분석 업무 규칙을 구현합니다.
  *
- * <p>스프린트 상태 전이, 백로그 배정, 요약 지표, Burndown 계산형 리포트를 조립합니다.</p>
+ * <p>스프린트 상태 전이, 백로그 배정, 요약 지표, 스냅샷 기반 Burndown 리포트를 조립합니다.</p>
  */
 @Service
 @Transactional(readOnly = true)
@@ -48,6 +50,7 @@ public class SprintServiceImpl implements SprintService {
     private final SprintDao sprintDao;
     private final ProjectDao projectDao;
     private final IssueDao issueDao;
+    private final SprintSnapshotService sprintSnapshotService;
 
     /**
      * 스프린트 서비스 구현체를 생성한다.
@@ -57,11 +60,18 @@ public class SprintServiceImpl implements SprintService {
      * @param sprintDao 스프린트 SQL 호출 DAO
      * @param projectDao 프로젝트 검증 DAO
      * @param issueDao 이슈 검증 DAO
+     * @param sprintSnapshotService 스프린트 일자별 스냅샷 서비스
      */
-    public SprintServiceImpl(SprintDao sprintDao, ProjectDao projectDao, IssueDao issueDao) {
+    public SprintServiceImpl(
+            SprintDao sprintDao,
+            ProjectDao projectDao,
+            IssueDao issueDao,
+            SprintSnapshotService sprintSnapshotService
+    ) {
         this.sprintDao = sprintDao;
         this.projectDao = projectDao;
         this.issueDao = issueDao;
+        this.sprintSnapshotService = sprintSnapshotService;
     }
 
     /**
@@ -136,6 +146,7 @@ public class SprintServiceImpl implements SprintService {
                     throw new BusinessException("이미 진행 중인 스프린트가 있습니다.", "SPRINT_ACTIVE_EXISTS");
                 });
         sprintDao.updateSprintStatus(sprintId, SprintStatus.ACTIVE, DateTimeUtil.now());
+        sprintSnapshotService.saveSprintDailySnapshot(sprintId);
         return selectSprintDetails(sprintId);
     }
 
@@ -252,26 +263,29 @@ public class SprintServiceImpl implements SprintService {
     /**
      * 스프린트 분석 리포트 데이터를 조회한다.
      *
-     * <p>여러 SQL 조회 결과를 하나의 화면/API 응답으로 조합한다. 현재 MVP에서는
-     * 스냅샷 테이블 없이 실시간 계산 방식으로 Burndown 데이터를 만든다.</p>
+     * <p>여러 SQL 조회 결과를 하나의 화면/API 응답으로 조합한다. 리포트 조회 시점의
+     * 스냅샷을 먼저 갱신한 뒤 저장된 스냅샷을 기준으로 Burndown 데이터를 만든다.</p>
      *
      * @param sprintId 분석 대상 스프린트 ID
      * @return 스프린트 분석 리포트 응답
      */
     @Override
+    @Transactional
     public SprintReportResponse selectSprintReportDetails(UUID sprintId) {
         SprintEntity sprint = selectSprintEntityDetails(sprintId);
         LocalDate today = LocalDate.now();
+        sprintSnapshotService.saveSprintDailySnapshot(sprintId);
         SprintSummaryResponse summary = selectSummary(sprintId, today);
         List<SprintStatusDistributionResponse> statusDistributions = selectStatusDistributions(sprintId, summary);
         List<SprintAssigneeWorkloadResponse> assigneeWorkloads = emptyIfNull(sprintDao.selectSprintAssigneeWorkloadList(sprintId));
         List<SprintRiskIssueResponse> riskIssues = emptyIfNull(sprintDao.selectSprintRiskIssueList(sprintId, today));
         List<SprintTestEvidenceRiskResponse> testEvidenceRisks = emptyIfNull(sprintDao.selectSprintTestEvidenceRiskList(sprintId));
+        List<SprintDailySnapshotResponse> snapshots = sprintSnapshotService.selectSprintDailySnapshotList(sprintId);
 
         SprintReportResponse report = new SprintReportResponse();
         report.setSprint(sprint.toResponse());
         report.setSummary(summary);
-        report.setBurndownPoints(buildBurndownPoints(sprint, summary, sprintDao.selectSprintDailySpentList(sprintId), today));
+        report.setBurndownPoints(buildBurndownPoints(sprint, summary, snapshots));
         report.setStatusDistributions(statusDistributions);
         report.setAssigneeWorkloads(assigneeWorkloads);
         report.setRiskIssues(riskIssues);
@@ -282,16 +296,23 @@ public class SprintServiceImpl implements SprintService {
     /**
      * Burndown Chart 포인트 목록을 조회한다.
      *
-     * <p>리포트 전체가 필요 없는 API 호출을 위해 차트 데이터만 계산해 반환한다.</p>
+     * <p>리포트 전체가 필요 없는 API 호출을 위해 당일 스냅샷을 갱신한 뒤 차트 데이터만
+     * 계산해 반환한다.</p>
      *
      * @param sprintId 분석 대상 스프린트 ID
      * @return Burndown Chart 포인트 목록
      */
     @Override
+    @Transactional
     public List<SprintBurndownPointResponse> selectSprintBurndownList(UUID sprintId) {
         SprintEntity sprint = selectSprintEntityDetails(sprintId);
         LocalDate today = LocalDate.now();
-        return buildBurndownPoints(sprint, selectSummary(sprintId, today), sprintDao.selectSprintDailySpentList(sprintId), today);
+        sprintSnapshotService.saveSprintDailySnapshot(sprintId);
+        return buildBurndownPoints(
+                sprint,
+                selectSummary(sprintId, today),
+                sprintSnapshotService.selectSprintDailySnapshotList(sprintId)
+        );
     }
 
     /**
@@ -325,6 +346,7 @@ public class SprintServiceImpl implements SprintService {
         sprintIssue.setDisplayOrder(selectDisplayOrder(sprintId, request.getDisplayOrder()));
         sprintIssue.setCreatedAt(DateTimeUtil.now());
         sprintDao.insertSprintIssue(sprintIssue);
+        sprintSnapshotService.saveSprintDailySnapshot(sprintId);
 
         return sprintDao.selectSprintIssueList(sprintId).stream()
                 .filter(item -> item.getIssueId().equals(issue.getIssueId()))
@@ -364,6 +386,7 @@ public class SprintServiceImpl implements SprintService {
         selectSprintEntityDetails(sprintId);
         selectSprintIssueEntityDetails(sprintId, issueId);
         sprintDao.deleteSprintIssue(sprintId, issueId);
+        sprintSnapshotService.saveSprintDailySnapshot(sprintId);
     }
 
     /**
@@ -495,62 +518,68 @@ public class SprintServiceImpl implements SprintService {
      *
      * <p>각 포인트에는 다음 값이 포함된다.</p>
      * <ul>
-     *     <li>해당 일자의 실제 투입 공수</li>
-     *     <li>누적 투입 공수</li>
+     *     <li>스냅샷 기준 누적 실제 공수</li>
      *     <li>이상 잔여 공수</li>
-     *     <li>현재일 이전 구간의 실제 잔여 공수</li>
+     *     <li>스냅샷 기준 실제 잔여 예상 공수</li>
      *     <li>SVG Polyline 표시를 위한 x/y 좌표 비율</li>
      * </ul>
      *
      * @param sprint 분석 대상 스프린트 엔티티
      * @param summary 스프린트 요약 지표
-     * @param dailySpentList 일자별 실제 투입 공수 목록
-     * @param today 실제 잔여 공수 표시 기준일
+     * @param snapshotList 저장된 일자별 스프린트 스냅샷 목록
      * @return Burndown Chart 포인트 목록
      */
     private List<SprintBurndownPointResponse> buildBurndownPoints(
             SprintEntity sprint,
             SprintSummaryResponse summary,
-            List<SprintBurndownPointResponse> dailySpentList,
-            LocalDate today
+            List<SprintDailySnapshotResponse> snapshotList
     ) {
         if (sprint.getStartDate() == null || sprint.getEndDate() == null || sprint.getEndDate().isBefore(sprint.getStartDate())) {
             return List.of();
         }
-        Map<LocalDate, Integer> spentByDate = emptyIfNull(dailySpentList).stream()
-                .filter(point -> point.getSnapshotDate() != null)
+        List<SprintDailySnapshotResponse> snapshots = emptyIfNull(snapshotList);
+        Map<LocalDate, SprintDailySnapshotResponse> snapshotByDate = snapshots.stream()
+                .filter(snapshot -> snapshot.getSnapshotDate() != null)
                 .collect(Collectors.toMap(
-                        SprintBurndownPointResponse::getSnapshotDate,
-                        SprintBurndownPointResponse::getSpentMinutes,
-                        Integer::sum
+                        SprintDailySnapshotResponse::getSnapshotDate,
+                        snapshot -> snapshot,
+                        (left, right) -> right
                 ));
 
-        int estimatedMinutes = summary.getEstimatedMinutes();
-        int maxRemainingMinutes = Math.max(1, estimatedMinutes);
+        int snapshotEstimatedMinutes = snapshots.stream()
+                .mapToInt(SprintDailySnapshotResponse::getTotalEstimatedMinutes)
+                .max()
+                .orElse(0);
+        int estimatedMinutes = Math.max(summary.getEstimatedMinutes(), snapshotEstimatedMinutes);
+        int maxChartMinutes = Math.max(1, estimatedMinutes);
+        for (SprintDailySnapshotResponse snapshot : snapshots) {
+            maxChartMinutes = Math.max(maxChartMinutes, snapshot.getRemainingEstimatedMinutes());
+            maxChartMinutes = Math.max(maxChartMinutes, snapshot.getSpentMinutes());
+        }
         long totalDays = ChronoUnit.DAYS.between(sprint.getStartDate(), sprint.getEndDate()) + 1;
         List<SprintBurndownPointResponse> points = new ArrayList<>();
-        int cumulativeSpentMinutes = 0;
 
         for (int dayIndex = 0; dayIndex < totalDays; dayIndex++) {
             LocalDate snapshotDate = sprint.getStartDate().plusDays(dayIndex);
-            int spentMinutes = spentByDate.getOrDefault(snapshotDate, 0);
-            cumulativeSpentMinutes += spentMinutes;
+            SprintDailySnapshotResponse snapshot = snapshotByDate.get(snapshotDate);
             int idealRemainingMinutes = calculateIdealRemainingMinutes(estimatedMinutes, dayIndex, totalDays);
-            Integer actualRemainingMinutes = snapshotDate.isAfter(today)
-                    ? null
-                    : Math.max(0, estimatedMinutes - cumulativeSpentMinutes);
+            Integer actualRemainingMinutes = snapshot == null ? null : snapshot.getRemainingEstimatedMinutes();
+            Integer spentMinutes = snapshot == null ? null : snapshot.getSpentMinutes();
 
             SprintBurndownPointResponse point = new SprintBurndownPointResponse();
             point.setSnapshotDate(snapshotDate);
-            point.setSpentMinutes(spentMinutes);
-            point.setCumulativeSpentMinutes(cumulativeSpentMinutes);
+            point.setSpentMinutes(spentMinutes == null ? 0 : spentMinutes);
+            point.setCumulativeSpentMinutes(spentMinutes == null ? 0 : spentMinutes);
             point.setIdealRemainingMinutes(idealRemainingMinutes);
             point.setActualRemainingMinutes(actualRemainingMinutes);
             point.setXPercent(calculateXPercent(dayIndex, totalDays));
-            point.setIdealYPercent(calculateYPercent(idealRemainingMinutes, maxRemainingMinutes));
+            point.setIdealYPercent(calculateYPercent(idealRemainingMinutes, maxChartMinutes));
             point.setActualYPercent(actualRemainingMinutes == null
                     ? null
-                    : calculateYPercent(actualRemainingMinutes, maxRemainingMinutes));
+                    : calculateYPercent(actualRemainingMinutes, maxChartMinutes));
+            point.setSpentYPercent(spentMinutes == null
+                    ? null
+                    : calculateYPercent(spentMinutes, maxChartMinutes));
             points.add(point);
         }
         return points;

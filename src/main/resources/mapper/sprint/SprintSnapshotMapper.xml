@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.devtrace.manager.sprint.dao.SprintSnapshotDao">
+
+    <resultMap id="SprintDailySnapshotResultMap" type="com.devtrace.manager.sprint.dto.SprintDailySnapshotEntity">
+        <id property="snapshotId" column="SNAPSHOT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="sprintId" column="SPRINT_ID" javaType="java.util.UUID" jdbcType="OTHER" typeHandler="com.devtrace.manager.common.config.UuidTypeHandler"/>
+        <result property="snapshotDate" column="SNAPSHOT_DATE"/>
+        <result property="totalIssueCount" column="TOTAL_ISSUE_COUNT"/>
+        <result property="doneIssueCount" column="DONE_ISSUE_COUNT"/>
+        <result property="remainingIssueCount" column="REMAINING_ISSUE_COUNT"/>
+        <result property="totalEstimatedMinutes" column="TOTAL_ESTIMATED_MINUTES"/>
+        <result property="doneEstimatedMinutes" column="DONE_ESTIMATED_MINUTES"/>
+        <result property="remainingEstimatedMinutes" column="REMAINING_ESTIMATED_MINUTES"/>
+        <result property="spentMinutes" column="SPENT_MINUTES"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <select id="selectSprintDailySnapshotSourceDetails" resultMap="SprintDailySnapshotResultMap">
+        WITH ISSUE_SUMMARY AS (
+            SELECT
+                COUNT(*) AS TOTAL_ISSUE_COUNT,
+                COALESCE(SUM(CASE WHEN I.STATUS IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END), 0) AS DONE_ISSUE_COUNT,
+                COALESCE(SUM(CASE WHEN I.STATUS NOT IN ('DONE', 'CLOSED') THEN 1 ELSE 0 END), 0) AS REMAINING_ISSUE_COUNT,
+                COALESCE(SUM(COALESCE(I.ESTIMATED_MINUTES, 0)), 0) AS TOTAL_ESTIMATED_MINUTES,
+                COALESCE(SUM(CASE WHEN I.STATUS IN ('DONE', 'CLOSED') THEN COALESCE(I.ESTIMATED_MINUTES, 0) ELSE 0 END), 0) AS DONE_ESTIMATED_MINUTES,
+                COALESCE(SUM(CASE WHEN I.STATUS NOT IN ('DONE', 'CLOSED') THEN COALESCE(I.ESTIMATED_MINUTES, 0) ELSE 0 END), 0) AS REMAINING_ESTIMATED_MINUTES
+            FROM SPRINT_ISSUE SI
+            INNER JOIN ISSUE I ON SI.ISSUE_ID = I.ISSUE_ID
+            WHERE SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        ),
+        SPENT_SUMMARY AS (
+            SELECT COALESCE(SUM(WL.SPENT_MINUTES), 0) AS SPENT_MINUTES
+            FROM SPRINT_ISSUE SI
+            INNER JOIN WORK_LOG WL ON SI.ISSUE_ID = WL.ISSUE_ID
+            WHERE SI.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+              AND WL.WORK_DATE &lt;= #{snapshotDate}
+        )
+        SELECT
+            NULL AS SNAPSHOT_ID,
+            S.SPRINT_ID,
+            #{snapshotDate} AS SNAPSHOT_DATE,
+            ISSUE_SUMMARY.TOTAL_ISSUE_COUNT,
+            ISSUE_SUMMARY.DONE_ISSUE_COUNT,
+            ISSUE_SUMMARY.REMAINING_ISSUE_COUNT,
+            ISSUE_SUMMARY.TOTAL_ESTIMATED_MINUTES,
+            ISSUE_SUMMARY.DONE_ESTIMATED_MINUTES,
+            ISSUE_SUMMARY.REMAINING_ESTIMATED_MINUTES,
+            SPENT_SUMMARY.SPENT_MINUTES,
+            NULL AS CREATED_AT
+        FROM SPRINT S
+        CROSS JOIN ISSUE_SUMMARY
+        CROSS JOIN SPENT_SUMMARY
+        WHERE S.SPRINT_ID = #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+
+    <insert id="saveSprintDailySnapshot" parameterType="com.devtrace.manager.sprint.dto.SprintDailySnapshotEntity">
+        INSERT INTO SPRINT_DAILY_SNAPSHOT (
+            SNAPSHOT_ID,
+            SPRINT_ID,
+            SNAPSHOT_DATE,
+            TOTAL_ISSUE_COUNT,
+            DONE_ISSUE_COUNT,
+            REMAINING_ISSUE_COUNT,
+            TOTAL_ESTIMATED_MINUTES,
+            DONE_ESTIMATED_MINUTES,
+            REMAINING_ESTIMATED_MINUTES,
+            SPENT_MINUTES,
+            CREATED_AT
+        ) VALUES (
+            #{snapshotId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{sprintId,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler},
+            #{snapshotDate},
+            #{totalIssueCount},
+            #{doneIssueCount},
+            #{remainingIssueCount},
+            #{totalEstimatedMinutes},
+            #{doneEstimatedMinutes},
+            #{remainingEstimatedMinutes},
+            #{spentMinutes},
+            #{createdAt}
+        )
+        ON CONFLICT (SPRINT_ID, SNAPSHOT_DATE)
+        DO UPDATE SET
+            TOTAL_ISSUE_COUNT = EXCLUDED.TOTAL_ISSUE_COUNT,
+            DONE_ISSUE_COUNT = EXCLUDED.DONE_ISSUE_COUNT,
+            REMAINING_ISSUE_COUNT = EXCLUDED.REMAINING_ISSUE_COUNT,
+            TOTAL_ESTIMATED_MINUTES = EXCLUDED.TOTAL_ESTIMATED_MINUTES,
+            DONE_ESTIMATED_MINUTES = EXCLUDED.DONE_ESTIMATED_MINUTES,
+            REMAINING_ESTIMATED_MINUTES = EXCLUDED.REMAINING_ESTIMATED_MINUTES,
+            SPENT_MINUTES = EXCLUDED.SPENT_MINUTES,
+            CREATED_AT = EXCLUDED.CREATED_AT
+    </insert>
+
+    <select id="selectSprintDailySnapshotList" parameterType="java.util.UUID" resultMap="SprintDailySnapshotResultMap">
+        SELECT
+            SNAPSHOT_ID,
+            SPRINT_ID,
+            SNAPSHOT_DATE,
+            TOTAL_ISSUE_COUNT,
+            DONE_ISSUE_COUNT,
+            REMAINING_ISSUE_COUNT,
+            TOTAL_ESTIMATED_MINUTES,
+            DONE_ESTIMATED_MINUTES,
+            REMAINING_ESTIMATED_MINUTES,
+            SPENT_MINUTES,
+            CREATED_AT
+        FROM SPRINT_DAILY_SNAPSHOT
+        WHERE SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+        ORDER BY SNAPSHOT_DATE ASC
+    </select>
+
+    <select id="selectSprintIdByIssueIdList" parameterType="java.util.UUID" resultType="java.util.UUID">
+        SELECT SPRINT_ID
+        FROM SPRINT_ISSUE
+        WHERE ISSUE_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
+    </select>
+</mapper>

@@ -12,6 +12,7 @@ import com.devtrace.manager.common.util.DateTimeUtil;
 import com.devtrace.manager.issue.dao.IssueDao;
 import com.devtrace.manager.issue.dto.IssueEntity;
 import com.devtrace.manager.issue.dto.IssueStatus;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
@@ -42,16 +43,19 @@ public class BoardServiceImpl implements BoardService {
 
     private final BoardDao boardDao;
     private final IssueDao issueDao;
+    private final SprintSnapshotService sprintSnapshotService;
 
     /**
      * 보드 서비스 구현체를 생성한다.
      *
      * @param boardDao 보드 조회 DAO
      * @param issueDao 이슈 상태 변경 DAO
+     * @param sprintSnapshotService 스프린트 일자별 스냅샷 서비스
      */
-    public BoardServiceImpl(BoardDao boardDao, IssueDao issueDao) {
+    public BoardServiceImpl(BoardDao boardDao, IssueDao issueDao, SprintSnapshotService sprintSnapshotService) {
         this.boardDao = boardDao;
         this.issueDao = issueDao;
+        this.sprintSnapshotService = sprintSnapshotService;
     }
 
     /**
@@ -126,6 +130,7 @@ public class BoardServiceImpl implements BoardService {
         }
 
         issueDao.updateIssueStatus(issue.getIssueId(), request.getStatus(), resolvedDate, now);
+        sprintSnapshotService.saveSprintDailySnapshotByIssueId(issue.getIssueId());
     }
 
     /**

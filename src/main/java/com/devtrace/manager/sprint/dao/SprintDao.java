@@ -2,7 +2,6 @@ package com.devtrace.manager.sprint.dao;
 
 import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
 import com.devtrace.manager.sprint.dto.SprintBacklogSearchCondition;
-import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueResponse;
@@ -177,16 +176,6 @@ public interface SprintDao {
      * @return 테스트 증적 위험 목록
      */
     List<SprintTestEvidenceRiskResponse> selectSprintTestEvidenceRiskList(UUID sprintId);
-
-    /**
-     * 스프린트 기간 내 일자별 실제 작업 공수를 조회한다.
-     *
-     * <p>Burndown Chart의 실제 잔여 공수 계산에 사용한다.</p>
-     *
-     * @param sprintId 스프린트 ID
-     * @return 일자별 작업 공수 목록
-     */
-    List<SprintBurndownPointResponse> selectSprintDailySpentList(UUID sprintId);
 
     /**
      * 스프린트와 이슈의 배정 관계를 저장한다.

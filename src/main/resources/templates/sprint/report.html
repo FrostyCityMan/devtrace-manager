@@ -60,7 +60,7 @@
             <header>
                 <div>
                     <h2>Burndown Chart</h2>
-                    <p>스프린트 기간의 이상 잔여 공수와 실제 잔여 공수를 비교합니다.</p>
+                    <p>스냅샷 기준 이상 잔여 공수, 실제 잔여 공수, 누적 투입 공수를 비교합니다.</p>
                 </div>
                 <span th:text="${#lists.size(report.burndownPoints) + '일'}">0일</span>
             </header>
@@ -74,16 +74,18 @@
                     <line x1="0" y1="90" x2="100" y2="90" class="axis"></line>
                     <polyline th:attr="points=${report.idealPolylinePoints}" class="ideal"></polyline>
                     <polyline th:attr="points=${report.actualPolylinePoints}" class="actual"></polyline>
+                    <polyline th:attr="points=${report.spentPolylinePoints}" class="spent"></polyline>
                 </svg>
                 <div class="dt-burndown-legend">
                     <span><i class="ideal"></i> 이상 잔여</span>
                     <span><i class="actual"></i> 실제 잔여</span>
+                    <span><i class="spent"></i> 누적 공수</span>
                 </div>
             </div>
             <div class="dt-burndown-points" th:if="${!#lists.isEmpty(report.burndownPoints)}">
                 <span th:each="point : ${report.burndownPoints}"
-                      th:text="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel}"
-                      th:title="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel}">2026-05-06 / 실제 0h / 이상 0h</span>
+                      th:text="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel + ' / 누적 ' + point.spentHoursLabel}"
+                      th:title="${point.snapshotDate + ' / 실제 ' + point.actualRemainingHoursLabel + ' / 이상 ' + point.idealRemainingHoursLabel + ' / 누적 ' + point.spentHoursLabel}">2026-05-06 / 실제 0h / 이상 0h / 누적 0h</span>
             </div>
         </article>
 

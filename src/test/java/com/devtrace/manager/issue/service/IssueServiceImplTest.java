@@ -18,6 +18,7 @@ import com.devtrace.manager.issue.service.impl.IssueServiceImpl;
 import com.devtrace.manager.project.dao.ProjectDao;
 import com.devtrace.manager.project.dto.ProjectEntity;
 import com.devtrace.manager.project.dto.ProjectStatus;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,11 +40,14 @@ class IssueServiceImplTest {
     @Mock
     private ProjectDao projectDao;
 
+    @Mock
+    private SprintSnapshotService sprintSnapshotService;
+
     private IssueService issueService;
 
     @BeforeEach
     void setUp() {
-        issueService = new IssueServiceImpl(issueDao, projectDao);
+        issueService = new IssueServiceImpl(issueDao, projectDao, sprintSnapshotService);
     }
 
     @Test
@@ -93,6 +97,7 @@ class IssueServiceImplTest {
         IssueResponse response = issueService.updateIssueStatus(issueId, IssueStatus.DONE);
 
         verify(issueDao).updateIssueStatus(eq(issueId), eq(IssueStatus.DONE), eq(response.getResolvedDate()), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshotByIssueId(issueId);
         assertThat(response.getStatus()).isEqualTo(IssueStatus.DONE);
         assertThat(response.getResolvedDate()).isNotNull();
         assertThat(response.getUpdatedAt()).isNotNull();

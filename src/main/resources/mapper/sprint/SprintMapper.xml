@@ -92,11 +92,6 @@
         <result property="testedAt" column="TESTED_AT"/>
     </resultMap>
 
-    <resultMap id="SprintBurndownPointResultMap" type="com.devtrace.manager.sprint.dto.SprintBurndownPointResponse">
-        <result property="snapshotDate" column="SNAPSHOT_DATE"/>
-        <result property="spentMinutes" column="SPENT_MINUTES"/>
-    </resultMap>
-
     <sql id="SprintColumns">
         SPRINT_ID,
         PROJECT_ID,
@@ -414,20 +409,6 @@
           AND TE.RESULT_STATUS IN ('FAIL', 'BLOCKED')
         ORDER BY TE.TESTED_AT DESC, I.ISSUE_KEY ASC
         LIMIT 30
-    </select>
-
-    <select id="selectSprintDailySpentList" parameterType="java.util.UUID" resultMap="SprintBurndownPointResultMap">
-        SELECT
-            WL.WORK_DATE AS SNAPSHOT_DATE,
-            COALESCE(SUM(WL.SPENT_MINUTES), 0) AS SPENT_MINUTES
-        FROM SPRINT S
-        INNER JOIN SPRINT_ISSUE SI ON S.SPRINT_ID = SI.SPRINT_ID
-        INNER JOIN WORK_LOG WL ON SI.ISSUE_ID = WL.ISSUE_ID
-        WHERE S.SPRINT_ID = #{_parameter,jdbcType=OTHER,typeHandler=com.devtrace.manager.common.config.UuidTypeHandler}
-          AND (S.START_DATE IS NULL OR WL.WORK_DATE &gt;= S.START_DATE)
-          AND (S.END_DATE IS NULL OR WL.WORK_DATE &lt;= S.END_DATE)
-        GROUP BY WL.WORK_DATE
-        ORDER BY WL.WORK_DATE ASC
     </select>
 
     <insert id="insertSprintIssue" parameterType="com.devtrace.manager.sprint.dto.SprintIssueEntity">

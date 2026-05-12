@@ -18,7 +18,7 @@ import com.devtrace.manager.project.dto.ProjectEntity;
 import com.devtrace.manager.project.dto.ProjectStatus;
 import com.devtrace.manager.sprint.dao.SprintDao;
 import com.devtrace.manager.sprint.dto.SprintAssigneeWorkloadResponse;
-import com.devtrace.manager.sprint.dto.SprintBurndownPointResponse;
+import com.devtrace.manager.sprint.dto.SprintDailySnapshotResponse;
 import com.devtrace.manager.sprint.dto.SprintEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueEntity;
 import com.devtrace.manager.sprint.dto.SprintIssueRequest;
@@ -57,11 +57,14 @@ class SprintServiceImplTest {
     @Mock
     private IssueDao issueDao;
 
+    @Mock
+    private SprintSnapshotService sprintSnapshotService;
+
     private SprintService sprintService;
 
     @BeforeEach
     void setUp() {
-        sprintService = new SprintServiceImpl(sprintDao, projectDao, issueDao);
+        sprintService = new SprintServiceImpl(sprintDao, projectDao, issueDao, sprintSnapshotService);
     }
 
     @Test
@@ -95,6 +98,19 @@ class SprintServiceImplTest {
     }
 
     @Test
+    void updateSprintStartSavesDailySnapshot() {
+        UUID projectId = UUID.randomUUID();
+        UUID sprintId = UUID.randomUUID();
+        when(sprintDao.selectSprintDetails(sprintId)).thenReturn(Optional.of(createSprint(sprintId, projectId, SprintStatus.PLANNED)));
+        when(sprintDao.selectActiveSprintByProjectIdDetails(projectId)).thenReturn(Optional.empty());
+
+        sprintService.updateSprintStart(sprintId);
+
+        verify(sprintDao).updateSprintStatus(eq(sprintId), eq(SprintStatus.ACTIVE), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshot(sprintId);
+    }
+
+    @Test
     void insertSprintIssueUsesNextDisplayOrder() {
         UUID projectId = UUID.randomUUID();
         UUID sprintId = UUID.randomUUID();
@@ -111,6 +127,7 @@ class SprintServiceImplTest {
 
         ArgumentCaptor<SprintIssueEntity> captor = ArgumentCaptor.forClass(SprintIssueEntity.class);
         verify(sprintDao).insertSprintIssue(captor.capture());
+        verify(sprintSnapshotService).saveSprintDailySnapshot(sprintId);
         assertThat(captor.getValue().getDisplayOrder()).isEqualTo(3);
         assertThat(response.getIssueId()).isEqualTo(issueId);
         assertThat(response.getDisplayOrder()).isEqualTo(3);
@@ -129,25 +146,30 @@ class SprintServiceImplTest {
         when(sprintDao.selectSprintAssigneeWorkloadList(sprintId)).thenReturn(List.of(createWorkload()));
         when(sprintDao.selectSprintRiskIssueList(eq(sprintId), any(LocalDate.class))).thenReturn(List.of(createRiskIssue()));
         when(sprintDao.selectSprintTestEvidenceRiskList(sprintId)).thenReturn(List.of(createTestEvidenceRisk()));
-        when(sprintDao.selectSprintDailySpentList(sprintId)).thenReturn(List.of(
-                createDailySpent(LocalDate.of(2026, 5, 4), 120),
-                createDailySpent(LocalDate.of(2026, 5, 5), 180)
+        when(sprintSnapshotService.selectSprintDailySnapshotList(sprintId)).thenReturn(List.of(
+                createSnapshot(LocalDate.of(2026, 5, 4), 600, 420, 120),
+                createSnapshot(LocalDate.of(2026, 5, 5), 600, 300, 300),
+                createSnapshot(LocalDate.of(2026, 5, 6), 600, 300, 300)
         ));
 
         SprintReportResponse report = sprintService.selectSprintReportDetails(sprintId);
 
+        verify(sprintSnapshotService).saveSprintDailySnapshot(sprintId);
         assertThat(report.getSprint().getSprintId()).isEqualTo(sprintId);
         assertThat(report.getRemainingIssueCount()).isEqualTo(2);
         assertThat(report.getBurndownPoints()).hasSize(3);
         assertThat(report.getBurndownPoints().get(0).getIdealRemainingMinutes()).isEqualTo(600);
         assertThat(report.getBurndownPoints().get(2).getIdealRemainingMinutes()).isZero();
         assertThat(report.getBurndownPoints().get(2).getActualRemainingMinutes()).isEqualTo(300);
+        assertThat(report.getBurndownPoints().get(2).getSpentMinutes()).isEqualTo(300);
+        assertThat(report.getBurndownPoints().get(2).getSpentYPercent()).isNotNull();
         assertThat(report.getStatusDistributions().get(0).getIssueRate()).isEqualTo(50);
         assertThat(report.getAssigneeWorkloads()).hasSize(1);
         assertThat(report.getRiskIssues()).hasSize(1);
         assertThat(report.getFailedTestEvidences()).hasSize(1);
         assertThat(report.getIdealPolylinePoints()).isNotBlank();
         assertThat(report.getActualPolylinePoints()).isNotBlank();
+        assertThat(report.getSpentPolylinePoints()).isNotBlank();
     }
 
     private SprintRequest createSprintRequest(UUID projectId) {
@@ -268,10 +290,23 @@ class SprintServiceImplTest {
         return risk;
     }
 
-    private SprintBurndownPointResponse createDailySpent(LocalDate snapshotDate, int spentMinutes) {
-        SprintBurndownPointResponse point = new SprintBurndownPointResponse();
-        point.setSnapshotDate(snapshotDate);
-        point.setSpentMinutes(spentMinutes);
-        return point;
+    private SprintDailySnapshotResponse createSnapshot(
+            LocalDate snapshotDate,
+            int totalEstimatedMinutes,
+            int remainingEstimatedMinutes,
+            int spentMinutes
+    ) {
+        SprintDailySnapshotResponse snapshot = new SprintDailySnapshotResponse();
+        snapshot.setSnapshotId(UUID.randomUUID());
+        snapshot.setSprintId(UUID.randomUUID());
+        snapshot.setSnapshotDate(snapshotDate);
+        snapshot.setTotalIssueCount(4);
+        snapshot.setDoneIssueCount(2);
+        snapshot.setRemainingIssueCount(2);
+        snapshot.setTotalEstimatedMinutes(totalEstimatedMinutes);
+        snapshot.setDoneEstimatedMinutes(totalEstimatedMinutes - remainingEstimatedMinutes);
+        snapshot.setRemainingEstimatedMinutes(remainingEstimatedMinutes);
+        snapshot.setSpentMinutes(spentMinutes);
+        return snapshot;
     }
 }

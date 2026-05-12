@@ -427,7 +427,8 @@
 }
 
 .dt-burndown-svg .ideal,
-.dt-burndown-svg .actual {
+.dt-burndown-svg .actual,
+.dt-burndown-svg .spent {
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -443,6 +444,11 @@
 .dt-burndown-svg .actual {
     stroke: var(--dt-coral);
     stroke-width: 1.8;
+}
+
+.dt-burndown-svg .spent {
+    stroke: #2f8f7a;
+    stroke-width: 1.45;
 }
 
 .dt-burndown-legend {
@@ -474,6 +480,10 @@
 
 .dt-burndown-legend i.actual {
     background: var(--dt-coral);
+}
+
+.dt-burndown-legend i.spent {
+    background: #2f8f7a;
 }
 
 .dt-burndown-points {

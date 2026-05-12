@@ -20,6 +20,7 @@ import com.devtrace.manager.issue.dto.IssueEntity;
 import com.devtrace.manager.issue.dto.IssuePriority;
 import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.issue.dto.IssueType;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,11 +41,14 @@ class BoardServiceImplTest {
     @Mock
     private IssueDao issueDao;
 
+    @Mock
+    private SprintSnapshotService sprintSnapshotService;
+
     private BoardService boardService;
 
     @BeforeEach
     void setUp() {
-        boardService = new BoardServiceImpl(boardDao, issueDao);
+        boardService = new BoardServiceImpl(boardDao, issueDao, sprintSnapshotService);
     }
 
     @Test
@@ -88,6 +92,7 @@ class BoardServiceImplTest {
         boardService.updateBoardIssueStatus(request);
 
         verify(issueDao).updateIssueStatus(eq(issueId), eq(IssueStatus.DONE), any(LocalDate.class), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshotByIssueId(issueId);
     }
 
     @Test

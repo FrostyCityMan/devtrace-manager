@@ -10,6 +10,7 @@ import com.devtrace.manager.issue.dto.IssueSearchCondition;
 import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.issue.service.IssueService;
 import com.devtrace.manager.project.dao.ProjectDao;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,16 +28,19 @@ public class IssueServiceImpl implements IssueService {
 
     private final IssueDao issueDao;
     private final ProjectDao projectDao;
+    private final SprintSnapshotService sprintSnapshotService;
 
     /**
      * 이슈 서비스 구현체를 생성한다.
      *
      * @param issueDao 이슈 SQL 호출 DAO
      * @param projectDao 프로젝트 존재 검증 DAO
+     * @param sprintSnapshotService 스프린트 일자별 스냅샷 서비스
      */
-    public IssueServiceImpl(IssueDao issueDao, ProjectDao projectDao) {
+    public IssueServiceImpl(IssueDao issueDao, ProjectDao projectDao, SprintSnapshotService sprintSnapshotService) {
         this.issueDao = issueDao;
         this.projectDao = projectDao;
+        this.sprintSnapshotService = sprintSnapshotService;
     }
 
     /**
@@ -111,6 +115,7 @@ public class IssueServiceImpl implements IssueService {
         }
 
         issueDao.updateIssueStatus(issue.getIssueId(), issue.getStatus(), issue.getResolvedDate(), issue.getUpdatedAt());
+        sprintSnapshotService.saveSprintDailySnapshotByIssueId(issue.getIssueId());
         return issue.toResponse();
     }
 

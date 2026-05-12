@@ -132,8 +132,9 @@ public interface SprintService {
     /**
      * Burndown Chart 표시용 일자별 포인트 목록을 조회한다.
      *
-     * <p>스냅샷 테이블이 없는 현재 구현에서는 스프린트 기간과 작업 공수 로그를 기반으로
-     * 이상 잔여 공수와 실제 잔여 공수를 계산한다.</p>
+     * <p>조회 시점의 스프린트 일자별 스냅샷을 갱신하고, 저장된
+     * {@code SPRINT_DAILY_SNAPSHOT.REMAINING_ESTIMATED_MINUTES}와
+     * {@code SPRINT_DAILY_SNAPSHOT.SPENT_MINUTES}를 기준으로 실제선과 공수선을 만든다.</p>
      *
      * @param sprintId 분석 대상 스프린트 ID
      * @return Burndown Chart 포인트 목록

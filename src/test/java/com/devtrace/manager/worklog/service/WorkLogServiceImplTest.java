@@ -11,6 +11,7 @@ import com.devtrace.manager.issue.dto.IssueEntity;
 import com.devtrace.manager.issue.dto.IssuePriority;
 import com.devtrace.manager.issue.dto.IssueStatus;
 import com.devtrace.manager.issue.dto.IssueType;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import com.devtrace.manager.worklog.dao.WorkLogDao;
 import com.devtrace.manager.worklog.dto.WorkLogEntity;
 import com.devtrace.manager.worklog.dto.WorkLogRequest;
@@ -38,11 +39,14 @@ class WorkLogServiceImplTest {
     @Mock
     private IssueDao issueDao;
 
+    @Mock
+    private SprintSnapshotService sprintSnapshotService;
+
     private WorkLogService workLogService;
 
     @BeforeEach
     void setUp() {
-        workLogService = new WorkLogServiceImpl(workLogDao, issueDao);
+        workLogService = new WorkLogServiceImpl(workLogDao, issueDao, sprintSnapshotService);
     }
 
     @Test
@@ -64,6 +68,7 @@ class WorkLogServiceImplTest {
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(response.getSpentMinutes()).isEqualTo(90);
         verify(issueDao).updateIssueSpentMinutes(eq(issueId), eq(90), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshotByIssueId(issueId);
     }
 
     @Test
@@ -81,6 +86,7 @@ class WorkLogServiceImplTest {
         verify(workLogDao).updateWorkLog(workLog);
         assertThat(response.getSpentMinutes()).isEqualTo(120);
         verify(issueDao).updateIssueSpentMinutes(eq(issueId), eq(120), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshotByIssueId(issueId);
     }
 
     @Test
@@ -95,6 +101,7 @@ class WorkLogServiceImplTest {
 
         verify(workLogDao).deleteWorkLog(workLogId);
         verify(issueDao).updateIssueSpentMinutes(eq(issueId), eq(0), any(LocalDateTime.class));
+        verify(sprintSnapshotService).saveSprintDailySnapshotByIssueId(issueId);
     }
 
     @Test

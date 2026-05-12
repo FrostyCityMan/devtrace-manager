@@ -19,6 +19,7 @@ public class SprintBurndownPointResponse {
     private int xPercent;
     private int idealYPercent;
     private Integer actualYPercent;
+    private Integer spentYPercent;
 
     /**
      * 이상 잔여 공수를 시간 라벨로 반환한다.
@@ -41,9 +42,9 @@ public class SprintBurndownPointResponse {
     }
 
     /**
-     * 해당 일자 투입 공수를 시간 라벨로 반환한다.
+     * 스냅샷 기준 누적 투입 공수를 시간 라벨로 반환한다.
      *
-     * @return 일자별 투입 공수 라벨
+     * @return 누적 투입 공수 라벨
      */
     public String getSpentHoursLabel() {
         return toHoursLabel(spentMinutes);
@@ -81,18 +82,18 @@ public class SprintBurndownPointResponse {
     }
 
     /**
-     * 해당 일자의 투입 공수를 반환한다.
+     * 스냅샷 기준 누적 투입 공수를 반환한다.
      *
-     * @return 분 단위 투입 공수
+     * @return 분 단위 누적 투입 공수
      */
     public int getSpentMinutes() {
         return spentMinutes;
     }
 
     /**
-     * 해당 일자의 투입 공수를 설정한다.
+     * 스냅샷 기준 누적 투입 공수를 설정한다.
      *
-     * @param spentMinutes 분 단위 투입 공수
+     * @param spentMinutes 분 단위 누적 투입 공수
      */
     public void setSpentMinutes(int spentMinutes) {
         this.spentMinutes = spentMinutes;
@@ -204,5 +205,23 @@ public class SprintBurndownPointResponse {
      */
     public void setActualYPercent(Integer actualYPercent) {
         this.actualYPercent = actualYPercent;
+    }
+
+    /**
+     * 누적 실제 공수의 SVG Y축 좌표 비율을 반환한다.
+     *
+     * @return 0~100 사이 Y축 비율, 스냅샷 값이 없으면 null
+     */
+    public Integer getSpentYPercent() {
+        return spentYPercent;
+    }
+
+    /**
+     * 누적 실제 공수의 SVG Y축 좌표 비율을 설정한다.
+     *
+     * @param spentYPercent 0~100 사이 Y축 비율
+     */
+    public void setSpentYPercent(Integer spentYPercent) {
+        this.spentYPercent = spentYPercent;
     }
 }

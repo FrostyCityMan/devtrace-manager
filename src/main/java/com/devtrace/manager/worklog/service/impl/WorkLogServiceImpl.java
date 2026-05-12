@@ -4,6 +4,7 @@ import com.devtrace.manager.common.exception.BusinessException;
 import com.devtrace.manager.common.util.DateTimeUtil;
 import com.devtrace.manager.issue.dao.IssueDao;
 import com.devtrace.manager.issue.dto.IssueEntity;
+import com.devtrace.manager.sprint.service.SprintSnapshotService;
 import com.devtrace.manager.worklog.dao.WorkLogDao;
 import com.devtrace.manager.worklog.dto.WorkLogEntity;
 import com.devtrace.manager.worklog.dto.WorkLogRequest;
@@ -26,16 +27,19 @@ public class WorkLogServiceImpl implements WorkLogService {
 
     private final WorkLogDao workLogDao;
     private final IssueDao issueDao;
+    private final SprintSnapshotService sprintSnapshotService;
 
     /**
      * 작업 공수 서비스 구현체를 생성한다.
      *
      * @param workLogDao 작업 공수 SQL 호출 DAO
      * @param issueDao 이슈 검증 및 공수 합계 반영 DAO
+     * @param sprintSnapshotService 스프린트 일자별 스냅샷 서비스
      */
-    public WorkLogServiceImpl(WorkLogDao workLogDao, IssueDao issueDao) {
+    public WorkLogServiceImpl(WorkLogDao workLogDao, IssueDao issueDao, SprintSnapshotService sprintSnapshotService) {
         this.workLogDao = workLogDao;
         this.issueDao = issueDao;
+        this.sprintSnapshotService = sprintSnapshotService;
     }
 
     /**
@@ -58,6 +62,7 @@ public class WorkLogServiceImpl implements WorkLogService {
 
         workLogDao.insertWorkLog(workLog);
         refreshIssueSpentMinutes(workLog.getIssueId());
+        sprintSnapshotService.saveSprintDailySnapshotByIssueId(workLog.getIssueId());
         return workLog.toResponse();
     }
 
@@ -82,8 +87,10 @@ public class WorkLogServiceImpl implements WorkLogService {
 
         workLogDao.updateWorkLog(workLog);
         refreshIssueSpentMinutes(previousIssueId);
+        sprintSnapshotService.saveSprintDailySnapshotByIssueId(previousIssueId);
         if (!previousIssueId.equals(workLog.getIssueId())) {
             refreshIssueSpentMinutes(workLog.getIssueId());
+            sprintSnapshotService.saveSprintDailySnapshotByIssueId(workLog.getIssueId());
         }
         return workLog.toResponse();
     }
@@ -101,6 +108,7 @@ public class WorkLogServiceImpl implements WorkLogService {
         WorkLogEntity workLog = selectWorkLogEntity(workLogId);
         workLogDao.deleteWorkLog(workLog.getWorkLogId());
         refreshIssueSpentMinutes(workLog.getIssueId());
+        sprintSnapshotService.saveSprintDailySnapshotByIssueId(workLog.getIssueId());
     }
 
     /**

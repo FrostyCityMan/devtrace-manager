@@ -104,6 +104,20 @@ public class SprintReportResponse {
     }
 
     /**
+     * SVG polyline에 사용할 누적 실제 공수 좌표 문자열을 만든다.
+     *
+     * <p>스냅샷이 저장된 일자만 공수선을 표시한다.</p>
+     *
+     * @return {@code "x,y x,y"} 형태의 좌표 문자열
+     */
+    public String getSpentPolylinePoints() {
+        return burndownPoints.stream()
+                .filter(point -> point.getSpentYPercent() != null)
+                .map(point -> point.getXPercent() + "," + point.getSpentYPercent())
+                .collect(Collectors.joining(" "));
+    }
+
+    /**
      * 스프린트 기본 정보를 반환한다.
      *
      * @return 스프린트 응답
